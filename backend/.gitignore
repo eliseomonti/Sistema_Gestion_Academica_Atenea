@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+logs/
+
+### Secretos y configuracion local (NUNCA subir) ###
+application-local.properties
+application-local.yml
+.env
+.env.*
+*.pem
+*.key
+*.jks
+*.p12
+
+### Sistema operativo ###
+.DS_Store
+Thumbs.db
