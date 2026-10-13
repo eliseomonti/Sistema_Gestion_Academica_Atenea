@@ -645,6 +645,20 @@ CREATE TABLE boleto_estudiantil (
     FOREIGN KEY (alumno_id) REFERENCES persona (id) ON DELETE RESTRICT
 );
 
+-- INSERTS DE SEGURIDAD --
+
+-- Administrador inicial, para poder loguearse en un sistema vacio.
+-- usuario: admin / contrasena: admin123 (hash BCrypt). SOLO PARA DESARROLLO: en produccion se
+-- cambia la contrasena apenas se instala.
+INSERT INTO persona (id, nombre, apellido, tipo_documento, nro_documento, telefono, fecha_nacimiento, email, legajo_admin) VALUES
+(1, 'Administrador', 'Sistema', 'DNI', '00000000', '0000000000', '2000-01-01', 'admin@atenea.local', 1);
+
+INSERT INTO usuario (id, persona_id, username, password) VALUES
+(1, 1, 'admin', '$2a$10$N0Iz328VrX8JHJ5am0MYZ.Kb9rgTR9sCnqe6aTVCIXSVYZC8bt6ZK');
+
+INSERT INTO usuario_rol (usuario_id, rol_id)
+SELECT 1, id FROM rol WHERE nombre = 'ROLE_ADMIN';
+
 -- INSERTS DE CARRERAS -- 
 
 INSERT INTO carrera (id, nombre, duracion, titulo_otorgado, modalidad_carrera) VALUES
@@ -1404,4 +1418,3 @@ INSERT INTO correlatividad_materias
  CREATE TRIGGER trg_nota_evaluacion_no_delete BEFORE DELETE ON nota_evaluacion
  FOR EACH ROW SIGNAL SQLSTATE '45000'
      SET MESSAGE_TEXT = 'nota_evaluacion es append-only: una nota de evaluacion no se borra.';
-
