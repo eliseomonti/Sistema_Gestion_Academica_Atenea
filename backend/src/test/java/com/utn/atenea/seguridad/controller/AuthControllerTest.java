@@ -24,6 +24,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -77,7 +78,9 @@ class AuthControllerTest {
 
     @Test
     void passwordIncorrectaDevuelve401() throws Exception {
-        login(USERNAME, "otra").andExpect(status().isUnauthorized());
+        login(USERNAME, "otra")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("No autenticado"));
     }
 
     @Test

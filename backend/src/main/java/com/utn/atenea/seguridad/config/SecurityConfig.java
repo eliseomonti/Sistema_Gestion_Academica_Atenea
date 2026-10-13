@@ -1,6 +1,7 @@
 package com.utn.atenea.seguridad.config;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +20,13 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -45,8 +49,20 @@ public class SecurityConfig {
         this.claveJwt = new SecretKeySpec(bytes, "HmacSHA256");
     }
 
+    // Los 401 y 403 se generan en los filtros, antes de llegar a un controller, así que el
+    // @RestControllerAdvice no los ve solo. Se le pasan a mano al HandlerExceptionResolver de
+    // Spring MVC para que los responda el GlobalExceptionHandler, con el mismo formato que el resto.
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) throws Exception {
+        AuthenticationEntryPoint noAutenticado = (request, response, ex) -> {
+            response.setHeader("WWW-Authenticate", "Bearer");
+            resolver.resolveException(request, response, null, ex);
+        };
+        AccessDeniedHandler accesoDenegado = (request, response, ex) ->
+                resolver.resolveException(request, response, null, ex);
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -59,8 +75,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/docente/**").hasRole("DOCENTE")
                         .requestMatchers("/api/alumno/**").hasRole("ALUMNO")
                         .anyRequest().denyAll())
+                .exceptionHandling(errores -> errores
+                        .authenticationEntryPoint(noAutenticado)
+                        .accessDeniedHandler(accesoDenegado))
                 .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtUsuarioPrincipalConverter())));
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtUsuarioPrincipalConverter()))
+                        .authenticationEntryPoint(noAutenticado)
+                        .accessDeniedHandler(accesoDenegado));
         return http.build();
     }
 
