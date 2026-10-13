@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -22,6 +23,8 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -49,19 +52,26 @@ class SecurityConfigTest {
 
     @Test
     void sinTokenDevuelve401() throws Exception {
-        mvc.perform(get("/api/admin/carreras")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/carreras"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate", "Bearer"))
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("No autenticado"));
     }
 
     @Test
     void tokenInvalidoDevuelve401() throws Exception {
         mvc.perform(get("/api/admin/carreras").header("Authorization", "Bearer basura"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("No autenticado"));
     }
 
     @Test
     void rolIncorrectoDevuelve403() throws Exception {
         mvc.perform(get("/api/admin/carreras").header("Authorization", bearer("ROLE_ALUMNO")))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Acceso denegado"));
     }
 
     @Test
