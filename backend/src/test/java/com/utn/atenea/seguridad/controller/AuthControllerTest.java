@@ -1,7 +1,7 @@
 package com.utn.atenea.seguridad.controller;
 
 import com.jayway.jsonpath.JsonPath;
-import com.utn.atenea.seguridad.model.NombreRol;
+import com.utn.atenea.seguridad.NombreRol;
 import com.utn.atenea.seguridad.model.Usuario;
 import com.utn.atenea.seguridad.repository.RolRepository;
 import com.utn.atenea.seguridad.repository.UsuarioRepository;
@@ -50,10 +50,10 @@ class AuthControllerTest {
 
     @BeforeEach
     void crearUsuario() {
-        // persona es del módulo personas, que todavía no tiene entidad: se inserta con SQL.
+        // persona es del módulo personas: se inserta con SQL para que este test no dependa de su código.
         jdbc.update("""
-                INSERT INTO persona (nombre, apellido, tipo_documento, nro_documento, telefono, fecha_nacimiento, email)
-                VALUES ('Test', 'Auth', 'DNI', 'TEST-AUTH-1', '000', '2000-01-01', 'test.auth@atenea.test')
+                INSERT INTO persona (nombre, apellido, dni, telefono, fecha_nacimiento, email)
+                VALUES ('Test', 'Auth', 'TEST-AUTH1', '000', '2000-01-01', 'test.auth@atenea.test')
                 """);
         Long personaId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
 

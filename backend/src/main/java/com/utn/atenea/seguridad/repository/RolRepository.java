@@ -1,6 +1,6 @@
 package com.utn.atenea.seguridad.repository;
 
-import com.utn.atenea.seguridad.model.NombreRol;
+import com.utn.atenea.seguridad.NombreRol;
 import com.utn.atenea.seguridad.model.Rol;
 import org.springframework.data.jpa.repository.JpaRepository;
 

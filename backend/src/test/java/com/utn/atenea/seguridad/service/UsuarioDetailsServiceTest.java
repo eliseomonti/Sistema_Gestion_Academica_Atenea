@@ -1,6 +1,6 @@
 package com.utn.atenea.seguridad.service;
 
-import com.utn.atenea.seguridad.model.NombreRol;
+import com.utn.atenea.seguridad.NombreRol;
 import com.utn.atenea.seguridad.model.Rol;
 import com.utn.atenea.seguridad.model.Usuario;
 import com.utn.atenea.seguridad.repository.UsuarioRepository;
