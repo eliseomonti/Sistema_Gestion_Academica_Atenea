@@ -45,6 +45,11 @@ public class PlanEstudio {
         this.anioInicio = anioInicio;
     }
 
+    // Un plan discontinuado, o de una carrera dada de baja, no recibe inscripciones nuevas.
+    public boolean admiteInscripciones() {
+        return vigente && carrera.isActiva();
+    }
+
     public void darDeBaja(LocalDate fecha) {
         this.vigente = false;
         this.fechaBaja = fecha;

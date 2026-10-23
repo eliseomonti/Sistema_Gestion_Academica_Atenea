@@ -1,4 +1,4 @@
-package com.utn.atenea.seguridad.model;
+package com.utn.atenea.seguridad;
 
 public enum NombreRol {
     ROLE_ADMIN,
