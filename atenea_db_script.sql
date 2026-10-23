@@ -12,9 +12,7 @@ CREATE TABLE persona (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
-    tipo_documento VARCHAR(50) NOT NULL,
-	nro_documento VARCHAR(50) NOT NULL,
-    UNIQUE (tipo_documento, nro_documento),
+	dni VARCHAR(10) NOT NULL UNIQUE,
     telefono VARCHAR(50) NOT NULL,
     fecha_nacimiento DATE NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -650,8 +648,8 @@ CREATE TABLE boleto_estudiantil (
 -- Administrador inicial, para poder loguearse en un sistema vacio.
 -- usuario: admin / contrasena: admin123 (hash BCrypt). SOLO PARA DESARROLLO: en produccion se
 -- cambia la contrasena apenas se instala.
-INSERT INTO persona (id, nombre, apellido, tipo_documento, nro_documento, telefono, fecha_nacimiento, email, legajo_admin) VALUES
-(1, 'Administrador', 'Sistema', 'DNI', '00000000', '0000000000', '2000-01-01', 'admin@atenea.local', 1);
+INSERT INTO persona (id, nombre, apellido, dni, telefono, fecha_nacimiento, email, legajo_admin) VALUES
+(1, 'Administrador', 'Sistema', '00000000', '0000000000', '2000-01-01', 'admin@atenea.local', 1);
 
 INSERT INTO usuario (id, persona_id, username, password) VALUES
 (1, 1, 'admin', '$2a$10$N0Iz328VrX8JHJ5am0MYZ.Kb9rgTR9sCnqe6aTVCIXSVYZC8bt6ZK');
@@ -1418,3 +1416,4 @@ INSERT INTO correlatividad_materias
  CREATE TRIGGER trg_nota_evaluacion_no_delete BEFORE DELETE ON nota_evaluacion
  FOR EACH ROW SIGNAL SQLSTATE '45000'
      SET MESSAGE_TEXT = 'nota_evaluacion es append-only: una nota de evaluacion no se borra.';
+     
