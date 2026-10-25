@@ -133,7 +133,7 @@ nivel 0   seguridad · carreras
 |---|---|
 | `seguridad` | Login, usuarios, roles, refresh tokens, `SecurityConfig` |
 | `carreras` | Carreras, planes de estudio, materias, correlatividades |
-| `personas` | Alumnos y docentes (tabla `persona`) e `inscripcion_carrera` |
+| `personas` | Estudiantes y docentes (tabla `persona`) e `inscripcion_carrera` |
 | `comisiones` | Comisiones, horarios, aulas, docentes de la comisión |
 | `examenes` | Parciales, finales, notas y cierre de cursada |
 | `inscripciones` | Períodos de inscripción, inscripción a comisión y a final, cupo, situación académica |
@@ -145,7 +145,7 @@ la declara `examenes` (la que la necesita) y la implementa `InscriptosImpl` en `
 
 - Si un módulo **necesita una respuesta** para seguir (¿hay cupo?, ¿quiénes están inscriptos?), usa la
   **interfaz** (`XxxApi`) del otro.
-- Si **pasó algo y otros pueden reaccionar** sin que importe quién (alumno dado de baja, cursada
+- Si **pasó algo y otros pueden reaccionar** sin que importe quién (estudiante dado de baja, cursada
   cerrada), se publica un **evento**. El de abajo publica y el de arriba escucha, así se respetan los
   niveles. El MVP casi no los necesita.
 
@@ -179,17 +179,17 @@ Carpetas opcionales: `reglas/` (Java puro), y en `seguridad` también `config/`,
 6. **Controller sin lógica.** Valida el request, saca el `personaId` del token, llama a un service y
    devuelve un DTO.
 7. **Los services no usan `SecurityContextHolder`.** Reciben el `personaId` como parámetro. El id del
-   alumno nunca viaja por URL en los endpoints de autoservicio.
+   estudiante nunca viaja por URL en los endpoints de autoservicio.
 8. **Cada regla vive en un solo lugar.** Correlativas, estado de materias y cupo en `inscripciones`.
    Docente asignado en `comisiones`. Nota vigente en `examenes`.
 9. **Un service se parte por caso de uso** cuando pasa las 250 líneas o las 6 dependencias.
-10. **Los módulos con endpoints de docente o alumno** usan `UsuarioPrincipal` de `seguridad` para saber
+10. **Los módulos con endpoints de docente o estudiante** usan `UsuarioPrincipal` de `seguridad` para saber
     quién llama.
 
 ### Endpoints y seguridad por prefijo
 
 `/api/auth/**` es público. `/api/admin/**` exige `ROLE_ADMIN`, `/api/docente/**` exige `ROLE_DOCENTE` y
-`/api/alumno/**` exige `ROLE_ALUMNO`. Se decide en un solo lugar: `SecurityConfig`.
+`/api/estudiante/**` exige `ROLE_ESTUDIANTE`. Se decide en un solo lugar: `SecurityConfig`.
 
 ### Nombres
 

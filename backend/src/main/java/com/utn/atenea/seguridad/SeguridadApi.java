@@ -8,7 +8,7 @@ public interface SeguridadApi {
      */
     CredencialesIniciales crearUsuario(Long personaId, String username, NombreRol rol);
 
-    /** Agrega un rol al usuario que la persona ya tiene, por ejemplo un alumno que pasa a ser docente. */
+    /** Agrega un rol al usuario que la persona ya tiene, por ejemplo un estudiante que pasa a ser docente. */
     void agregarRol(Long personaId, NombreRol rol);
 
     /**

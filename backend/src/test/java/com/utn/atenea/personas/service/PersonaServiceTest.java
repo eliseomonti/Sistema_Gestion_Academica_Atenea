@@ -67,7 +67,7 @@ class PersonaServiceTest {
         assertThat(persona.getDni()).isEqualTo(DNI);
         assertThat(persona.getEmail()).isEqualTo(EMAIL);
         assertThat(persona.isActivo()).isTrue();
-        assertThat(persona.esAlumno()).isFalse();
+        assertThat(persona.esEstudiante()).isFalse();
         assertThat(persona.esDocente()).isFalse();
     }
 
@@ -113,13 +113,13 @@ class PersonaServiceTest {
     void asignaElLegajoSiguienteAlUltimo() {
         Persona persona = persona();
         when(personaRepository.ultimoLegajoDocente()).thenReturn(41L);
-        when(personaRepository.ultimoLegajoAlumno()).thenReturn(0L);
+        when(personaRepository.ultimoLegajoEstudiante()).thenReturn(0L);
 
         service.asignarLegajoDocente(persona);
-        service.asignarLegajoAlumno(persona);
+        service.asignarLegajoEstudiante(persona);
 
         assertThat(persona.getLegajoDocente()).isEqualTo(42L);
-        assertThat(persona.getLegajoAlumno()).isEqualTo(1L);
+        assertThat(persona.getLegajoEstudiante()).isEqualTo(1L);
     }
 
     @Test
@@ -202,7 +202,7 @@ class PersonaServiceTest {
         Persona persona = persona();
         InscripcionCarrera activa = new InscripcionCarrera(persona, 10L, LocalDate.of(2024, 3, 1));
         when(personaRepository.findById(7L)).thenReturn(Optional.of(persona));
-        when(inscripcionCarreraRepository.findByAlumnoIdAndEstado(7L, EstadoInscripcionCarrera.ACTIVA))
+        when(inscripcionCarreraRepository.findByEstudianteIdAndEstado(7L, EstadoInscripcionCarrera.ACTIVA))
                 .thenReturn(List.of(activa));
 
         PersonaResponse respuesta = service.darDeBaja(7L);

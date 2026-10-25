@@ -1,5 +1,6 @@
 package com.utn.atenea.carreras.model;
 
+import com.utn.atenea.carreras.PeriodoLectivo;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;

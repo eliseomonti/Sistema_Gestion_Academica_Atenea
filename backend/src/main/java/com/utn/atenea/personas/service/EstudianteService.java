@@ -5,8 +5,8 @@ import com.utn.atenea.carreras.PlanEstudioResumen;
 import com.utn.atenea.compartido.exception.RecursoDuplicadoException;
 import com.utn.atenea.compartido.exception.RecursoNoEncontradoException;
 import com.utn.atenea.compartido.exception.ReglaNegocioException;
-import com.utn.atenea.personas.dto.AltaAlumnoRequest;
-import com.utn.atenea.personas.dto.AlumnoListadoResponse;
+import com.utn.atenea.personas.dto.AltaEstudianteRequest;
+import com.utn.atenea.personas.dto.EstudianteListadoResponse;
 import com.utn.atenea.personas.dto.AltaPersonaResponse;
 import com.utn.atenea.personas.dto.InscripcionCarreraRequest;
 import com.utn.atenea.personas.dto.InscripcionCarreraResponse;
@@ -30,14 +30,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.utn.atenea.personas.repository.PersonaSpecifications.alumnoCoincideCon;
+import static com.utn.atenea.personas.repository.PersonaSpecifications.estudianteCoincideCon;
 import static com.utn.atenea.personas.repository.PersonaSpecifications.conInscripcion;
-import static com.utn.atenea.personas.repository.PersonaSpecifications.esAlumno;
+import static com.utn.atenea.personas.repository.PersonaSpecifications.esEstudiante;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class AlumnoService {
+public class EstudianteService {
 
     private final PersonaService personaService;
     private final PersonaRepository personaRepository;
@@ -47,15 +47,15 @@ public class AlumnoService {
     private final InscripcionCarreraMapper inscripcionCarreraMapper;
 
     /**
-     * Alumnos con al menos una inscripción en ese estado, de la carrera indicada o de cualquiera,
+     * Estudiantes con al menos una inscripción en ese estado, de la carrera indicada o de cualquiera,
      * que coinciden con el texto buscado. El orden es siempre por apellido y nombre: el que venga
      * en el request se ignora.
      */
-    public Page<AlumnoListadoResponse> listar(String buscar, Long carreraId, EstadoInscripcionCarrera estado,
+    public Page<EstudianteListadoResponse> listar(String buscar, Long carreraId, EstadoInscripcionCarrera estado,
                                               Pageable pageable) {
-        List<Specification<Persona>> filtros = new ArrayList<>(List.of(esAlumno()));
+        List<Specification<Persona>> filtros = new ArrayList<>(List.of(esEstudiante()));
         if (buscar != null && !buscar.isBlank()) {
-            filtros.add(alumnoCoincideCon(buscar));
+            filtros.add(estudianteCoincideCon(buscar));
         }
 
         List<Long> planesDeLaCarrera = null;
@@ -68,27 +68,27 @@ public class AlumnoService {
         filtros.add(conInscripcion(estado, planesDeLaCarrera));
 
         return personaRepository.findAll(Specification.allOf(filtros), PersonaService.ordenAlfabetico(pageable))
-                .map(personaMapper::toAlumnoListado);
+                .map(personaMapper::toEstudianteListado);
     }
 
-    /** Alta de una persona nueva como alumno: persona, legajo, usuario e inscripción en una sola transacción. */
+    /** Alta de una persona nueva como estudiante: persona, legajo, usuario e inscripción en una sola transacción. */
     @Transactional
-    public AltaPersonaResponse alta(AltaAlumnoRequest request) {
+    public AltaPersonaResponse alta(AltaEstudianteRequest request) {
         // El plan se valida primero: si no sirve, no tiene sentido crear la persona.
         PlanEstudioResumen plan = buscarPlanQueAdmiteInscripciones(request.planEstudioId());
 
-        Persona alumno = personaService.crear(request.datosPersonales());
-        personaService.asignarLegajoAlumno(alumno);
-        CredencialesIniciales credenciales = personaService.crearUsuario(alumno, NombreRol.ROLE_ALUMNO);
-        inscripcionCarreraRepository.save(new InscripcionCarrera(alumno, plan.id(), LocalDate.now()));
+        Persona estudiante = personaService.crear(request.datosPersonales());
+        personaService.asignarLegajoEstudiante(estudiante);
+        CredencialesIniciales credenciales = personaService.crearUsuario(estudiante, NombreRol.ROLE_ESTUDIANTE);
+        inscripcionCarreraRepository.save(new InscripcionCarrera(estudiante, plan.id(), LocalDate.now()));
 
-        return new AltaPersonaResponse(alumno.getId(), alumno.getLegajoAlumno(),
+        return new AltaPersonaResponse(estudiante.getId(), estudiante.getLegajoEstudiante(),
                 credenciales.username(), credenciales.passwordTemporal());
     }
 
     /**
-     * Inscribe en un plan a una persona que ya existe: un alumno que suma otra carrera, o alguien
-     * (por ejemplo, un docente) que todavía no es alumno y con esto pasa a serlo.
+     * Inscribe en un plan a una persona que ya existe: un estudiante que suma otra carrera, o alguien
+     * (por ejemplo, un docente) que todavía no es estudiante y con esto pasa a serlo.
      */
     @Transactional
     public InscripcionCarreraResponse inscribir(Long personaId, InscripcionCarreraRequest request) {
@@ -96,19 +96,19 @@ public class AlumnoService {
         PlanEstudioResumen plan = buscarPlanQueAdmiteInscripciones(request.planEstudioId());
         validarQuePuedeInscribirse(persona, plan);
 
-        if (!persona.esAlumno()) {
-            personaService.asignarLegajoAlumno(persona);
-            personaService.agregarRol(persona, NombreRol.ROLE_ALUMNO);
+        if (!persona.esEstudiante()) {
+            personaService.asignarLegajoEstudiante(persona);
+            personaService.agregarRol(persona, NombreRol.ROLE_ESTUDIANTE);
         }
         InscripcionCarrera inscripcion = inscripcionCarreraRepository.save(
                 new InscripcionCarrera(persona, plan.id(), LocalDate.now()));
         return inscripcionCarreraMapper.toResponse(inscripcion);
     }
 
-    /** El alumno deja una carrera. Conserva el legajo, el usuario y sus otras inscripciones. */
+    /** El estudiante deja una carrera. Conserva el legajo, el usuario y sus otras inscripciones. */
     @Transactional
     public InscripcionCarreraResponse darDeBajaInscripcion(Long personaId, Long inscripcionId) {
-        InscripcionCarrera inscripcion = inscripcionCarreraRepository.findByIdAndAlumnoId(inscripcionId, personaId)
+        InscripcionCarrera inscripcion = inscripcionCarreraRepository.findByIdAndEstudianteId(inscripcionId, personaId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "La persona " + personaId + " no tiene la inscripción " + inscripcionId));
         if (inscripcion.getEstado() != EstadoInscripcionCarrera.ACTIVA) {
@@ -123,11 +123,11 @@ public class AlumnoService {
     // inscripcion_carrera guarda el plan, no la carrera: para saber si ya cursa esa carrera se
     // buscan sus inscripciones activas entre todos los planes de la carrera.
     private void validarQuePuedeInscribirse(Persona persona, PlanEstudioResumen plan) {
-        if (inscripcionCarreraRepository.existsByAlumnoIdAndPlanEstudioId(persona.getId(), plan.id())) {
+        if (inscripcionCarreraRepository.existsByEstudianteIdAndPlanEstudioId(persona.getId(), plan.id())) {
             throw new RecursoDuplicadoException("La persona " + persona.getId()
                     + " ya está o estuvo inscripta al plan de estudio " + plan.id());
         }
-        if (inscripcionCarreraRepository.existsByAlumnoIdAndPlanEstudioIdInAndEstado(
+        if (inscripcionCarreraRepository.existsByEstudianteIdAndPlanEstudioIdInAndEstado(
                 persona.getId(), carrerasApi.idsDePlanes(plan.carreraId()), EstadoInscripcionCarrera.ACTIVA)) {
             throw new ReglaNegocioException("La persona " + persona.getId()
                     + " ya tiene una inscripción activa en otro plan de esa carrera");

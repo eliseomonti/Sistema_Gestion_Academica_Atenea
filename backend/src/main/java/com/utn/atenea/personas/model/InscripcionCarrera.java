@@ -16,8 +16,8 @@ public class InscripcionCarrera {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "alumno_id", nullable = false, updatable = false)
-    private Persona alumno;
+    @JoinColumn(name = "estudiante_id", nullable = false, updatable = false)
+    private Persona estudiante;
 
     // plan_estudio es del módulo carreras: se referencia por id.
     @Column(name = "plan_estudio_id", nullable = false, updatable = false)
@@ -34,8 +34,8 @@ public class InscripcionCarrera {
     @Column(name = "fecha_estado")
     private LocalDate fechaEstado;
 
-    public InscripcionCarrera(Persona alumno, Long planEstudioId, LocalDate fechaInscripcion) {
-        this.alumno = alumno;
+    public InscripcionCarrera(Persona estudiante, Long planEstudioId, LocalDate fechaInscripcion) {
+        this.estudiante = estudiante;
         this.planEstudioId = planEstudioId;
         this.fechaInscripcion = fechaInscripcion;
     }

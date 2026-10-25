@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Locale;
 
-/** Datos personales que el admin carga en el alta de un alumno o de un docente. */
+/** Datos personales que el admin carga en el alta de un estudiante o de un docente. */
 public record DatosPersonalesRequest(
 
         @NotBlank(message = "El nombre es obligatorio")

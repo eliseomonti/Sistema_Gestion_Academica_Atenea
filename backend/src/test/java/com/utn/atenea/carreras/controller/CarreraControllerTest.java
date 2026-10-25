@@ -53,7 +53,7 @@ class CarreraControllerTest {
 
     @Test
     void sinRolAdminDevuelve403() throws Exception {
-        mvc.perform(get("/api/admin/carreras").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ALUMNO"))))
+        mvc.perform(get("/api/admin/carreras").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ESTUDIANTE"))))
                 .andExpect(status().isForbidden());
     }
 

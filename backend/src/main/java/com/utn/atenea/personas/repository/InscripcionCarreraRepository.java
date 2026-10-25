@@ -10,13 +10,13 @@ import java.util.Optional;
 
 public interface InscripcionCarreraRepository extends JpaRepository<InscripcionCarrera, Long> {
 
-    // Con el alumno en la condición, una inscripción no se encuentra desde la URL de otra persona.
-    Optional<InscripcionCarrera> findByIdAndAlumnoId(Long id, Long alumnoId);
+    // Con el estudiante en la condición, una inscripción no se encuentra desde la URL de otra persona.
+    Optional<InscripcionCarrera> findByIdAndEstudianteId(Long id, Long estudianteId);
 
-    List<InscripcionCarrera> findByAlumnoIdAndEstado(Long alumnoId, EstadoInscripcionCarrera estado);
+    List<InscripcionCarrera> findByEstudianteIdAndEstado(Long estudianteId, EstadoInscripcionCarrera estado);
 
-    boolean existsByAlumnoIdAndPlanEstudioId(Long alumnoId, Long planEstudioId);
+    boolean existsByEstudianteIdAndPlanEstudioId(Long estudianteId, Long planEstudioId);
 
-    boolean existsByAlumnoIdAndPlanEstudioIdInAndEstado(
-            Long alumnoId, Collection<Long> planEstudioIds, EstadoInscripcionCarrera estado);
+    boolean existsByEstudianteIdAndPlanEstudioIdInAndEstado(
+            Long estudianteId, Collection<Long> planEstudioIds, EstadoInscripcionCarrera estado);
 }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/** Filtros de los listados de alumnos y docentes, para combinar con PersonaRepository.findAll(Specification, Pageable). */
+/** Filtros de los listados de estudiantes y docentes, para combinar con PersonaRepository.findAll(Specification, Pageable). */
 public final class PersonaSpecifications {
 
     // '!' y no '\' como escape del LIKE: la barra invertida también es escape en los textos de MySQL.
@@ -21,8 +21,8 @@ public final class PersonaSpecifications {
     private PersonaSpecifications() {
     }
 
-    public static Specification<Persona> esAlumno() {
-        return (persona, query, cb) -> cb.isNotNull(persona.get("legajoAlumno"));
+    public static Specification<Persona> esEstudiante() {
+        return (persona, query, cb) -> cb.isNotNull(persona.get("legajoEstudiante"));
     }
 
     public static Specification<Persona> esDocente() {
@@ -34,9 +34,9 @@ public final class PersonaSpecifications {
         return (persona, query, cb) -> cb.equal(persona.get("activo"), activo);
     }
 
-    /** Búsqueda de texto del listado de alumnos: el legajo que se compara es el de alumno. */
-    public static Specification<Persona> alumnoCoincideCon(String texto) {
-        return coincideCon(texto, "legajoAlumno");
+    /** Búsqueda de texto del listado de estudiantes: el legajo que se compara es el de estudiante. */
+    public static Specification<Persona> estudianteCoincideCon(String texto) {
+        return coincideCon(texto, "legajoEstudiante");
     }
 
     /** Búsqueda de texto del listado de docentes: el legajo que se compara es el de docente. */
@@ -68,7 +68,7 @@ public final class PersonaSpecifications {
 
     /**
      * Tiene al menos una inscripción en ese estado, en alguno de esos planes (o en cualquiera, si
-     * planEstudioIds es null). Con EXISTS y no con un join, un alumno con dos inscripciones que
+     * planEstudioIds es null). Con EXISTS y no con un join, un estudiante con dos inscripciones que
      * cumplen no sale dos veces ni se cuenta dos veces en el total.
      */
     public static Specification<Persona> conInscripcion(EstadoInscripcionCarrera estado, Collection<Long> planEstudioIds) {
@@ -77,7 +77,7 @@ public final class PersonaSpecifications {
             Root<InscripcionCarrera> inscripcion = subquery.from(InscripcionCarrera.class);
 
             List<Predicate> condiciones = new ArrayList<>(List.of(
-                    cb.equal(inscripcion.get("alumno"), persona),
+                    cb.equal(inscripcion.get("estudiante"), persona),
                     cb.equal(inscripcion.get("estado"), estado)));
             if (planEstudioIds != null) {
                 condiciones.add(inscripcion.get("planEstudioId").in(planEstudioIds));

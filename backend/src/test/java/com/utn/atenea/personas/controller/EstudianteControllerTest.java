@@ -32,11 +32,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Alta, inscripción, listado y baja de alumnos contra la base real; {@code @Transactional} deshace todo. */
+/** Alta, inscripción, listado y baja de estudiantes contra la base real; {@code @Transactional} deshace todo. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class AlumnoControllerTest {
+class EstudianteControllerTest {
 
     private static final String DNI = "99000002";
 
@@ -54,7 +54,7 @@ class AlumnoControllerTest {
     @BeforeEach
     void crearCarrerasConPlanes() {
         // carrera y plan_estudio son del módulo carreras: se insertan con SQL para no depender de su código.
-        carreraId = insertarCarrera("Carrera de prueba alumnos");
+        carreraId = insertarCarrera("Carrera de prueba estudiantes");
         planVigente = insertarPlan(carreraId, "Plan 2024");
         otroPlanVigenteDeLaMismaCarrera = insertarPlan(carreraId, "Plan 2025");
         jdbc.update("""
@@ -63,14 +63,14 @@ class AlumnoControllerTest {
                 """, carreraId);
         planDiscontinuado = ultimoId();
 
-        planDeOtraCarrera = insertarPlan(insertarCarrera("Otra carrera de prueba alumnos"), "Plan 2024");
+        planDeOtraCarrera = insertarPlan(insertarCarrera("Otra carrera de prueba estudiantes"), "Plan 2024");
     }
 
-    // --- Alta de una persona nueva como alumno ---
+    // --- Alta de una persona nueva como estudiante ---
 
     @Test
-    void altaCreaElAlumnoConLegajoUsuarioEInscripcion() throws Exception {
-        long legajoEsperado = personaRepository.ultimoLegajoAlumno() + 1;
+    void altaCreaElEstudianteConLegajoUsuarioEInscripcion() throws Exception {
+        long legajoEsperado = personaRepository.ultimoLegajoEstudiante() + 1;
 
         String respuesta = alta(DNI, planVigente)
                 .andExpect(status().isCreated())
@@ -79,19 +79,19 @@ class AlumnoControllerTest {
 
         long personaId = JsonPath.<Number>read(respuesta, "$.personaId").longValue();
         assertThat(JsonPath.<Number>read(respuesta, "$.legajo").longValue()).isEqualTo(legajoEsperado);
-        Persona alumno = personaRepository.findById(personaId).orElseThrow();
-        assertThat(alumno.getLegajoAlumno()).isEqualTo(legajoEsperado);
-        assertThat(alumno.esDocente()).isFalse();
+        Persona estudiante = personaRepository.findById(personaId).orElseThrow();
+        assertThat(estudiante.getLegajoEstudiante()).isEqualTo(legajoEsperado);
+        assertThat(estudiante.esDocente()).isFalse();
 
         Map<String, Object> inscripcion = jdbc.queryForMap(
-                "SELECT plan_estudio_id, estado, fecha_inscripcion FROM inscripcion_carrera WHERE alumno_id = ?",
+                "SELECT plan_estudio_id, estado, fecha_inscripcion FROM inscripcion_carrera WHERE estudiante_id = ?",
                 personaId);
         assertThat(((Number) inscripcion.get("plan_estudio_id")).longValue()).isEqualTo(planVigente);
         assertThat(inscripcion.get("estado")).isEqualTo("ACTIVA");
         assertThat(((Date) inscripcion.get("fecha_inscripcion")).toLocalDate()).isEqualTo(LocalDate.now());
 
-        // Las credenciales devueltas sirven para loguearse y el token trae el rol de alumno.
-        assertThat(roles(DNI, JsonPath.read(respuesta, "$.passwordTemporal"))).containsExactly("ROLE_ALUMNO");
+        // Las credenciales devueltas sirven para loguearse y el token trae el rol de estudiante.
+        assertThat(roles(DNI, JsonPath.read(respuesta, "$.passwordTemporal"))).containsExactly("ROLE_ESTUDIANTE");
     }
 
     @Test
@@ -114,11 +114,11 @@ class AlumnoControllerTest {
 
     @Test
     void datosInvalidosDevuelve400ConLosCampos() throws Exception {
-        mvc.perform(post("/api/admin/alumnos").with(admin()).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/admin/estudiantes").with(admin()).contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"datosPersonales": {"nombre": "Lucía", "apellido": "Gómez", "dni": "07123456",
                                   "telefono": "2234567890", "fechaNacimiento": "2004-08-15",
-                                  "email": "alumno.test@atenea.test"}}
+                                  "email": "estudiante.test@atenea.test"}}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errores[*].campo")
@@ -128,7 +128,7 @@ class AlumnoControllerTest {
     // --- Inscripción de una persona que ya existe ---
 
     @Test
-    void unDocenteQueSeInscribePasaASerTambienAlumno() throws Exception {
+    void unDocenteQueSeInscribePasaASerTambienEstudiante() throws Exception {
         String respuesta = mvc.perform(post("/api/admin/docentes").with(admin()).contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"nombre": "Ana", "apellido": "Ruiz", "dni": "%s", "telefono": "2234567890",
@@ -137,34 +137,34 @@ class AlumnoControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         long personaId = JsonPath.<Number>read(respuesta, "$.personaId").longValue();
-        long legajoEsperado = personaRepository.ultimoLegajoAlumno() + 1;
+        long legajoEsperado = personaRepository.ultimoLegajoEstudiante() + 1;
 
         inscribir(personaId, planVigente)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.personaId").value(personaId))
-                .andExpect(jsonPath("$.legajoAlumno").value(legajoEsperado))
+                .andExpect(jsonPath("$.legajoEstudiante").value(legajoEsperado))
                 .andExpect(jsonPath("$.planEstudioId").value(planVigente))
                 .andExpect(jsonPath("$.estado").value("ACTIVA"));
 
         // Conserva su contraseña y el token trae los dos roles.
         assertThat(roles(DNI, JsonPath.read(respuesta, "$.passwordTemporal")))
-                .containsExactlyInAnyOrder("ROLE_DOCENTE", "ROLE_ALUMNO");
+                .containsExactlyInAnyOrder("ROLE_DOCENTE", "ROLE_ESTUDIANTE");
     }
 
     @Test
-    void unAlumnoSeInscribeEnOtraCarreraYConservaSuLegajo() throws Exception {
-        long personaId = altaAlumno(planVigente);
-        Long legajo = personaRepository.findById(personaId).orElseThrow().getLegajoAlumno();
+    void unEstudianteSeInscribeEnOtraCarreraYConservaSuLegajo() throws Exception {
+        long personaId = altaEstudiante(planVigente);
+        Long legajo = personaRepository.findById(personaId).orElseThrow().getLegajoEstudiante();
 
         inscribir(personaId, planDeOtraCarrera)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.legajoAlumno").value(legajo))
+                .andExpect(jsonPath("$.legajoEstudiante").value(legajo))
                 .andExpect(jsonPath("$.planEstudioId").value(planDeOtraCarrera));
     }
 
     @Test
     void inscribirseDosVecesAlMismoPlanDevuelve409() throws Exception {
-        long personaId = altaAlumno(planVigente);
+        long personaId = altaEstudiante(planVigente);
 
         inscribir(personaId, planVigente)
                 .andExpect(status().isConflict())
@@ -173,7 +173,7 @@ class AlumnoControllerTest {
 
     @Test
     void conUnaInscripcionActivaNoPuedeInscribirseEnOtroPlanDeLaMismaCarrera() throws Exception {
-        long personaId = altaAlumno(planVigente);
+        long personaId = altaEstudiante(planVigente);
 
         inscribir(personaId, otroPlanVigenteDeLaMismaCarrera)
                 .andExpect(status().isConflict())
@@ -188,11 +188,11 @@ class AlumnoControllerTest {
     // --- Listado ---
 
     @Test
-    void listaLosAlumnosActivosDeLaCarreraOrdenadosPorApellido() throws Exception {
-        altaAlumno("99000011", "Lucía", "Gómez", planVigente);
-        altaAlumno("99000012", "Ana", "Álvarez", planVigente);
-        altaAlumno("99000013", "Juan", "Pérez", otroPlanVigenteDeLaMismaCarrera);
-        altaAlumno("99000014", "Carla", "Benítez", planDeOtraCarrera);
+    void listaLosEstudiantesActivosDeLaCarreraOrdenadosPorApellido() throws Exception {
+        altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
+        altaEstudiante("99000012", "Ana", "Álvarez", planVigente);
+        altaEstudiante("99000013", "Juan", "Pérez", otroPlanVigenteDeLaMismaCarrera);
+        altaEstudiante("99000014", "Carla", "Benítez", planDeOtraCarrera);
 
         listar("carreraId", carreraId.toString())
                 .andExpect(status().isOk())
@@ -207,9 +207,9 @@ class AlumnoControllerTest {
 
     @Test
     void porDefectoTraeLasInscripcionesActivasYSePuedeFiltrarPorOtroEstado() throws Exception {
-        altaAlumno("99000011", "Lucía", "Gómez", planVigente);
-        long deBaja = altaAlumno("99000012", "Ana", "Álvarez", planVigente);
-        jdbc.update("UPDATE inscripcion_carrera SET estado = 'BAJA', fecha_estado = CURRENT_DATE WHERE alumno_id = ?",
+        altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
+        long deBaja = altaEstudiante("99000012", "Ana", "Álvarez", planVigente);
+        jdbc.update("UPDATE inscripcion_carrera SET estado = 'BAJA', fecha_estado = CURRENT_DATE WHERE estudiante_id = ?",
                 deBaja);
 
         listar("carreraId", carreraId.toString())
@@ -220,9 +220,9 @@ class AlumnoControllerTest {
 
     @Test
     void buscaPorApellidoSinTildePorNombreCompletoPorDniYPorLegajo() throws Exception {
-        long gomez = altaAlumno("99000011", "Lucía", "Gómez", planVigente);
-        altaAlumno("99000022", "Ana", "Álvarez", planVigente);
-        String legajo = personaRepository.findById(gomez).orElseThrow().getLegajoAlumno().toString();
+        long gomez = altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
+        altaEstudiante("99000022", "Ana", "Álvarez", planVigente);
+        String legajo = personaRepository.findById(gomez).orElseThrow().getLegajoEstudiante().toString();
 
         listar("carreraId", carreraId.toString(), "buscar", "gomez")
                 .andExpect(jsonPath("$.content[*].apellido").value(contains("Gómez")));
@@ -238,7 +238,7 @@ class AlumnoControllerTest {
 
     @Test
     void losComodinesDelLikeSeBuscanComoTexto() throws Exception {
-        altaAlumno("99000011", "Lucía", "Gómez", planVigente);
+        altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
 
         listar("carreraId", carreraId.toString(), "buscar", "%")
                 .andExpect(jsonPath("$.page.totalElements").value(0));
@@ -246,9 +246,9 @@ class AlumnoControllerTest {
 
     @Test
     void paginaLosResultados() throws Exception {
-        altaAlumno("99000011", "Lucía", "Gómez", planVigente);
-        altaAlumno("99000012", "Ana", "Álvarez", planVigente);
-        altaAlumno("99000013", "Juan", "Pérez", planVigente);
+        altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
+        altaEstudiante("99000012", "Ana", "Álvarez", planVigente);
+        altaEstudiante("99000013", "Juan", "Pérez", planVigente);
 
         listar("carreraId", carreraId.toString(), "size", "2")
                 .andExpect(jsonPath("$.content[*].apellido").value(contains("Álvarez", "Gómez")))
@@ -282,7 +282,7 @@ class AlumnoControllerTest {
 
     @Test
     void bajaDeUnaInscripcionLaSacaDelListadoYConservaLasOtras() throws Exception {
-        long personaId = altaAlumno(planVigente);
+        long personaId = altaEstudiante(planVigente);
         inscribir(personaId, planDeOtraCarrera).andExpect(status().isCreated());
 
         bajaDeInscripcion(personaId, inscripcionId(personaId, planVigente))
@@ -301,7 +301,7 @@ class AlumnoControllerTest {
 
     @Test
     void bajaDeUnaInscripcionQueNoEstaActivaDevuelve409() throws Exception {
-        long personaId = altaAlumno(planVigente);
+        long personaId = altaEstudiante(planVigente);
         long inscripcionId = inscripcionId(personaId, planVigente);
         bajaDeInscripcion(personaId, inscripcionId).andExpect(status().isOk());
 
@@ -312,8 +312,8 @@ class AlumnoControllerTest {
 
     @Test
     void bajaDeLaInscripcionDeOtraPersonaDevuelve404() throws Exception {
-        long gomez = altaAlumno("99000011", "Lucía", "Gómez", planVigente);
-        long alvarez = altaAlumno("99000012", "Ana", "Álvarez", planVigente);
+        long gomez = altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
+        long alvarez = altaEstudiante("99000012", "Ana", "Álvarez", planVigente);
 
         bajaDeInscripcion(alvarez, inscripcionId(gomez, planVigente))
                 .andExpect(status().isNotFound());
@@ -342,7 +342,7 @@ class AlumnoControllerTest {
     }
 
     private ResultActions alta(String dni, String nombre, String apellido, Long planEstudioId) throws Exception {
-        return mvc.perform(post("/api/admin/alumnos").with(admin()).contentType(MediaType.APPLICATION_JSON)
+        return mvc.perform(post("/api/admin/estudiantes").with(admin()).contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"datosPersonales": {"nombre": "%s", "apellido": "%s", "dni": "%s",
                           "telefono": "2234567890", "fechaNacimiento": "2004-08-15",
@@ -351,11 +351,11 @@ class AlumnoControllerTest {
                         """.formatted(nombre, apellido, dni, dni, planEstudioId)));
     }
 
-    private long altaAlumno(Long planEstudioId) throws Exception {
-        return altaAlumno(DNI, "Lucía", "Gómez", planEstudioId);
+    private long altaEstudiante(Long planEstudioId) throws Exception {
+        return altaEstudiante(DNI, "Lucía", "Gómez", planEstudioId);
     }
 
-    private long altaAlumno(String dni, String nombre, String apellido, Long planEstudioId) throws Exception {
+    private long altaEstudiante(String dni, String nombre, String apellido, Long planEstudioId) throws Exception {
         String respuesta = alta(dni, nombre, apellido, planEstudioId)
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
@@ -364,7 +364,7 @@ class AlumnoControllerTest {
 
     /** GET del listado con los parámetros dados de a pares: nombre, valor, nombre, valor... */
     private ResultActions listar(String... parametros) throws Exception {
-        MockHttpServletRequestBuilder request = get("/api/admin/alumnos").with(admin());
+        MockHttpServletRequestBuilder request = get("/api/admin/estudiantes").with(admin());
         for (int i = 0; i < parametros.length; i += 2) {
             request.param(parametros[i], parametros[i + 1]);
         }
@@ -372,17 +372,17 @@ class AlumnoControllerTest {
     }
 
     private ResultActions bajaDeInscripcion(long personaId, long inscripcionId) throws Exception {
-        return mvc.perform(post("/api/admin/alumnos/{personaId}/inscripciones/{inscripcionId}/baja",
+        return mvc.perform(post("/api/admin/estudiantes/{personaId}/inscripciones/{inscripcionId}/baja",
                 personaId, inscripcionId).with(admin()));
     }
 
     private long inscripcionId(long personaId, Long planEstudioId) {
-        return jdbc.queryForObject("SELECT id FROM inscripcion_carrera WHERE alumno_id = ? AND plan_estudio_id = ?",
+        return jdbc.queryForObject("SELECT id FROM inscripcion_carrera WHERE estudiante_id = ? AND plan_estudio_id = ?",
                 Long.class, personaId, planEstudioId);
     }
 
     private ResultActions inscribir(long personaId, Long planEstudioId) throws Exception {
-        return mvc.perform(post("/api/admin/alumnos/{personaId}/inscripciones", personaId).with(admin())
+        return mvc.perform(post("/api/admin/estudiantes/{personaId}/inscripciones", personaId).with(admin())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"planEstudioId\": " + planEstudioId + "}"));
     }

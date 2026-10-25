@@ -1,6 +1,6 @@
 package com.utn.atenea.personas.mapper;
 
-import com.utn.atenea.personas.dto.AlumnoListadoResponse;
+import com.utn.atenea.personas.dto.EstudianteListadoResponse;
 import com.utn.atenea.personas.dto.DatosPersonalesRequest;
 import com.utn.atenea.personas.dto.DocenteListadoResponse;
 import com.utn.atenea.personas.dto.PersonaResponse;
@@ -16,8 +16,8 @@ public interface PersonaMapper {
     PersonaResponse toResponse(Persona persona);
 
     @Mapping(target = "personaId", source = "id")
-    @Mapping(target = "legajo", source = "legajoAlumno")
-    AlumnoListadoResponse toAlumnoListado(Persona persona);
+    @Mapping(target = "legajo", source = "legajoEstudiante")
+    EstudianteListadoResponse toEstudianteListado(Persona persona);
 
     @Mapping(target = "personaId", source = "id")
     @Mapping(target = "legajo", source = "legajoDocente")

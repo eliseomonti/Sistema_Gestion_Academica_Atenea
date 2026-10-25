@@ -54,7 +54,7 @@ public class DocenteService {
                 credenciales.username(), credenciales.passwordTemporal());
     }
 
-    /** Una persona que ya existe (por ejemplo, un alumno) pasa a ser también docente. Conserva su usuario. */
+    /** Una persona que ya existe (por ejemplo, un estudiante) pasa a ser también docente. Conserva su usuario. */
     @Transactional
     public PersonaResponse asignarRol(Long personaId) {
         Persona persona = personaService.buscarActiva(personaId);

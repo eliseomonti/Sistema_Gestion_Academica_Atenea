@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface PersonaRepository extends JpaRepository<Persona, Long>, JpaSpecificationExecutor<Persona> {
@@ -20,8 +22,10 @@ public interface PersonaRepository extends JpaRepository<Persona, Long>, JpaSpec
 
     boolean existsByEmailAndIdNot(String email, Long id);
 
-    @Query("select coalesce(max(p.legajoAlumno), 0L) from Persona p")
-    Long ultimoLegajoAlumno();
+    List<Persona> findByIdInAndLegajoDocenteIsNotNull(Collection<Long> ids);
+
+    @Query("select coalesce(max(p.legajoEstudiante), 0L) from Persona p")
+    Long ultimoLegajoEstudiante();
 
     @Query("select coalesce(max(p.legajoDocente), 0L) from Persona p")
     Long ultimoLegajoDocente();
