@@ -10,4 +10,13 @@ public interface CarrerasApi {
 
     /** Los ids de todos los planes de la carrera, vigentes o no. */
     List<Long> idsDePlanes(Long carreraId);
+
+    /** Cantidad de años del plan: el mayor año de cursado de sus materias, o 0 si no tiene ninguna. */
+    int cantidadDeAnios(Long planEstudioId);
+
+    /** La materia dentro del plan, o vacío si la materia no es de ese plan. */
+    Optional<MateriaDelPlan> buscarMateriaDelPlan(Long planEstudioId, Long materiaId);
+
+    /** Todas las materias del plan, ordenadas por año, período y nombre. */
+    List<MateriaDelPlan> materiasDelPlan(Long planEstudioId);
 }

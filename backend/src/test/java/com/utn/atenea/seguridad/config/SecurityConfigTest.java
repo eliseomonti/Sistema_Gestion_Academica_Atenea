@@ -68,7 +68,7 @@ class SecurityConfigTest {
 
     @Test
     void rolIncorrectoDevuelve403() throws Exception {
-        mvc.perform(get("/api/admin/carreras").header("Authorization", bearer("ROLE_ALUMNO")))
+        mvc.perform(get("/api/admin/carreras").header("Authorization", bearer("ROLE_ESTUDIANTE")))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.title").value("Acceso denegado"));
@@ -88,7 +88,7 @@ class SecurityConfigTest {
 
     @Test
     void elControllerRecibeElUsuarioPrincipal() throws Exception {
-        mvc.perform(get("/api/alumno/yo").header("Authorization", bearer("ROLE_ALUMNO")))
+        mvc.perform(get("/api/estudiante/yo").header("Authorization", bearer("ROLE_ESTUDIANTE")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("7-42-jperez"));
     }
@@ -109,7 +109,7 @@ class SecurityConfigTest {
     @RestController
     static class PrincipalController {
 
-        @GetMapping("/api/alumno/yo")
+        @GetMapping("/api/estudiante/yo")
         String yo(@AuthenticationPrincipal UsuarioPrincipal principal) {
             return principal.usuarioId() + "-" + principal.personaId() + "-" + principal.username();
         }

@@ -35,9 +35,9 @@ public class Persona {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "legajo_alumno", unique = true)
+    @Column(name = "legajo_estudiante", unique = true)
     @Setter(AccessLevel.NONE)
-    private Long legajoAlumno;
+    private Long legajoEstudiante;
 
     @Column(name = "legajo_docente", unique = true)
     @Setter(AccessLevel.NONE)
@@ -65,8 +65,8 @@ public class Persona {
         this.email = email;
     }
 
-    public boolean esAlumno() {
-        return legajoAlumno != null;
+    public boolean esEstudiante() {
+        return legajoEstudiante != null;
     }
 
     public boolean esDocente() {
@@ -77,11 +77,11 @@ public class Persona {
         return legajoAdmin != null;
     }
 
-    public void asignarLegajoAlumno(Long legajo) {
-        if (esAlumno()) {
-            throw new IllegalStateException("La persona " + id + " ya tiene legajo de alumno");
+    public void asignarLegajoEstudiante(Long legajo) {
+        if (esEstudiante()) {
+            throw new IllegalStateException("La persona " + id + " ya tiene legajo de estudiante");
         }
-        this.legajoAlumno = legajo;
+        this.legajoEstudiante = legajo;
     }
 
     public void asignarLegajoDocente(Long legajo) {

@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/docente/**").hasRole("DOCENTE")
-                        .requestMatchers("/api/alumno/**").hasRole("ALUMNO")
+                        .requestMatchers("/api/estudiante/**").hasRole("ESTUDIANTE")
                         .anyRequest().denyAll())
                 .exceptionHandling(errores -> errores
                         .authenticationEntryPoint(noAutenticado)

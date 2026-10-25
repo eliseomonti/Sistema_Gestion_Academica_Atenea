@@ -28,7 +28,7 @@ public class DocenteController {
 
     private final DocenteService docenteService;
 
-    // Ejemplo: GET /api/admin/docentes?buscar=ruiz&page=0&size=20. Misma forma de respuesta que el listado de alumnos.
+    // Ejemplo: GET /api/admin/docentes?buscar=ruiz&page=0&size=20. Misma forma de respuesta que el listado de estudiantes.
     // Por defecto trae sólo los activos; con activo=false, los dados de baja.
     @GetMapping
     public PagedModel<DocenteListadoResponse> listar(
@@ -44,7 +44,7 @@ public class DocenteController {
         return docenteService.alta(request);
     }
 
-    // Alumnos y docentes se identifican por el id de la persona: con el PUT, la persona que ya
+    // Estudiantes y docentes se identifican por el id de la persona: con el PUT, la persona que ya
     // existe pasa a estar también en /docentes.
     @PutMapping("/{personaId}")
     @ResponseStatus(HttpStatus.CREATED)

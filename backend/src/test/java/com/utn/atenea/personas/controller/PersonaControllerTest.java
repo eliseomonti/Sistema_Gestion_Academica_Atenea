@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Búsqueda por DNI, modificación y baja contra la base real; {@code @Transactional} deshace todo al
- * terminar cada test. La baja de un alumno con inscripciones se prueba en AlumnoControllerTest.
+ * terminar cada test. La baja de un estudiante con inscripciones se prueba en EstudianteControllerTest.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,7 +45,7 @@ class PersonaControllerTest {
                 .andExpect(jsonPath("$.nombre").value("Ana"))
                 .andExpect(jsonPath("$.dni").value(DNI))
                 .andExpect(jsonPath("$.legajoDocente").value(notNullValue()))
-                .andExpect(jsonPath("$.legajoAlumno").value(nullValue()))
+                .andExpect(jsonPath("$.legajoEstudiante").value(nullValue()))
                 .andExpect(jsonPath("$.activo").value(true));
     }
 

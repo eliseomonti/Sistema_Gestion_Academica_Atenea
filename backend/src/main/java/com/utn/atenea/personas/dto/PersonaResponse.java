@@ -10,7 +10,7 @@ public record PersonaResponse(
         String apellido,
         String dni,
         String email,
-        Long legajoAlumno,
+        Long legajoEstudiante,
         Long legajoDocente,
         boolean activo
 ) {

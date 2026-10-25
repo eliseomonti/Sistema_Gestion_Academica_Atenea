@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public record InscripcionCarreraResponse(
         Long id,
         Long personaId,
-        Long legajoAlumno,
+        Long legajoEstudiante,
         Long planEstudioId,
         EstadoInscripcionCarrera estado,
         LocalDate fechaInscripcion

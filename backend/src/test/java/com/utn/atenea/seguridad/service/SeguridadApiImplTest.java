@@ -82,16 +82,16 @@ class SeguridadApiImplTest {
 
     @Test
     void agregarRolSumaElRolAlUsuarioExistente() {
-        Rol alumno = mock(Rol.class);
+        Rol estudiante = mock(Rol.class);
         Rol docente = mock(Rol.class);
         Usuario usuario = new Usuario(7L, "30111222", "hash", LocalDateTime.now());
-        usuario.agregarRol(alumno);
+        usuario.agregarRol(estudiante);
         when(usuarioRepository.findByPersonaId(7L)).thenReturn(Optional.of(usuario));
         when(rolRepository.findByNombre(NombreRol.ROLE_DOCENTE)).thenReturn(Optional.of(docente));
 
         service.agregarRol(7L, NombreRol.ROLE_DOCENTE);
 
-        assertThat(usuario.getRoles()).containsExactlyInAnyOrder(alumno, docente);
+        assertThat(usuario.getRoles()).containsExactlyInAnyOrder(estudiante, docente);
     }
 
     @Test

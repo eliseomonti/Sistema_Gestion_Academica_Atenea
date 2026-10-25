@@ -34,7 +34,7 @@ class UsuarioDetailsServiceTest {
     void mapeaCredencialesYRoles() {
         Usuario usuario = new Usuario(42L, "jperez", "hash", LocalDateTime.now());
         usuario.agregarRol(rol(NombreRol.ROLE_DOCENTE));
-        usuario.agregarRol(rol(NombreRol.ROLE_ALUMNO));
+        usuario.agregarRol(rol(NombreRol.ROLE_ESTUDIANTE));
         when(usuarioRepository.findByUsername("jperez")).thenReturn(Optional.of(usuario));
 
         UserDetails details = service.loadUserByUsername("jperez");
@@ -42,7 +42,7 @@ class UsuarioDetailsServiceTest {
         assertThat(details.getUsername()).isEqualTo("jperez");
         assertThat(details.getPassword()).isEqualTo("hash");
         assertThat(details.getAuthorities()).extracting(GrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder("ROLE_DOCENTE", "ROLE_ALUMNO");
+                .containsExactlyInAnyOrder("ROLE_DOCENTE", "ROLE_ESTUDIANTE");
         assertThat(details.isEnabled()).isTrue();
         assertThat(details.isAccountNonLocked()).isTrue();
     }

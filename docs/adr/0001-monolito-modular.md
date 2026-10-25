@@ -43,7 +43,7 @@ Se adopta un **monolito modular por dominio** (package-by-feature):
 | Alternativa | Veredicto |
 |---|---|
 | **Capas por tipo** | Descartada. Baja cohesión, acoplamiento alto e invisible|
-| **Por actor** (admin, docente, alumno) | Descartada. Duplica reglas entre actores.|
+| **Por actor** (admin, docente, estudiante) | Descartada. Duplica reglas entre actores.|
 | **Hexagonal completa** | Posible, pero **no recomendada como estructura global** (ver abajo). |
 | **Arquitectura limpia / cebolla** | Mismo veredicto que hexagonal, con más ceremonia. |
 | **Microservicios** | Descartada. Un equipo chico, una sola base y transacciones que cruzan módulos (inscripción, cupo, notas): el costo operativo no se justifica. |

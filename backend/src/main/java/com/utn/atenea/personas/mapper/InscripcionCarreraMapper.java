@@ -9,7 +9,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface InscripcionCarreraMapper {
 
-    @Mapping(target = "personaId", source = "alumno.id")
-    @Mapping(target = "legajoAlumno", source = "alumno.legajoAlumno")
+    @Mapping(target = "personaId", source = "estudiante.id")
+    @Mapping(target = "legajoEstudiante", source = "estudiante.legajoEstudiante")
     InscripcionCarreraResponse toResponse(InscripcionCarrera inscripcion);
 }

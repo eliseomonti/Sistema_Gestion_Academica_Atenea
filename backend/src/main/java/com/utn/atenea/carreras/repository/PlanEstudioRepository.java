@@ -10,6 +10,8 @@ public interface PlanEstudioRepository extends JpaRepository<PlanEstudio, Long> 
 
     List<PlanEstudio> findByCarreraIdOrderByAnioInicioDesc(Long carreraId);
 
+    boolean existsByIdAndCarreraId(Long id, Long carreraId);
+
     @Query("select p.id from PlanEstudio p where p.carrera.id = :carreraId")
     List<Long> findIdsByCarreraId(Long carreraId);
 }

@@ -64,7 +64,7 @@ class DocenteControllerTest {
         assertThat(legajo).isEqualTo(legajoEsperado);
         Persona docente = personaRepository.findById(personaId).orElseThrow();
         assertThat(docente.getLegajoDocente()).isEqualTo(legajoEsperado);
-        assertThat(docente.esAlumno()).isFalse();
+        assertThat(docente.esEstudiante()).isFalse();
         assertThat(docente.getNombre()).isEqualTo("María José");
 
         // Las credenciales devueltas sirven para loguearse y el token trae el rol de docente.
@@ -99,22 +99,22 @@ class DocenteControllerTest {
     }
 
     @Test
-    void unAlumnoExistentePasaASerTambienDocente() throws Exception {
-        // Se arma un alumno sin pasar por su endpoint, que necesita una carrera y un plan.
-        Persona alumno = personaService.crear(new DatosPersonalesRequest(
-                "Lucía", "Gómez", DNI, "2234567890", LocalDate.of(2000, 5, 10), "alumna.test@atenea.test"));
-        personaService.asignarLegajoAlumno(alumno);
-        CredencialesIniciales credenciales = personaService.crearUsuario(alumno, NombreRol.ROLE_ALUMNO);
+    void unEstudianteExistentePasaASerTambienDocente() throws Exception {
+        // Se arma un estudiante sin pasar por su endpoint, que necesita una carrera y un plan.
+        Persona estudiante = personaService.crear(new DatosPersonalesRequest(
+                "Lucía", "Gómez", DNI, "2234567890", LocalDate.of(2000, 5, 10), "estudiante.test@atenea.test"));
+        personaService.asignarLegajoEstudiante(estudiante);
+        CredencialesIniciales credenciales = personaService.crearUsuario(estudiante, NombreRol.ROLE_ESTUDIANTE);
         long legajoEsperado = personaRepository.ultimoLegajoDocente() + 1;
 
-        mvc.perform(put("/api/admin/docentes/{personaId}", alumno.getId()).with(admin()))
+        mvc.perform(put("/api/admin/docentes/{personaId}", estudiante.getId()).with(admin()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.legajoDocente").value(legajoEsperado))
-                .andExpect(jsonPath("$.legajoAlumno").value(alumno.getLegajoAlumno()));
+                .andExpect(jsonPath("$.legajoEstudiante").value(estudiante.getLegajoEstudiante()));
 
         // Conserva su contraseña y el token trae los dos roles.
         assertThat(roles(credenciales.username(), credenciales.passwordTemporal()))
-                .containsExactlyInAnyOrder("ROLE_ALUMNO", "ROLE_DOCENTE");
+                .containsExactlyInAnyOrder("ROLE_ESTUDIANTE", "ROLE_DOCENTE");
     }
 
     @Test
@@ -141,7 +141,7 @@ class DocenteControllerTest {
     void listaSoloDocentesOrdenadosPorApellido() throws Exception {
         Persona ruiz = docente("99000031", "Ana", "Ruiz");
         docente("99000032", "Pedro", "Acosta");
-        personaService.asignarLegajoAlumno(persona("99000033", "Lucía", "Gómez"));
+        personaService.asignarLegajoEstudiante(persona("99000033", "Lucía", "Gómez"));
 
         listar("buscar", "990000")
                 .andExpect(status().isOk())

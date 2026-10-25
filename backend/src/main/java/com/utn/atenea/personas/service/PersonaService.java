@@ -24,7 +24,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 /**
- * Lo común a alumnos y docentes. Las altas y las asignaciones de rol las arman AlumnoService y
+ * Lo común a estudiantes y docentes. Las altas y las asignaciones de rol las arman EstudianteService y
  * DocenteService con estos métodos; los que llegan desde un controller son buscarPorDni, modificar
  * y darDeBaja.
  */
@@ -75,7 +75,7 @@ public class PersonaService {
     }
 
     /**
-     * Reemplaza los datos personales; sirve igual para alumnos y docentes. Una persona dada de baja
+     * Reemplaza los datos personales; sirve igual para estudiantes y docentes. Una persona dada de baja
      * también se puede corregir. Legajos e inscripciones no se tocan.
      */
     public PersonaResponse modificar(Long personaId, DatosPersonalesRequest datos) {
@@ -110,7 +110,7 @@ public class PersonaService {
         }
 
         LocalDate hoy = LocalDate.now();
-        inscripcionCarreraRepository.findByAlumnoIdAndEstado(personaId, EstadoInscripcionCarrera.ACTIVA)
+        inscripcionCarreraRepository.findByEstudianteIdAndEstado(personaId, EstadoInscripcionCarrera.ACTIVA)
                 .forEach(inscripcion -> inscripcion.darDeBaja(hoy));
         persona.darDeBaja(hoy);
         seguridadApi.deshabilitarUsuario(personaId);
@@ -118,8 +118,8 @@ public class PersonaService {
     }
 
     // MAX + 1: si dos altas simultáneas toman el mismo número, el UNIQUE de la base rechaza la segunda.
-    public void asignarLegajoAlumno(Persona persona) {
-        persona.asignarLegajoAlumno(personaRepository.ultimoLegajoAlumno() + 1);
+    public void asignarLegajoEstudiante(Persona persona) {
+        persona.asignarLegajoEstudiante(personaRepository.ultimoLegajoEstudiante() + 1);
     }
 
     public void asignarLegajoDocente(Persona persona) {
