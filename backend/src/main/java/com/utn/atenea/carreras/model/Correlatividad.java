@@ -1,5 +1,6 @@
 package com.utn.atenea.carreras.model;
 
+import com.utn.atenea.carreras.EstadoCorrelativa;
 import jakarta.persistence.*;
 import lombok.*;
 

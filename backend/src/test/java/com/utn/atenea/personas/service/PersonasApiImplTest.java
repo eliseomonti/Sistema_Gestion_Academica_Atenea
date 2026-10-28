@@ -1,6 +1,7 @@
 package com.utn.atenea.personas.service;
 
 import com.utn.atenea.personas.DocenteResumen;
+import com.utn.atenea.personas.EstudianteResumen;
 import com.utn.atenea.personas.InscripcionCarreraResumen;
 import com.utn.atenea.personas.PersonasApi;
 import com.utn.atenea.personas.model.InscripcionCarrera;
@@ -81,9 +82,26 @@ class PersonasApiImplTest {
 
         assertThat(personasApi.inscripcionesCarrera(estudiante.getId()))
                 .containsExactlyInAnyOrder(
-                        new InscripcionCarreraResumen(activa.getId(), planActivo, true),
-                        new InscripcionCarreraResumen(dadaDeBaja.getId(), planDadoDeBaja, false));
+                        new InscripcionCarreraResumen(activa.getId(), estudiante.getId(), planActivo, true),
+                        new InscripcionCarreraResumen(dadaDeBaja.getId(), estudiante.getId(), planDadoDeBaja, false));
         assertThat(personasApi.inscripcionesCarrera(docente.getId())).isEmpty();
+    }
+
+    @Test
+    void buscarInscripcionesCarreraDevuelveAlEstudianteDeCadaUna() {
+        Long plan = insertarPlan("Carrera de prueba api personas 3");
+        InscripcionCarrera inscripcion = inscripcionCarreraRepository.save(
+                new InscripcionCarrera(estudiante, plan, LocalDate.of(2024, 3, 1)));
+
+        assertThat(personasApi.buscarInscripcionesCarrera(List.of(inscripcion.getId(), -1L)))
+                .containsExactly(new InscripcionCarreraResumen(inscripcion.getId(), estudiante.getId(), plan, true));
+    }
+
+    @Test
+    void buscarEstudiantesNoDevuelveALosQueNoSonEstudiantes() {
+        assertThat(personasApi.buscarEstudiantes(List.of(estudiante.getId(), docente.getId(), -1L)))
+                .containsExactly(new EstudianteResumen(estudiante.getId(), "Sol", "Díaz", 990003L, "sol.api@atenea.test"));
+        assertThat(personasApi.buscarEstudiantes(List.of())).isEmpty();
     }
 
     // carrera y plan_estudio son del módulo carreras: se insertan con SQL.

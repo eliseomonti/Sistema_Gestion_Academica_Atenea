@@ -18,6 +18,9 @@ public interface InscripcionFinalRepository extends JpaRepository<InscripcionFin
 
     List<InscripcionFinal> findByInscripcionCarreraIdAndEstado(Long inscripcionCarreraId, EstadoInscripcion estado);
 
+    List<InscripcionFinal> findByInscripcionCarreraIdInAndEstado(
+            Collection<Long> inscripcionCarreraIds, EstadoInscripcion estado);
+
     // Los anotados a la mesa, para el acta.
     List<InscripcionFinal> findByExamenFinalIdAndEstado(Long examenFinalId, EstadoInscripcion estado);
 

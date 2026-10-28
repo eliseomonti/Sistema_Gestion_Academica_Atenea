@@ -46,7 +46,10 @@ class InscripcionComisionControllerTest {
 
     Long carreraId;
     Long plan;
+    Long programacion;
+    Long analisis;
     Long estudiante;
+    Long inscripcionCarreraEstudiante;
     Long otroEstudiante;
     Long sinInscripcionAlPlan;
     Long comision1;
@@ -60,14 +63,15 @@ class InscripcionComisionControllerTest {
         carreraId = insertar("INSERT INTO carrera (nombre, duracion, titulo_otorgado, modalidad_carrera) "
                 + "VALUES ('Carrera de prueba inscripciones', '2 años', 'Técnico', 'PRESENCIAL')");
         plan = insertar("INSERT INTO plan_estudio (carrera_id, nombre) VALUES (?, 'Plan 2024')", carreraId);
-        Long programacion = insertarMateria("Programación I de prueba", "PRIMER_CUATRIMESTRE");
+        programacion = insertarMateria("Programación I de prueba", "PRIMER_CUATRIMESTRE");
         Long ingles = insertarMateria("Inglés I de prueba", "PRIMER_CUATRIMESTRE");
-        Long analisis = insertarMateria("Análisis de prueba", "SEGUNDO_CUATRIMESTRE");
+        analisis = insertarMateria("Análisis de prueba", "SEGUNDO_CUATRIMESTRE");
 
         estudiante = insertarEstudiante("40000101", 980101L);
         otroEstudiante = insertarEstudiante("40000102", 980102L);
         sinInscripcionAlPlan = insertarEstudiante("40000103", 980103L);
-        insertar("INSERT INTO inscripcion_carrera (estudiante_id, plan_estudio_id) VALUES (?, ?)", estudiante, plan);
+        inscripcionCarreraEstudiante = insertar(
+                "INSERT INTO inscripcion_carrera (estudiante_id, plan_estudio_id) VALUES (?, ?)", estudiante, plan);
         insertar("INSERT INTO inscripcion_carrera (estudiante_id, plan_estudio_id) VALUES (?, ?)", otroEstudiante, plan);
 
         comision1 = insertarComision(1);
@@ -254,6 +258,73 @@ class InscripcionComisionControllerTest {
                         "El período de inscripción ya cerró: la baja de la cursada se pide en la institución"));
     }
 
+    // --- Situación académica ---
+
+    @Test
+    void sinLasCorrelativasParaCursarDevuelve409ConLasQueFaltan() throws Exception {
+        abrirPeriodo("ANUAL");
+        exigirParaCursar(analisis, programacion, "CURSADA");
+
+        inscribir(estudiante, analisisEnComision1)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        "Te faltan correlativas para cursar esta materia: Programación I de prueba"));
+    }
+
+    @Test
+    void conLaCorrelativaRegularSeInscribe() throws Exception {
+        abrirPeriodo("ANUAL");
+        exigirParaCursar(analisis, programacion, "CURSADA");
+        cursoProgramacionElAnioPasado("REGULAR", LocalDate.now().plusYears(1));
+
+        inscribir(estudiante, analisisEnComision1).andExpect(status().isCreated());
+    }
+
+    @Test
+    void laRegularidadVencidaNoCumpleLaCorrelativa() throws Exception {
+        abrirPeriodo("ANUAL");
+        exigirParaCursar(analisis, programacion, "CURSADA");
+        cursoProgramacionElAnioPasado("REGULAR", LocalDate.now().minusDays(1));
+
+        inscribir(estudiante, analisisEnComision1).andExpect(status().isConflict());
+    }
+
+    @Test
+    void unaMateriaQueYaTieneRegularDevuelve409() throws Exception {
+        abrirPeriodo("PRIMER_CUATRIMESTRE");
+        cursoProgramacionElAnioPasado("REGULAR", LocalDate.now().plusYears(1));
+
+        inscribir(estudiante, programacionEnComision1)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("Ya tenés esta materia regular"));
+    }
+
+    @Test
+    void ofertaMuestraSoloLoQuePuedeCursar() throws Exception {
+        abrirPeriodo("ANUAL");
+        exigirParaCursar(analisis, programacion, "CURSADA");
+
+        mvc.perform(get(URL + "/oferta").with(estudianteLogueado(estudiante)))
+                .andExpect(jsonPath("$[*].nombreMateria").value(contains("Inglés I de prueba", "Programación I de prueba")));
+
+        // Con Programación regular, ya no la cursa y se le habilita Análisis.
+        cursoProgramacionElAnioPasado("REGULAR", LocalDate.now().plusYears(1));
+
+        mvc.perform(get(URL + "/oferta").with(estudianteLogueado(estudiante)))
+                .andExpect(jsonPath("$[*].nombreMateria").value(contains("Inglés I de prueba", "Análisis de prueba")));
+    }
+
+    @Test
+    void ofertaSigueMostrandoLoQueCursaAunqueYaNoCumplaLasCorrelativas() throws Exception {
+        abrirPeriodo("ANUAL");
+        inscribir(estudiante, analisisEnComision1).andExpect(status().isCreated());
+        exigirParaCursar(analisis, programacion, "CURSADA");
+
+        mvc.perform(get(URL + "/oferta").with(estudianteLogueado(estudiante)))
+                .andExpect(jsonPath("$[*].nombreMateria").value(
+                        contains("Inglés I de prueba", "Programación I de prueba", "Análisis de prueba")));
+    }
+
     // --- Listado ---
 
     @Test
@@ -386,6 +457,37 @@ class InscripcionComisionControllerTest {
                 INSERT INTO periodo_inscripcion (carrera_id, tipo, anio_lectivo, periodo_lectivo, fecha_inicio, fecha_cierre)
                 VALUES (?, 'CURSADA', ?, ?, ?, ?)
                 """, carreraId, ANIO, periodoLectivo, LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1));
+    }
+
+    // correlatividad_materias es del módulo carreras.
+    private void exigirParaCursar(Long materia, Long correlativa, String estado) {
+        jdbc.update("""
+                INSERT INTO correlatividad_materias (plan_estudio_id, plan_materia_id, plan_materia_correlativa_id,
+                                                     estado_para_cursar)
+                SELECT ?, pm.id, pc.id, ? FROM plan_materia pm, plan_materia pc
+                WHERE pm.plan_estudio_id = ? AND pm.materia_id = ? AND pc.plan_estudio_id = ? AND pc.materia_id = ?
+                """, plan, estado, plan, materia, plan, correlativa);
+    }
+
+    /** El estudiante cursó Programación I el año pasado y el acta de cierre quedó en esa condición. */
+    private void cursoProgramacionElAnioPasado(String condicion, LocalDate vencimiento) {
+        Long comision = insertar("INSERT INTO comision (plan_estudio_id, anio_cursado, nro_comision, turno, anio_lectivo) "
+                + "VALUES (?, 1, 1, 'MANANA', ?)", plan, ANIO - 1);
+        Long periodo = insertar("""
+                INSERT INTO periodo_inscripcion (carrera_id, tipo, anio_lectivo, periodo_lectivo, fecha_inicio, fecha_cierre)
+                VALUES (?, 'CURSADA', ?, 'PRIMER_CUATRIMESTRE', ?, ?)
+                """, carreraId, ANIO - 1, LocalDateTime.now().minusYears(1), LocalDateTime.now().minusYears(1).plusDays(7));
+        Long inscripcion = insertar("INSERT INTO estudiante_inscripcion_comision (inscripcion_carrera_id, "
+                + "comision_materia_id, periodo_id) VALUES (?, ?, ?)", inscripcionCarreraEstudiante,
+                insertarComisionMateria(comision, programacion, "PRIMER_CUATRIMESTRE", null), periodo);
+        Long docente = insertar("""
+                INSERT INTO persona (nombre, apellido, dni, telefono, fecha_nacimiento, email, legajo_docente)
+                VALUES ('Luis', 'Paz', '30000111', '2232222222', '1975-01-01', 'luis@inscripciones.test', 980211)
+                """);
+        // cierre_cursada es del módulo examenes.
+        insertar("INSERT INTO cierre_cursada (inscripcion_comision_id, docente_id, condicion, fecha_cierre, "
+                + "fecha_vencimiento) VALUES (?, ?, ?, ?, ?)",
+                inscripcion, docente, condicion, LocalDate.now().minusMonths(6), vencimiento);
     }
 
     private Long insertarMateria(String nombre, String periodoLectivo) {

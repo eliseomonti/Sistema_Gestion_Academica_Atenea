@@ -24,6 +24,8 @@ public interface PersonaRepository extends JpaRepository<Persona, Long>, JpaSpec
 
     List<Persona> findByIdInAndLegajoDocenteIsNotNull(Collection<Long> ids);
 
+    List<Persona> findByIdInAndLegajoEstudianteIsNotNull(Collection<Long> ids);
+
     @Query("select coalesce(max(p.legajoEstudiante), 0L) from Persona p")
     Long ultimoLegajoEstudiante();
 

@@ -3,6 +3,7 @@ package com.utn.atenea.inscripciones.service;
 import com.utn.atenea.carreras.CarrerasApi;
 import com.utn.atenea.compartido.exception.RecursoNoEncontradoException;
 import com.utn.atenea.compartido.exception.ReglaNegocioException;
+import com.utn.atenea.examenes.ExamenesApi;
 import com.utn.atenea.inscripciones.dto.AltaPeriodoInscripcionRequest;
 import com.utn.atenea.inscripciones.dto.ModificacionPeriodoInscripcionRequest;
 import com.utn.atenea.inscripciones.dto.PeriodoInscripcionFiltroRequest;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 
 /** ABM de las ventanas de inscripción a cursadas y a finales. */
@@ -26,8 +29,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PeriodoInscripcionService {
 
+    private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
     private final PeriodoInscripcionRepository periodoInscripcionRepository;
     private final CarrerasApi carrerasApi;
+    private final ExamenesApi examenesApi;
     private final PeriodoInscripcionMapper periodoInscripcionMapper;
 
     public List<PeriodoInscripcionResponse> listar(PeriodoInscripcionFiltroRequest filtro) {
@@ -61,6 +67,7 @@ public class PeriodoInscripcionService {
         PeriodoInscripcion periodo = buscar(periodoId);
         validarSinSuperposicion(periodo.getCarreraId(), periodo.getTipo(), request.fechaInicio(),
                 request.fechaCierre(), periodoId);
+        validarCierreAntesDeLasMesas(periodo, request.fechaCierre());
 
         periodo.cambiarFechas(request.fechaInicio(), request.fechaCierre());
         return periodoInscripcionMapper.toResponse(periodo);
@@ -100,6 +107,25 @@ public class PeriodoInscripcionService {
             throw new ReglaNegocioException("El período de inscripción " + periodoId
                     + " tiene inscripciones o mesas de examen: no se puede borrar, sólo deshabilitar");
         }
+    }
+
+    /**
+     * Una mesa se toma después de que cierra la inscripción de su turno: si no, un estudiante podría
+     * anotarse a un examen que ya pasó. Es la otra mitad de la regla de ExamenFinalService.validarHorario:
+     * allá se valida al crear o mover una mesa; acá, al mover el cierre del turno.
+     */
+    private void validarCierreAntesDeLasMesas(PeriodoInscripcion periodo, LocalDateTime fechaCierre) {
+        if (periodo.getTipo() != TipoPeriodo.FINAL) {
+            return;
+        }
+        examenesApi.examenesFinalesDeLosTurnos(List.of(periodo.getId())).stream()
+                .map(mesa -> mesa.fecha().atTime(mesa.horaInicio()))
+                .min(Comparator.naturalOrder())
+                .filter(fechaCierre::isAfter)
+                .ifPresent(primeraMesa -> {
+                    throw new ReglaNegocioException("El turno tiene mesas desde el " + primeraMesa.format(FECHA_HORA)
+                            + ": la inscripción tiene que cerrar antes");
+                });
     }
 
     private PeriodoInscripcion buscar(Long periodoId) {

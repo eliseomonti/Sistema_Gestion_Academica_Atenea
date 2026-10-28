@@ -1,9 +1,11 @@
 package com.utn.atenea.personas.service;
 
 import com.utn.atenea.personas.DocenteResumen;
+import com.utn.atenea.personas.EstudianteResumen;
 import com.utn.atenea.personas.InscripcionCarreraResumen;
 import com.utn.atenea.personas.PersonasApi;
 import com.utn.atenea.personas.model.EstadoInscripcionCarrera;
+import com.utn.atenea.personas.model.InscripcionCarrera;
 import com.utn.atenea.personas.repository.InscripcionCarreraRepository;
 import com.utn.atenea.personas.repository.PersonaRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +37,31 @@ public class PersonasApiImpl implements PersonasApi {
     @Override
     public List<InscripcionCarreraResumen> inscripcionesCarrera(Long estudianteId) {
         return inscripcionCarreraRepository.findByEstudianteId(estudianteId).stream()
-                .map(inscripcion -> new InscripcionCarreraResumen(inscripcion.getId(), inscripcion.getPlanEstudioId(),
-                        inscripcion.getEstado() == EstadoInscripcionCarrera.ACTIVA))
+                .map(PersonasApiImpl::toResumen)
                 .toList();
+    }
+
+    @Override
+    public List<InscripcionCarreraResumen> buscarInscripcionesCarrera(Collection<Long> inscripcionCarreraIds) {
+        return inscripcionCarreraRepository.findAllById(inscripcionCarreraIds).stream()
+                .map(PersonasApiImpl::toResumen)
+                .toList();
+    }
+
+    @Override
+    public List<EstudianteResumen> buscarEstudiantes(Collection<Long> personaIds) {
+        if (personaIds.isEmpty()) {
+            return List.of();
+        }
+        return personaRepository.findByIdInAndLegajoEstudianteIsNotNull(personaIds).stream()
+                .map(persona -> new EstudianteResumen(persona.getId(), persona.getNombre(), persona.getApellido(),
+                        persona.getLegajoEstudiante(), persona.getEmail()))
+                .toList();
+    }
+
+    // getEstudiante().getId() no inicializa el proxy: el id ya está en la fila de inscripcion_carrera.
+    private static InscripcionCarreraResumen toResumen(InscripcionCarrera inscripcion) {
+        return new InscripcionCarreraResumen(inscripcion.getId(), inscripcion.getEstudiante().getId(),
+                inscripcion.getPlanEstudioId(), inscripcion.getEstado() == EstadoInscripcionCarrera.ACTIVA);
     }
 }

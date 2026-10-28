@@ -1,5 +1,6 @@
 package com.utn.atenea.carreras;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,4 +23,10 @@ public interface CarrerasApi {
 
     /** Todas las materias del plan, ordenadas por año, período y nombre. */
     List<MateriaDelPlan> materiasDelPlan(Long planEstudioId);
+
+    /** Las materias con esos ids. Las que no existen no vienen. */
+    List<MateriaResumen> buscarMaterias(Collection<Long> materiaIds);
+
+    /** Todas las correlatividades del plan. */
+    List<CorrelativaDelPlan> correlatividades(Long planEstudioId);
 }

@@ -12,6 +12,7 @@ import com.utn.atenea.inscripciones.model.EstadoInscripcion;
 import com.utn.atenea.inscripciones.model.InscripcionComision;
 import com.utn.atenea.inscripciones.model.PeriodoInscripcion;
 import com.utn.atenea.inscripciones.model.TipoPeriodo;
+import com.utn.atenea.inscripciones.reglas.SituacionAcademica;
 import com.utn.atenea.inscripciones.repository.CantidadInscriptos;
 import com.utn.atenea.inscripciones.repository.InscripcionComisionRepository;
 import com.utn.atenea.inscripciones.repository.PeriodoInscripcionRepository;
@@ -34,9 +35,8 @@ import java.util.stream.Collectors;
 
 /**
  * Lo que el estudiante puede elegir para inscribirse: las materias de las comisiones de sus planes que
- * entran en un período de cursada abierto, con horarios, docentes y cupo libre.
- * Todavía no filtra por situación académica (correlativas, materias ya regulares o aprobadas): eso
- * necesita los cierres de cursada y las notas de final de examenes.
+ * entran en un período de cursada abierto y que puede cursar según su situación académica, con
+ * horarios, docentes y cupo libre. Es un solo caso de uso: las 7 dependencias no justifican partirlo.
  */
 @Service
 @RequiredArgsConstructor
@@ -48,6 +48,7 @@ public class OfertaComisionService {
     private final ComisionesApi comisionesApi;
     private final PersonasApi personasApi;
     private final CarrerasApi carrerasApi;
+    private final SituacionAcademicaService situacionAcademicaService;
     private final OfertaComisionMapper ofertaComisionMapper;
 
     /** Por plan; dentro de cada plan, por año de la carrera, período y nombre de la materia. */
@@ -66,16 +67,20 @@ public class OfertaComisionService {
         if (dictadas.isEmpty()) {
             return List.of();
         }
-
-        // Lo que la oferta muestra y no sabe comisiones se pide una sola vez, para todo el plan.
-        List<Long> comisionMateriaIds = dictadas.stream().map(MateriaDictada::comisionMateriaId).toList();
-        Map<Long, Long> inscriptos = inscripcionComisionRepository.contarInscriptos(comisionMateriaIds).stream()
-                .collect(Collectors.toMap(CantidadInscriptos::comisionMateriaId, CantidadInscriptos::cantidad));
         Set<Long> inscriptoEn = inscripcionComisionRepository
                 .findByInscripcionCarreraIdInAndEstado(List.of(inscripcionCarrera.id()), EstadoInscripcion.INSCRIPTO)
                 .stream()
                 .map(InscripcionComision::getComisionMateriaId)
                 .collect(Collectors.toSet());
+        dictadas = queElEstudiantePuedeElegir(dictadas, inscripcionCarrera, inscriptoEn);
+        if (dictadas.isEmpty()) {
+            return List.of();
+        }
+
+        // Lo que la oferta muestra y no sabe comisiones se pide una sola vez, para todo el plan.
+        List<Long> comisionMateriaIds = dictadas.stream().map(MateriaDictada::comisionMateriaId).toList();
+        Map<Long, Long> inscriptos = inscripcionComisionRepository.contarInscriptos(comisionMateriaIds).stream()
+                .collect(Collectors.toMap(CantidadInscriptos::comisionMateriaId, CantidadInscriptos::cantidad));
         Set<Long> docenteIds = dictadas.stream()
                 .flatMap(materia -> materia.docentes().stream())
                 .map(MateriaDictada.Docente::docenteId)
@@ -100,6 +105,25 @@ public class OfertaComisionService {
                 .sorted(Comparator.comparingInt(OfertaMateriaResponse::anioCursado)
                         .thenComparing(OfertaMateriaResponse::periodoLectivo)
                         .thenComparing(OfertaMateriaResponse::nombreMateria))
+                .toList();
+    }
+
+    /**
+     * Las que puede cursar según su situación académica, y las que ya está cursando: ésas siguen para que
+     * vea en qué comisión está y pueda darse de baja, aunque una correlativa haya cambiado después.
+     */
+    private List<MateriaDictada> queElEstudiantePuedeElegir(List<MateriaDictada> dictadas,
+                                                           InscripcionCarreraResumen inscripcionCarrera,
+                                                           Set<Long> inscriptoEn) {
+        SituacionAcademica situacion = situacionAcademicaService.de(inscripcionCarrera.id(),
+                inscripcionCarrera.planEstudioId());
+        Set<Long> materiasQueCursa = dictadas.stream()
+                .filter(dictada -> inscriptoEn.contains(dictada.comisionMateriaId()))
+                .map(MateriaDictada::materiaId)
+                .collect(Collectors.toSet());
+        return dictadas.stream()
+                .filter(dictada -> materiasQueCursa.contains(dictada.materiaId())
+                        || situacion.puedeCursar(dictada.materiaId()))
                 .toList();
     }
 

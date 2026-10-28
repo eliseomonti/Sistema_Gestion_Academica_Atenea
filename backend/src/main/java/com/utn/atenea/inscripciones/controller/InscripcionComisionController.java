@@ -3,6 +3,7 @@ package com.utn.atenea.inscripciones.controller;
 import com.utn.atenea.inscripciones.dto.InscripcionComisionRequest;
 import com.utn.atenea.inscripciones.dto.InscripcionComisionResponse;
 import com.utn.atenea.inscripciones.dto.OfertaMateriaResponse;
+import com.utn.atenea.inscripciones.service.AltaInscripcionComisionService;
 import com.utn.atenea.inscripciones.service.InscripcionComisionService;
 import com.utn.atenea.inscripciones.service.OfertaComisionService;
 import com.utn.atenea.seguridad.UsuarioPrincipal;
@@ -28,6 +29,7 @@ import java.util.List;
 public class InscripcionComisionController {
 
     private final InscripcionComisionService inscripcionComisionService;
+    private final AltaInscripcionComisionService altaInscripcionComisionService;
     private final OfertaComisionService ofertaComisionService;
 
     // Lo que el estudiante puede elegir ahora: materias de sus planes con período de cursada abierto.
@@ -47,7 +49,7 @@ public class InscripcionComisionController {
     @ResponseStatus(HttpStatus.CREATED)
     public InscripcionComisionResponse inscribir(@AuthenticationPrincipal UsuarioPrincipal principal,
                                                  @Valid @RequestBody InscripcionComisionRequest request) {
-        return inscripcionComisionService.inscribir(principal.personaId(), request);
+        return altaInscripcionComisionService.inscribir(principal.personaId(), request);
     }
 
     @PostMapping("/{inscripcionId}/baja")

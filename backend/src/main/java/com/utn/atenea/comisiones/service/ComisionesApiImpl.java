@@ -1,11 +1,13 @@
 package com.utn.atenea.comisiones.service;
 
+import com.utn.atenea.comisiones.AulaResumen;
 import com.utn.atenea.comisiones.ComisionMateriaResumen;
 import com.utn.atenea.comisiones.ComisionesApi;
 import com.utn.atenea.comisiones.MateriaDictada;
 import com.utn.atenea.comisiones.model.ComisionDocente;
 import com.utn.atenea.comisiones.model.ComisionHorario;
 import com.utn.atenea.comisiones.model.ComisionMateria;
+import com.utn.atenea.comisiones.repository.AulaRepository;
 import com.utn.atenea.comisiones.repository.ComisionMateriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class ComisionesApiImpl implements ComisionesApi {
 
     private final ComisionMateriaRepository comisionMateriaRepository;
+    private final AulaRepository aulaRepository;
 
     // MANDATORY: el bloqueo dura lo que la transacción, así que sin una de quien llama no serviría de nada.
     @Override
@@ -50,6 +53,18 @@ public class ComisionesApiImpl implements ComisionesApi {
     public List<MateriaDictada> materiasDictadas(Long planEstudioId, int anioLectivo) {
         return comisionMateriaRepository.dictadasEnElPlan(planEstudioId, anioLectivo).stream()
                 .map(ComisionesApiImpl::toMateriaDictada)
+                .toList();
+    }
+
+    @Override
+    public boolean esDocenteDe(Long docenteId, Long comisionMateriaId) {
+        return comisionMateriaRepository.tieneAlDocente(comisionMateriaId, docenteId);
+    }
+
+    @Override
+    public List<AulaResumen> buscarAulas(Collection<Long> aulaIds) {
+        return aulaRepository.findAllById(aulaIds).stream()
+                .map(aula -> new AulaResumen(aula.getId(), aula.getNombre(), aula.isActiva()))
                 .toList();
     }
 

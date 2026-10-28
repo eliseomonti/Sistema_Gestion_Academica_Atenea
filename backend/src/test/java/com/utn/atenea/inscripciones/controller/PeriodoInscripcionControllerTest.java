@@ -148,6 +148,21 @@ class PeriodoInscripcionControllerTest {
                 .andExpect(jsonPath("$.detail").value("No existe el período de inscripción con id -1"));
     }
 
+    @Test
+    void elCierreDeUnTurnoNoPuedeQuedarDespuesDeSuPrimeraMesa() throws Exception {
+        Long id = idDe(altaFinal(carreraId, "2026-02-01T08:00:00", "2026-02-07T23:59:00"));
+        insertarMesa(id, "2026-02-12", "14:00");
+        insertarMesa(id, "2026-02-10", "09:00");
+
+        modificar(id, "2026-02-01T08:00:00", "2026-02-10T10:00:00")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        "El turno tiene mesas desde el 10/02/2026 09:00: la inscripción tiene que cerrar antes"));
+        // Hasta el inicio de la primera mesa, sí.
+        modificar(id, "2026-02-01T08:00:00", "2026-02-10T09:00:00")
+                .andExpect(status().isOk());
+    }
+
     // --- Habilitar y deshabilitar ---
 
     @Test
@@ -273,6 +288,14 @@ class PeriodoInscripcionControllerTest {
     private static Long idDe(ResultActions alta) throws Exception {
         String json = alta.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
         return ((Number) JsonPath.read(json, "$.id")).longValue();
+    }
+
+    // materia es de carreras y examen_final, de examenes: se insertan con SQL.
+    private void insertarMesa(Long turnoId, String fecha, String horaInicio) {
+        jdbc.update("INSERT INTO materia (nombre, carga_horaria_semanal, carga_horaria_total) "
+                + "VALUES ('Materia de prueba períodos', 4, 64)");
+        jdbc.update("INSERT INTO examen_final (materia_id, periodo_id, fecha, hora_inicio, hora_fin) "
+                + "VALUES (?, ?, ?, ?, ADDTIME(?, '02:00'))", ultimoId(), turnoId, fecha, horaInicio, horaInicio);
     }
 
     private Long insertarCarrera(String nombre) {

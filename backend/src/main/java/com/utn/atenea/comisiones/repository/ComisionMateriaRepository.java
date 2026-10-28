@@ -41,4 +41,22 @@ public interface ComisionMateriaRepository extends JpaRepository<ComisionMateria
             order by cm.comision.anioCursado, cm.comision.nroComision
             """)
     List<ComisionMateria> dictadasEnElPlan(Long planEstudioId, int anioLectivo);
+
+    @Query("""
+            select count(cm) > 0 from ComisionMateria cm join cm.docentes d
+            where cm.id = :comisionMateriaId and d.docenteId = :docenteId
+            """)
+    boolean tieneAlDocente(Long comisionMateriaId, Long docenteId);
+
+    /** Las que el docente tiene asignadas en comisiones activas de ese año lectivo, con horarios y aulas. */
+    @EntityGraph(attributePaths = {"comision", "horarios", "horarios.aula", "docentes"})
+    @Query("""
+            select cm from ComisionMateria cm
+            where cm.comision.anioLectivo = :anioLectivo
+              and cm.comision.activa = true
+              and exists (select 1 from ComisionMateria asignada join asignada.docentes d
+                          where asignada.id = cm.id and d.docenteId = :docenteId)
+            order by cm.periodoLectivo, cm.comision.anioCursado, cm.comision.nroComision
+            """)
+    List<ComisionMateria> asignadasAlDocente(Long docenteId, int anioLectivo);
 }

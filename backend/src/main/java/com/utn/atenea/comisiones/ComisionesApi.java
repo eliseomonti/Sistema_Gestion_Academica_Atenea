@@ -21,4 +21,10 @@ public interface ComisionesApi {
 
     /** Las materias que se dictan en las comisiones activas del plan en ese año lectivo, con horarios y docentes. */
     List<MateriaDictada> materiasDictadas(Long planEstudioId, int anioLectivo);
+
+    /** El docente está asignado a la materia de la comisión, con cualquier rol. */
+    boolean esDocenteDe(Long docenteId, Long comisionMateriaId);
+
+    /** Las aulas con esos ids, activas o dadas de baja (activa lo distingue). Las que no existen no vienen. */
+    List<AulaResumen> buscarAulas(Collection<Long> aulaIds);
 }
