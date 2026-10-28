@@ -68,6 +68,13 @@ class CarrerasApiImplTest {
     }
 
     @Test
+    void existeCarreraIncluyeLasDadasDeBaja() {
+        assertThat(carrerasApi.existeCarrera(activa.getId())).isTrue();
+        assertThat(carrerasApi.existeCarrera(deCarreraInactiva.getCarrera().getId())).isTrue();
+        assertThat(carrerasApi.existeCarrera(-1L)).isFalse();
+    }
+
+    @Test
     void planVigenteDeCarreraActivaAdmiteInscripciones() {
         assertThat(carrerasApi.buscarPlan(vigente.getId()))
                 .contains(new PlanEstudioResumen(vigente.getId(), activa.getId(), true));

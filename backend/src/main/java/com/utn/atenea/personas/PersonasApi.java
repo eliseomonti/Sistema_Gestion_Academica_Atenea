@@ -10,4 +10,7 @@ public interface PersonasApi {
      * personas que no existen o no son docentes no vienen: quien llama compara contra los ids que pidió.
      */
     List<DocenteResumen> buscarDocentes(Collection<Long> personaIds);
+
+    /** Las inscripciones a carrera del estudiante, en cualquier estado (activa lo distingue). */
+    List<InscripcionCarreraResumen> inscripcionesCarrera(Long estudianteId);
 }

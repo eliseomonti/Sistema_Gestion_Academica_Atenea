@@ -1,6 +1,7 @@
 package com.utn.atenea.comisiones.model;
 
 import com.utn.atenea.carreras.PeriodoLectivo;
+import com.utn.atenea.comisiones.Turno;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;

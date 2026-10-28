@@ -8,7 +8,7 @@ import com.utn.atenea.comisiones.model.Aula;
 import com.utn.atenea.comisiones.model.Comision;
 import com.utn.atenea.comisiones.model.ComisionHorario;
 import com.utn.atenea.comisiones.model.ComisionMateria;
-import com.utn.atenea.comisiones.model.DiaSemana;
+import com.utn.atenea.comisiones.DiaSemana;
 import com.utn.atenea.comisiones.repository.AulaRepository;
 import com.utn.atenea.comisiones.repository.ComisionHorarioRepository;
 import com.utn.atenea.compartido.exception.RecursoNoEncontradoException;

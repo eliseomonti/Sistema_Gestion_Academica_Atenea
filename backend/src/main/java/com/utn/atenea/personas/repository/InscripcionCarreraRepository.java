@@ -13,6 +13,8 @@ public interface InscripcionCarreraRepository extends JpaRepository<InscripcionC
     // Con el estudiante en la condición, una inscripción no se encuentra desde la URL de otra persona.
     Optional<InscripcionCarrera> findByIdAndEstudianteId(Long id, Long estudianteId);
 
+    List<InscripcionCarrera> findByEstudianteId(Long estudianteId);
+
     List<InscripcionCarrera> findByEstudianteIdAndEstado(Long estudianteId, EstadoInscripcionCarrera estado);
 
     boolean existsByEstudianteIdAndPlanEstudioId(Long estudianteId, Long planEstudioId);

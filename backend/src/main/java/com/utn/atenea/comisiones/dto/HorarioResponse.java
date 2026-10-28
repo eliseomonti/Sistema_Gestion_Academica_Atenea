@@ -1,6 +1,6 @@
 package com.utn.atenea.comisiones.dto;
 
-import com.utn.atenea.comisiones.model.DiaSemana;
+import com.utn.atenea.comisiones.DiaSemana;
 
 import java.time.LocalTime;
 

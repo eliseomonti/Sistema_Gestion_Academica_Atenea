@@ -5,6 +5,9 @@ import java.util.Optional;
 
 public interface CarrerasApi {
 
+    /** La carrera existe, activa o dada de baja. */
+    boolean existeCarrera(Long carreraId);
+
     /** El plan con ese id, o vacío si no existe. */
     Optional<PlanEstudioResumen> buscarPlan(Long planEstudioId);
 

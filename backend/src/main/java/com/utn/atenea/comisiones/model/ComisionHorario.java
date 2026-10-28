@@ -1,5 +1,6 @@
 package com.utn.atenea.comisiones.model;
 
+import com.utn.atenea.comisiones.DiaSemana;
 import jakarta.persistence.*;
 import lombok.*;
 

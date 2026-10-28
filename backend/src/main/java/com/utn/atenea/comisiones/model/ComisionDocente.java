@@ -1,5 +1,6 @@
 package com.utn.atenea.comisiones.model;
 
+import com.utn.atenea.comisiones.RolDocente;
 import jakarta.persistence.*;
 import lombok.*;
 
