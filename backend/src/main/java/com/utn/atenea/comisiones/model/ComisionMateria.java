@@ -1,6 +1,8 @@
 package com.utn.atenea.comisiones.model;
 
 import com.utn.atenea.carreras.PeriodoLectivo;
+import com.utn.atenea.comisiones.DiaSemana;
+import com.utn.atenea.comisiones.RolDocente;
 import jakarta.persistence.*;
 import lombok.*;
 

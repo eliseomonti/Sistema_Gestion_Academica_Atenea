@@ -1,4 +1,4 @@
-package com.utn.atenea.comisiones.model;
+package com.utn.atenea.comisiones;
 
 public enum Turno {
     MANANA,

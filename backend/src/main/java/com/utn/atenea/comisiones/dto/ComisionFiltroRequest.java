@@ -1,7 +1,7 @@
 package com.utn.atenea.comisiones.dto;
 
 import com.utn.atenea.carreras.PeriodoLectivo;
-import com.utn.atenea.comisiones.model.Turno;
+import com.utn.atenea.comisiones.Turno;
 import jakarta.validation.constraints.NotNull;
 
 /**

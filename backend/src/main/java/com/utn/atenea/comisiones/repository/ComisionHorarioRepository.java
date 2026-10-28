@@ -2,7 +2,7 @@ package com.utn.atenea.comisiones.repository;
 
 import com.utn.atenea.carreras.PeriodoLectivo;
 import com.utn.atenea.comisiones.model.ComisionHorario;
-import com.utn.atenea.comisiones.model.DiaSemana;
+import com.utn.atenea.comisiones.DiaSemana;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

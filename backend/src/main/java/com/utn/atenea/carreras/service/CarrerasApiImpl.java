@@ -4,6 +4,7 @@ import com.utn.atenea.carreras.CarrerasApi;
 import com.utn.atenea.carreras.MateriaDelPlan;
 import com.utn.atenea.carreras.PlanEstudioResumen;
 import com.utn.atenea.carreras.model.PlanMateria;
+import com.utn.atenea.carreras.repository.CarreraRepository;
 import com.utn.atenea.carreras.repository.PlanEstudioRepository;
 import com.utn.atenea.carreras.repository.PlanMateriaRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,14 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class CarrerasApiImpl implements CarrerasApi {
 
+    private final CarreraRepository carreraRepository;
     private final PlanEstudioRepository planEstudioRepository;
     private final PlanMateriaRepository planMateriaRepository;
+
+    @Override
+    public boolean existeCarrera(Long carreraId) {
+        return carreraRepository.existsById(carreraId);
+    }
 
     @Override
     public Optional<PlanEstudioResumen> buscarPlan(Long planEstudioId) {

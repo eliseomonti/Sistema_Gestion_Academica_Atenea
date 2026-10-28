@@ -1,6 +1,6 @@
 package com.utn.atenea.comisiones.dto;
 
-import com.utn.atenea.comisiones.model.RolDocente;
+import com.utn.atenea.comisiones.RolDocente;
 import jakarta.validation.constraints.NotNull;
 
 public record DocenteAsignadoRequest(

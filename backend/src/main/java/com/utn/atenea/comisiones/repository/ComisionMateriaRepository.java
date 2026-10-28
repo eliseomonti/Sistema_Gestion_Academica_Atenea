@@ -1,8 +1,14 @@
 package com.utn.atenea.comisiones.repository;
 
 import com.utn.atenea.comisiones.model.ComisionMateria;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /** Las materias se agregan y se quitan desde Comision; esto es para consultarlas. */
@@ -13,4 +19,26 @@ public interface ComisionMateriaRepository extends JpaRepository<ComisionMateria
 
     // El docente está asignado a la materia de la comisión, con cualquier rol.
     boolean existsByIdAndDocentesDocenteId(Long id, Long docenteId);
+
+    // SELECT ... FOR UPDATE: ver ComisionesApi.bloquearComisionMateria.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select cm from ComisionMateria cm join fetch cm.comision where cm.id = :id")
+    Optional<ComisionMateria> bloquear(Long id);
+
+    @EntityGraph(attributePaths = "comision")
+    List<ComisionMateria> findByIdIn(Collection<Long> ids);
+
+    @Query("select cm.id from ComisionMateria cm where cm.materiaId = :materiaId and cm.comision.anioLectivo = :anioLectivo")
+    List<Long> idsPorMateriaYAnioLectivo(Long materiaId, int anioLectivo);
+
+    // Una sola consulta con comisión, horarios, aulas y docentes: la oferta los muestra todos.
+    @EntityGraph(attributePaths = {"comision", "horarios", "horarios.aula", "docentes"})
+    @Query("""
+            select cm from ComisionMateria cm
+            where cm.comision.planEstudioId = :planEstudioId
+              and cm.comision.anioLectivo = :anioLectivo
+              and cm.comision.activa = true
+            order by cm.comision.anioCursado, cm.comision.nroComision
+            """)
+    List<ComisionMateria> dictadasEnElPlan(Long planEstudioId, int anioLectivo);
 }

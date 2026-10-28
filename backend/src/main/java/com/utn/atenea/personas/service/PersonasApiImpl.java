@@ -1,7 +1,10 @@
 package com.utn.atenea.personas.service;
 
 import com.utn.atenea.personas.DocenteResumen;
+import com.utn.atenea.personas.InscripcionCarreraResumen;
 import com.utn.atenea.personas.PersonasApi;
+import com.utn.atenea.personas.model.EstadoInscripcionCarrera;
+import com.utn.atenea.personas.repository.InscripcionCarreraRepository;
 import com.utn.atenea.personas.repository.PersonaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.util.List;
 public class PersonasApiImpl implements PersonasApi {
 
     private final PersonaRepository personaRepository;
+    private final InscripcionCarreraRepository inscripcionCarreraRepository;
 
     @Override
     public List<DocenteResumen> buscarDocentes(Collection<Long> personaIds) {
@@ -25,6 +29,14 @@ public class PersonasApiImpl implements PersonasApi {
         return personaRepository.findByIdInAndLegajoDocenteIsNotNull(personaIds).stream()
                 .map(persona -> new DocenteResumen(persona.getId(), persona.getNombre(), persona.getApellido(),
                         persona.getLegajoDocente(), persona.isActivo()))
+                .toList();
+    }
+
+    @Override
+    public List<InscripcionCarreraResumen> inscripcionesCarrera(Long estudianteId) {
+        return inscripcionCarreraRepository.findByEstudianteId(estudianteId).stream()
+                .map(inscripcion -> new InscripcionCarreraResumen(inscripcion.getId(), inscripcion.getPlanEstudioId(),
+                        inscripcion.getEstado() == EstadoInscripcionCarrera.ACTIVA))
                 .toList();
     }
 }

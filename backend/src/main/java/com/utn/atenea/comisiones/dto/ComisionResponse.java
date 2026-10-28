@@ -1,6 +1,6 @@
 package com.utn.atenea.comisiones.dto;
 
-import com.utn.atenea.comisiones.model.Turno;
+import com.utn.atenea.comisiones.Turno;
 
 /** Fila del listado de comisiones; también es la respuesta del alta, la modificación y la baja. */
 public record ComisionResponse(

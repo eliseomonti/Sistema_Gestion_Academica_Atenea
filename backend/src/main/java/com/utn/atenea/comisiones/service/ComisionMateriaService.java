@@ -11,7 +11,7 @@ import com.utn.atenea.comisiones.mapper.ComisionMateriaMapper;
 import com.utn.atenea.comisiones.model.Aula;
 import com.utn.atenea.comisiones.model.Comision;
 import com.utn.atenea.comisiones.model.ComisionMateria;
-import com.utn.atenea.comisiones.model.RolDocente;
+import com.utn.atenea.comisiones.RolDocente;
 import com.utn.atenea.comisiones.repository.ComisionMateriaRepository;
 import com.utn.atenea.compartido.exception.RecursoDuplicadoException;
 import com.utn.atenea.compartido.exception.RecursoNoEncontradoException;
