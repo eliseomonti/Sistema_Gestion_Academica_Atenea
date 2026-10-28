@@ -13,3 +13,6 @@ Thumbs.db
 # Claude Code: archivos personales (el CLAUDE.md del equipo SI se sube)
 CLAUDE.local.md
 **/.claude/settings.local.json
+
+# IDE
+.idea/
