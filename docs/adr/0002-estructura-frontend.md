@@ -146,12 +146,18 @@ Cada `xxx.routes.ts` de actor carga sus features también de forma diferida.
   mira el prefijo de la URL, no el nombre del módulo.
 - **`shared/` puede llenarse** de cosas que usa una sola feature. Sólo sube ahí lo que usan dos
   actores o más.
-- **Sin herramienta, las reglas de dependencia son sólo una convención.**
+- **La regla 4 no la verifica ninguna herramienta.** Depende de la revisión de los pull requests.
+- **Sheriff va por la versión 0.20.** Puede cambiar la forma de configurarlo en versiones futuras.
 
 ## Cumplimiento
 
-- En la revisión de cada pull request se controla que los archivos nuevos estén donde indica la tabla
-  y que no haya imports entre actores.
-- Para verificarlo de forma automática, como hace Spring Modulith en el backend, se puede sumar
-  [Sheriff](https://github.com/softarc-consulting/sheriff) con ESLint. Las reglas 1 a 3 se escriben
-  como reglas de dependencia, y el lint falla si alguien las rompe.
+- **Las reglas 1 a 3 las verifica [Sheriff](https://github.com/softarc-consulting/sheriff)**, igual
+  que Spring Modulith en el backend. Están escritas en `frontend/sheriff.config.ts` y Sheriff corre
+  como plugin de ESLint, así que un import prohibido aparece como error en el editor y en
+  `npm run lint`.
+- **`npm run lint` tiene que pasar siempre.** Los pull requests no se aprueban si lo rompen.
+- **Un error de Sheriff se corrige moviendo el código, no relajando `sheriff.config.ts`.** La
+  configuración sólo cambia si cambia la estructura (un actor o una carpeta nueva en el primer nivel
+  de `src/app/`), y en ese caso también se actualiza este ADR.
+- **La regla 4, y que los archivos nuevos estén donde indica la tabla,** se controlan en la revisión
+  de cada pull request.
