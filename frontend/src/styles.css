@@ -1,1 +1,94 @@
-/* You can add global styles to this file, and also import other style files */
+/* Paleta basada en el azul del logo */
+:root {
+  /* Marca */
+  --color-marca: #123153; /* azul del logo */
+  --color-primario: #3a6aa8; /* botones, acciones */
+  --color-primario-hover: #2d5689;
+  --color-primario-claro: #e8f0fa; /* fondos seleccionados, badges */
+
+  /* Texto */
+  --color-texto: #1f2933;
+  --color-texto-suave: #5f6b7a;
+  --color-texto-sobre-primario: #ffffff;
+  --color-link: #2d5689;
+
+  /* Superficies */
+  --color-fondo: #f4f6f9;
+  --color-superficie: #ffffff;
+  --color-fondo-marca: var(--color-marca); /* login */
+
+  /* Bordes */
+  --color-borde: #7a8594; /* inputs */
+  --color-divisor: #e3e7ec; /* separadores, bordes de tarjetas */
+
+  /* Interacción */
+  --color-foco: #3a6aa8; /* outline 2px + offset 2px */
+  --color-deshabilitado: #c5ccd5;
+
+  /* Estados */
+  --color-error: #c0392b;
+  --color-error-fondo: #fdecea;
+  --color-ok: #2e7d32;
+  --color-ok-fondo: #eaf7ea;
+  --color-alerta: #8a6400;
+  --color-alerta-fondo: #fff6e0;
+
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 1rem;
+  --espacio-4: 1.5rem;
+  --espacio-5: 2rem;
+
+  --texto-chico: 0.875rem;
+  --texto-base: 1rem;
+  --texto-grande: 1.25rem;
+
+  --radio: 0.5rem;
+  --sombra: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 44px;
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+button {
+  min-height: 44px;
+  padding: var(--espacio-2) var(--espacio-4);
+  border: none;
+  border-radius: var(--radio);
+  color: var(--color-superficie);
+  background: var(--color-primario);
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--color-primario-hover);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

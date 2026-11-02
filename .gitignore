@@ -10,7 +10,8 @@ Thumbs.db
 *.jks
 *.p12
 
-# Claude Code: archivos personales (el CLAUDE.md del equipo SI se sube)
+# Claude Code: archivos personales, no se suben
+CLAUDE.md
 CLAUDE.local.md
 **/.claude/settings.local.json
 
