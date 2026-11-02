@@ -1,0 +1,44 @@
+:host {
+  display: block;
+  background: var(--color-superficie);
+  border-bottom: 1px solid var(--color-divisor);
+}
+
+ul {
+  margin: 0;
+  padding: var(--espacio-2) 0;
+  list-style: none;
+}
+
+a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--espacio-2) var(--espacio-3);
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+a:hover {
+  background: var(--color-fondo);
+}
+
+/* La pantalla en la que se está. */
+a.activo {
+  color: var(--color-link);
+  font-weight: 600;
+  background: var(--color-primario-claro);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: -2px;
+}
+
+/* En escritorio el menú pasa a ser una columna a la izquierda. */
+@media (min-width: 1024px) {
+  :host {
+    border-bottom: none;
+    border-right: 1px solid var(--color-divisor);
+  }
+}

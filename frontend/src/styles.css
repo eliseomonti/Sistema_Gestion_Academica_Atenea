@@ -1,3 +1,5 @@
+@import "@fontsource-variable/inter";
+
 /* Paleta basada en el azul del logo */
 :root {
   /* Marca */
@@ -55,7 +57,7 @@
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter Variable', system-ui, sans-serif;
   font-size: var(--texto-base);
   line-height: 1.5;
   color: var(--color-texto);
