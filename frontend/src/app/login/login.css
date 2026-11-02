@@ -1,0 +1,98 @@
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding-bottom: var(--espacio-5);
+  background: var(--color-fondo);
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-3);
+  width: 100%;
+  padding: clamp(3rem, 12vh, 6rem) var(--espacio-3)
+    calc(var(--espacio-5) + var(--espacio-4));
+  background: var(--color-fondo-marca);
+}
+
+.logo {
+  width: min(25rem, 80%);
+  height: auto;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  width: min(24rem, 100% - 2 * var(--espacio-3));
+  margin-top: calc(-1 * var(--espacio-4)); /* el azul termina justo arriba de "Usuario" */
+  padding: var(--espacio-5) var(--espacio-4);
+  background: var(--color-superficie);
+  border: 2px solid var(--color-divisor);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--texto-grande);
+  text-align: center;
+  color: var(--color-texto-sobre-primario);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* Input de contraseña con el botón del ojo encima, contra el borde derecho */
+.con-boton {
+  position: relative;
+}
+
+.con-boton input {
+  width: 100%;
+  padding-right: 3rem; /* que el texto no quede debajo del botón */
+}
+
+.ver-password {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.ver-password:hover {
+  color: var(--color-texto);
+  background: transparent;
+}
+
+.ver-password:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: -2px;
+}
+
+.ver-password svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.error-campo,
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--texto-chico);
+}
