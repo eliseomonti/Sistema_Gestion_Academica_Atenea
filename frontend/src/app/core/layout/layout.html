@@ -1,0 +1,39 @@
+<header class="barra">
+  <button
+    type="button"
+    class="hamburguesa"
+    aria-controls="menu-principal"
+    [attr.aria-expanded]="menuAbierto()"
+    [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+    (click)="menuAbierto.set(!menuAbierto())"
+  >
+    @if (menuAbierto()) {
+      <!-- x (Feather) -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    } @else {
+      <!-- menu (Feather) -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    }
+  </button>
+  <img class="logo" src="img/atenea-icono-blanco.svg" alt="Atenea" />
+  <button type="button" class="salir" (click)="salir()">Salir</button>
+</header>
+
+<app-menu
+  id="menu-principal"
+  class="menu"
+  [class.abierto]="menuAbierto()"
+  [items]="menu"
+  (elegido)="menuAbierto.set(false)"
+/>
+
+<main class="contenido">
+  <router-outlet />
+</main>

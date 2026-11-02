@@ -1,0 +1,92 @@
+:host {
+  display: grid;
+  grid-template-rows: auto auto 1fr; /* barra, menú, contenido */
+  min-height: 100dvh;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--color-fondo-marca);
+}
+
+.logo {
+  height: clamp(2.5rem, 6vw, 3rem);
+  width: auto;
+}
+
+/* Botones de la barra: sin el fondo del botón primario, que sobre el azul casi no se distingue. */
+.hamburguesa,
+.salir {
+  color: var(--color-texto-sobre-primario);
+  background: transparent;
+}
+
+.hamburguesa:hover,
+.salir:hover {
+  background: var(--color-primario-hover);
+}
+
+/* Sobre el azul de la marca, el foco tiene que ser blanco. */
+.hamburguesa:focus-visible,
+.salir:focus-visible {
+  outline: 2px solid var(--color-texto-sobre-primario);
+  outline-offset: 2px;
+}
+
+.hamburguesa {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+}
+
+.hamburguesa svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.salir {
+  margin-left: auto; /* contra el borde derecho */
+  border: 1px solid var(--color-texto-sobre-primario);
+}
+
+/* En celular y tablet el menú se ve sólo cuando está abierto. */
+.menu {
+  display: none;
+}
+
+.menu.abierto {
+  display: block;
+}
+
+.contenido {
+  min-width: 0; /* que una tabla ancha no estire la columna */
+  padding: var(--espacio-4) var(--espacio-3);
+}
+
+/* En escritorio, el menú va a la izquierda del contenido y la barra ocupa todo el ancho. */
+@media (min-width: 1024px) {
+  :host {
+    grid-template-columns: 16rem 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .barra {
+    grid-column: 1 / -1;
+  }
+
+  .hamburguesa {
+    display: none;
+  }
+
+  .menu {
+    display: block;
+  }
+}

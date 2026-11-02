@@ -1,0 +1,16 @@
+<nav aria-label="Menú principal">
+  <ul>
+    @for (item of items(); track item.ruta) {
+      <li>
+        <a
+          [routerLink]="item.ruta"
+          routerLinkActive="activo"
+          ariaCurrentWhenActive="page"
+          (click)="elegido.emit()"
+        >
+          {{ item.texto }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
