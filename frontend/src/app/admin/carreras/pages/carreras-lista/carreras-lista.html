@@ -1,0 +1,56 @@
+<h1>Carreras</h1>
+
+@if (carreras.isLoading()) {
+  <p class="estado">Cargando carreras…</p>
+} @else if (carreras.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar las carreras.</p>
+  <button type="button" (click)="carreras.reload()">Reintentar</button>
+} @else if (carreras.value()?.length === 0) {
+  <p class="estado">Todavía no hay carreras cargadas.</p>
+} @else {
+  <div class="herramientas">
+    <input
+      type="search"
+      class="buscador"
+      placeholder="Buscar por nombre"
+      aria-label="Buscar carrera por nombre"
+      [formField]="filtrosForm.busqueda"
+    />
+
+    <!-- popover: el navegador lo abre y lo cierra, y también lo cierra con Esc o al tocar afuera. -->
+    <button
+      type="button"
+      class="boton-filtro"
+      [class.activo]="hayFiltro()"
+      popovertarget="filtros-carreras"
+      aria-label="Filtros"
+    >
+      <app-icono nombre="filtro" />
+    </button>
+    <div #panelFiltros id="filtros-carreras" class="panel-filtros" popover>
+      <label for="filtro-estado">Estado</label>
+      <!-- Al elegir una opción, el panel se cierra: el valor ya lo guardó [formField]. -->
+      <select
+        id="filtro-estado"
+        [formField]="filtrosForm.estado"
+        (change)="panelFiltros.hidePopover()"
+      >
+        <option value="TODAS">Todas</option>
+        <option value="ACTIVAS">Activas</option>
+        <option value="INACTIVAS">Inactivas</option>
+      </select>
+    </div>
+  </div>
+
+  @if (carrerasFiltradas().length === 0) {
+    <p class="estado">Ninguna carrera coincide con la búsqueda.</p>
+  } @else {
+    <app-tabla [columnas]="columnas" [filas]="carrerasFiltradas()" [enlace]="enlace">
+      <ng-template appCelda="activa" let-carrera>
+        <app-etiqueta [tipo]="carrera.activa ? 'ok' : 'error'">
+          {{ carrera.activa ? 'Activa' : 'Inactiva' }}
+        </app-etiqueta>
+      </ng-template>
+    </app-tabla>
+  }
+}

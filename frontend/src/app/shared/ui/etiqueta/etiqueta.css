@@ -1,0 +1,17 @@
+:host {
+  display: inline-block;
+  padding: 0 var(--espacio-2);
+  border-radius: var(--radio);
+  font-size: var(--texto-chico);
+  font-weight: 500;
+}
+
+:host(.ok) {
+  color: var(--color-ok);
+  background: var(--color-ok-fondo);
+}
+
+:host(.error) {
+  color: var(--color-error);
+  background: var(--color-error-fondo);
+}

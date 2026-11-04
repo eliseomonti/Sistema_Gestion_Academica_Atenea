@@ -80,15 +80,6 @@ h1 {
   outline-offset: -2px;
 }
 
-.ver-password svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 
 .error-campo,
 .error {

@@ -1,0 +1,255 @@
+/* La tabla mira el ancho que le toca a ella, no el de la pantalla (container query). */
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
+/* ---- Base (angosto): una lista, con una línea entre fila y fila ---- */
+/* Los mismos bordes que la tabla de escritorio. */
+
+table {
+  display: block;
+  overflow: hidden; /* para que el fondo de una fila resaltada no tape las esquinas */
+  border: 1px solid var(--color-borde-tabla);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+}
+
+tbody {
+  display: block;
+}
+
+thead {
+  display: none;
+}
+
+/* Cada fila: la primera celda como título y el resto en una línea debajo, en gris. */
+tr {
+  position: relative; /* para el link estirado y la flecha */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-1) var(--espacio-2);
+  padding: var(--espacio-3) var(--espacio-5) var(--espacio-3) var(--espacio-3);
+  border-bottom: 1px solid var(--color-borde-tabla);
+}
+
+/* Sin enlace no hace falta el lugar para tocar: filas más bajas, entran más en la pantalla. */
+tr:not(.con-enlace) {
+  row-gap: 0;
+  padding: var(--espacio-2) var(--espacio-3);
+  line-height: 1.25;
+}
+
+tbody:last-child tr:last-child {
+  border-bottom: none;
+}
+
+td {
+  display: block;
+  padding: 0;
+  color: var(--color-texto-suave);
+}
+
+/* Con `tituloEnLista`, el dato va en su propia línea, chico y resaltado, con su título en gris. */
+td[data-titulo] {
+  flex-basis: 100%;
+  font-size: var(--texto-chico);
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+td[data-titulo]::before {
+  content: attr(data-titulo) ' ';
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+td.principal {
+  order: -1; /* primero, aunque no sea la primera columna */
+  flex-basis: 100%;
+  font-weight: 500;
+  color: var(--color-texto);
+}
+
+td.flecha {
+  position: absolute;
+  top: 50%;
+  right: var(--espacio-3);
+  translate: 0 -50%;
+}
+
+/* Franja con el título de un grupo: "1.er año  9 materias". */
+tr.grupo {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--color-encabezado-tabla); /* en celular no hay encabezado */
+}
+
+.grupo th,
+.subgrupo th {
+  display: block;
+  padding: 0;
+  text-align: left;
+  font-size: var(--texto-chico);
+  font-weight: 600;
+  color: var(--color-marca);
+}
+
+.detalle {
+  margin-left: var(--espacio-2);
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+/* Franja de subtítulo dentro de un grupo ("1.er cuatrimestre  5 materias"), más clara. */
+tr.subgrupo {
+  display: block;
+  padding: var(--espacio-1) var(--espacio-3);
+  background: var(--color-fondo);
+  border-bottom-color: var(--color-divisor);
+}
+
+/* Una marca azul a la izquierda, para que se note que está adentro del grupo. */
+.subgrupo th::before {
+  content: '';
+  display: inline-block;
+  height: 0.9em;
+  margin-right: var(--espacio-2);
+  vertical-align: -0.1em;
+  border-left: 3px solid var(--color-primario);
+}
+
+td.oculta-en-lista {
+  display: none;
+}
+
+/* ---- Ancho (tablet en adelante): tabla ---- */
+
+@container (min-width: 48rem) {
+  /*
+   * Bordes separados: cada celda dibuja su borde inferior (la línea entre filas) y la tabla el
+   * contorno. Entre columnas no hay línea: las separa el espacio. Con border-collapse, el fondo
+   * de una fila resaltada tapaba el borde de arriba.
+   */
+  table {
+    display: table;
+    overflow: visible;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--color-borde-tabla);
+    border-bottom: none; /* lo pone la última fila */
+    border-radius: 0;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tbody {
+    display: table-row-group;
+  }
+
+  tr,
+  tr.grupo {
+    display: table-row;
+    padding: 0;
+    border: none;
+  }
+
+  th,
+  td,
+  .grupo th {
+    display: table-cell;
+    padding: var(--espacio-3);
+    text-align: left;
+    color: var(--color-texto);
+    border-bottom: 1px solid var(--color-borde-tabla);
+  }
+
+  /* PRUEBA: con `centrado`, todo centrado menos la columna principal (por ahora, sólo materias). */
+  :host(.centrado) thead th:not(.principal),
+  :host(.centrado) td:not(.principal) {
+    text-align: center;
+  }
+
+  th {
+    font-size: var(--texto-chico);
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--color-encabezado-tabla);
+  }
+
+  .grupo th {
+    padding: var(--espacio-2) var(--espacio-3);
+    text-transform: none;
+    color: var(--color-marca);
+    background: var(--color-fondo);
+  }
+
+  td[data-titulo] {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  td[data-titulo]::before {
+    content: none; /* en la tabla ya está en el encabezado */
+  }
+
+  tr:not(.con-enlace) {
+    line-height: inherit;
+  }
+
+  tr.subgrupo {
+    display: none; /* en la tabla, el dato está en su columna */
+  }
+
+  td.oculta-en-lista {
+    display: table-cell;
+  }
+
+  .flecha {
+    width: 1%; /* lo justo para la flecha */
+  }
+
+  td.flecha {
+    position: static;
+    translate: none;
+    padding: var(--espacio-3);
+  }
+}
+
+/* ---- Fila con enlace (en los dos formatos) ---- */
+
+.con-enlace:hover {
+  background: var(--color-primario-claro);
+}
+
+.con-enlace:has(a:focus-visible) {
+  outline: 2px solid var(--color-foco);
+  outline-offset: -2px;
+}
+
+.con-enlace a {
+  color: var(--color-marca);
+  text-decoration: none;
+}
+
+.con-enlace a:focus-visible {
+  outline: none; /* el foco se marca en toda la fila */
+}
+
+.con-enlace a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.flecha {
+  color: var(--color-texto-suave);
+}
+
+.flecha app-icono {
+  display: block;
+}

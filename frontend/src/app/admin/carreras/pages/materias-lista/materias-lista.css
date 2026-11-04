@@ -1,0 +1,48 @@
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-1);
+  min-height: 44px; /* lo mínimo para tocar con el dedo */
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.volver:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  margin-bottom: 0;
+}
+
+.subtitulo {
+  margin: var(--espacio-1) 0 var(--espacio-4);
+  color: var(--color-texto-suave);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* El código, con números de ancho fijo para que queden alineados. En la tabla, en gris. */
+.codigo {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+/* En la lista de celular, el estilo lo pone `tituloEnLista`; en la tabla (desde 48rem), gris. */
+@container (min-width: 48rem) {
+  .codigo {
+    color: var(--color-texto-suave);
+  }
+}
+
+/* El período es un dato de apoyo: más chico y en gris. */
+.periodo {
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}

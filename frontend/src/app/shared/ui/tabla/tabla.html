@@ -1,0 +1,81 @@
+<table>
+  @if (encabezado()) {
+    <thead>
+      <tr>
+        @for (columna of columnas(); track columna.clave) {
+          <th scope="col" [class.principal]="columna === columnaPrincipal()">
+            {{ columna.titulo }}
+          </th>
+        }
+        @if (enlace()) {
+          <th class="flecha"></th>
+        }
+      </tr>
+    </thead>
+  }
+
+  <!-- Un <tbody> por grupo: es la forma de HTML de separar las filas de una tabla en partes. -->
+  @for (grupo of grupos(); track $index) {
+    <tbody>
+      @if (grupo.titulo) {
+        <tr class="grupo">
+          <th scope="rowgroup" [attr.colspan]="cantidadColumnas()">
+            {{ grupo.titulo }}
+            @if (detalleGrupo(); as detalle) {
+              <span class="detalle">{{ detalle(grupo.cantidad) }}</span>
+            }
+          </th>
+        </tr>
+      }
+
+      @for (subgrupo of grupo.subgrupos; track $index) {
+        <!-- Franja de subtítulo ("1.er cuatrimestre"): sólo en la lista de celular. -->
+        @if (subgrupo.titulo) {
+          <tr class="subgrupo">
+            <th scope="rowgroup" [attr.colspan]="cantidadColumnas()">
+              {{ subgrupo.titulo }}
+              @if (detalleGrupo(); as detalle) {
+                <span class="detalle">{{ detalle(subgrupo.filas.length) }}</span>
+              }
+            </th>
+          </tr>
+        }
+
+        @for (fila of subgrupo.filas; track fila) {
+          <tr [class.con-enlace]="enlace()">
+            @for (columna of columnas(); track columna.clave) {
+              <td
+                [class.principal]="columna === columnaPrincipal()"
+                [class.oculta-en-lista]="columna.ocultaEnLista"
+                [attr.data-titulo]="columna.tituloEnLista ? columna.titulo : null"
+              >
+                <!-- La celda principal lleva el link; su ::after se estira sobre toda la fila. -->
+                @if (columna === columnaPrincipal() && enlace(); as enlace) {
+                  <a [routerLink]="enlace(fila)">
+                    <ng-container *ngTemplateOutlet="contenido; context: { fila, columna }" />
+                  </a>
+                } @else {
+                  <ng-container *ngTemplateOutlet="contenido; context: { fila, columna }" />
+                }
+              </td>
+            }
+            @if (enlace()) {
+              <td class="flecha" aria-hidden="true">
+                <app-icono nombre="flecha-derecha" />
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  }
+</table>
+
+<!-- Lo que va adentro de una celda: el template especial de la columna, si hay, o su valor. -->
+<ng-template #contenido let-fila="fila" let-columna="columna">
+  @if (plantillas().get(columna.clave); as plantilla) {
+    <ng-container *ngTemplateOutlet="plantilla; context: { $implicit: fila }" />
+  } @else {
+    {{ valor(fila, columna) }}
+  }
+</ng-template>

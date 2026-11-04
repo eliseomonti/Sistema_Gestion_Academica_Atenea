@@ -8,6 +8,7 @@
           ariaCurrentWhenActive="page"
           (click)="elegido.emit()"
         >
+          <app-icono [nombre]="item.icono" />
           {{ item.texto }}
         </a>
       </li>
