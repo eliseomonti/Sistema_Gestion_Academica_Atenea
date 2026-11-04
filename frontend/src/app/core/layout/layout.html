@@ -1,3 +1,4 @@
+<!-- Barra de celular y tablet, para abrir el menú. En escritorio se oculta: el menú se ve siempre. -->
 <header class="barra">
   <button
     type="button"
@@ -7,32 +8,30 @@
     [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
     (click)="menuAbierto.set(!menuAbierto())"
   >
-    @if (menuAbierto()) {
-      <!-- x (Feather) -->
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
-    } @else {
-      <!-- menu (Feather) -->
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </svg>
-    }
+    <app-icono [nombre]="menuAbierto() ? 'cerrar' : 'menu'" />
   </button>
-  <img class="logo" src="img/atenea-icono-blanco.svg" alt="Atenea" />
-  <button type="button" class="salir" (click)="salir()">Salir</button>
+  <!-- En la barra, la marca va en horizontal: el logo al lado del texto. -->
+  <div class="marca">
+    <img class="marca-icono" src="img/atenea-icono-blanco.svg" alt="" />
+    <div>
+      <img class="marca-letras" src="img/atenea-letras.svg" alt="Atenea" />
+      <p class="marca-modulo">{{ modulo }}</p>
+    </div>
+  </div>
 </header>
 
-<app-menu
-  id="menu-principal"
-  class="menu"
-  [class.abierto]="menuAbierto()"
-  [items]="menu"
-  (elegido)="menuAbierto.set(false)"
-/>
+<aside id="menu-principal" class="lateral" [class.abierto]="menuAbierto()">
+  <!-- En el menú, la marca va en vertical y centrada. En celular ya está en la barra. -->
+  <div class="marca-lateral">
+    <img class="lateral-icono" src="img/atenea-icono-blanco.svg" alt="" />
+    <img class="lateral-letras" src="img/atenea-letras.svg" alt="Atenea" />
+    <p class="lateral-modulo">{{ modulo }}</p>
+  </div>
+
+  <app-menu [items]="menu" (elegido)="menuAbierto.set(false)" />
+
+  <button type="button" class="salir" (click)="salir()">Salir</button>
+</aside>
 
 <main class="contenido">
   <router-outlet />

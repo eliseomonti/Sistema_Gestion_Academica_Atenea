@@ -1,3 +1,5 @@
+/* ---- Celular y tablet: barra arriba, menú desplegable debajo y el contenido ---- */
+
 :host {
   display: grid;
   grid-template-rows: auto auto 1fr; /* barra, menú, contenido */
@@ -5,19 +7,48 @@
 }
 
 .barra {
-  display: flex;
+  /* Hamburguesa a la izquierda y la marca centrada. La tercera columna, vacía, equilibra la
+     primera para que la marca quede en el centro de la barra y no del espacio que sobra. */
+  display: grid;
+  grid-template-columns: 2.75rem 1fr 2.75rem;
   align-items: center;
-  gap: var(--espacio-3);
-  padding: var(--espacio-2) var(--espacio-3);
+  gap: var(--espacio-2);
+  padding: var(--espacio-3);
   background: var(--color-fondo-marca);
 }
 
-.logo {
-  height: clamp(2.5rem, 6vw, 3rem);
+/* Marca de la barra (celular): el logo al lado de las letras y el módulo. */
+.marca {
+  display: flex;
+  align-items: center;
+  justify-self: center;
+  gap: var(--espacio-2);
+  color: var(--color-texto-sobre-primario);
+}
+
+.marca-icono {
+  height: 3.5rem; /* más alto que el texto: sobresale arriba y abajo, como en el boceto */
   width: auto;
 }
 
-/* Botones de la barra: sin el fondo del botón primario, que sobre el azul casi no se distingue. */
+.marca p {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.marca-letras {
+  display: block;
+  width: 6.5rem; /* igual que en el menú de escritorio */
+  height: auto;
+  margin-bottom: var(--espacio-1);
+}
+
+.marca-modulo {
+  font-size: var(--texto-base);
+  color: var(--color-texto-sobre-marca-suave);
+}
+
+/* Botones sobre el azul: sin el fondo del botón primario, que ahí casi no se distingue. */
 .hamburguesa,
 .salir {
   color: var(--color-texto-sobre-primario);
@@ -39,54 +70,93 @@
 .hamburguesa {
   display: grid;
   place-items: center;
-  width: 44px;
+  width: 2.75rem;
   padding: 0;
 }
 
-.hamburguesa svg {
+.hamburguesa app-icono {
   width: 1.5rem;
   height: 1.5rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
 }
 
-.salir {
-  margin-left: auto; /* contra el borde derecho */
-  border: 1px solid var(--color-texto-sobre-primario);
+/* El menú lateral: azul, con el logo arriba, las opciones y Salir al pie. */
+.lateral {
+  display: none; /* en celular, sólo cuando está abierto */
+  flex-direction: column;
+  padding: var(--espacio-2) var(--espacio-3) var(--espacio-3);
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-fondo-marca);
 }
 
-/* En celular y tablet el menú se ve sólo cuando está abierto. */
-.menu {
+.lateral.abierto {
+  display: flex;
+}
+
+/* En celular la marca ya está en la barra. */
+.marca-lateral {
   display: none;
 }
 
-.menu.abierto {
-  display: block;
+.salir {
+  margin-top: var(--espacio-3);
+  border: 1px solid var(--color-texto-sobre-primario);
 }
 
 .contenido {
   min-width: 0; /* que una tabla ancha no estire la columna */
-  padding: var(--espacio-4) var(--espacio-3);
+  /* A los costados crece con la pantalla: 1rem en celular, hasta 2rem en tablet y escritorio. */
+  padding: var(--espacio-5) clamp(var(--espacio-3), 4vw, var(--espacio-5));
 }
 
-/* En escritorio, el menú va a la izquierda del contenido y la barra ocupa todo el ancho. */
+/* ---- Escritorio: sin barra, el menú es una columna azul a la izquierda ---- */
+
 @media (min-width: 1024px) {
   :host {
     grid-template-columns: 16rem 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr;
   }
 
   .barra {
-    grid-column: 1 / -1;
-  }
-
-  .hamburguesa {
     display: none;
   }
 
-  .menu {
-    display: block;
+  .lateral {
+    display: flex;
+    position: sticky; /* queda fijo al hacer scroll en el contenido */
+    top: 0;
+    height: 100dvh;
+    overflow-y: auto; /* si hay muchas opciones, el menú se desplaza solo */
+    padding: var(--espacio-3) var(--espacio-3) var(--espacio-4);
+  }
+
+  /* Marca del menú (escritorio): ícono, letras y módulo, uno abajo del otro y centrados. */
+  .marca-lateral {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--espacio-2) 0 var(--espacio-3); /* arriba se suma al relleno del menú */
+    margin-bottom: var(--espacio-2);
+    border-bottom: 1px solid var(--color-primario-hover);
+  }
+
+  .lateral-icono {
+    height: 4rem;
+    width: auto;
+  }
+
+  .lateral-letras {
+    width: 6.5rem;
+    height: auto;
+    margin-top: var(--espacio-2);
+  }
+
+  .lateral-modulo {
+    margin: var(--espacio-1) 0 0;
+    font-size: var(--texto-base);
+    color: var(--color-texto-sobre-marca-suave);
+  }
+
+  .salir {
+    margin-top: auto; /* al pie del menú */
   }
 }

@@ -1,11 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Icono } from '../../../shared/ui/icono/icono';
 import { ItemMenu } from '../menus';
 
 /** Lista de opciones del menú. Qué opciones mostrar lo decide el layout según el rol. */
 @Component({
   selector: 'app-menu',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, Icono],
   templateUrl: './menu.html',
   styleUrl: './menu.css',
 })

@@ -12,6 +12,7 @@
   --color-texto: #1f2933;
   --color-texto-suave: #5f6b7a;
   --color-texto-sobre-primario: #ffffff;
+  --color-texto-sobre-marca-suave: #a9bbd1; /* texto secundario sobre el azul del logo */
   --color-link: #2d5689;
 
   /* Superficies */
@@ -22,6 +23,10 @@
   /* Bordes */
   --color-borde: #7a8594; /* inputs */
   --color-divisor: #e3e7ec; /* separadores, bordes de tarjetas */
+
+  /* Tablas */
+  --color-encabezado-tabla: #dce1e7;
+  --color-borde-tabla: #8a95a3;
 
   /* Interacción */
   --color-foco: #3a6aa8; /* outline 2px + offset 2px */
@@ -45,7 +50,7 @@
   --texto-base: 1rem;
   --texto-grande: 1.25rem;
 
-  --radio: 0.5rem;
+  --radio: 0.25rem; /* el único radio de la app: bordes apenas redondeados */
   --sombra: 0 1px 3px rgb(0 0 0 / 0.12);
 }
 
@@ -65,11 +70,13 @@ body {
 }
 
 input,
+select,
 button {
   font: inherit;
 }
 
-input {
+input,
+select {
   min-height: 44px;
   padding: var(--espacio-2) var(--espacio-3);
   border: 1px solid var(--color-borde);

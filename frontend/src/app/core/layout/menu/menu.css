@@ -1,10 +1,11 @@
+/* El fondo azul lo pone el menú lateral del layout. */
 :host {
   display: block;
-  background: var(--color-superficie);
-  border-bottom: 1px solid var(--color-divisor);
 }
 
 ul {
+  display: grid;
+  gap: var(--espacio-1);
   margin: 0;
   padding: var(--espacio-2) 0;
   list-style: none;
@@ -13,32 +14,27 @@ ul {
 a {
   display: flex;
   align-items: center;
+  gap: var(--espacio-3); /* entre el ícono y el texto */
   min-height: 44px;
   padding: var(--espacio-2) var(--espacio-3);
-  color: var(--color-texto);
+  border-radius: var(--radio);
+  color: var(--color-texto-sobre-primario);
   text-decoration: none;
 }
 
 a:hover {
-  background: var(--color-fondo);
+  background: var(--color-primario-hover);
 }
 
-/* La pantalla en la que se está. */
+/* La pantalla en la que se está: en blanco, como una pastilla. */
 a.activo {
-  color: var(--color-link);
   font-weight: 600;
-  background: var(--color-primario-claro);
+  color: var(--color-marca);
+  background: var(--color-superficie);
 }
 
+/* Sobre el azul de la marca, el foco tiene que ser blanco. */
 a:focus-visible {
-  outline: 2px solid var(--color-foco);
-  outline-offset: -2px;
-}
-
-/* En escritorio el menú pasa a ser una columna a la izquierda. */
-@media (min-width: 1024px) {
-  :host {
-    border-bottom: none;
-    border-right: 1px solid var(--color-divisor);
-  }
+  outline: 2px solid var(--color-texto-sobre-primario);
+  outline-offset: 2px;
 }

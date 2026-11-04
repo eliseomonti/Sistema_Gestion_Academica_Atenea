@@ -1,0 +1,21 @@
+<a class="volver" routerLink="/admin/carreras">
+  <app-icono nombre="flecha-izquierda" />
+  Carreras
+</a>
+
+<h1>Planes de estudio</h1>
+@if (nombreCarrera(); as nombre) {
+  <p class="subtitulo">{{ nombre }}</p>
+}
+
+@if (planes.isLoading() || redirigiendo()) {
+  <p class="estado">Cargando planes…</p>
+} @else if (planes.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar los planes de la carrera.</p>
+  <button type="button" (click)="planes.reload()">Reintentar</button>
+} @else if (vigentes().length === 0) {
+  <p class="estado">La carrera no tiene planes de estudio vigentes.</p>
+} @else {
+  <!-- Una sola columna: el título "Plan" sobra. -->
+  <app-tabla [columnas]="columnas" [filas]="vigentes()" [enlace]="enlace" [encabezado]="false" />
+}

@@ -1,0 +1,34 @@
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-1);
+  min-height: 44px; /* lo mínimo para tocar con el dedo */
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.volver:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  margin-bottom: 0;
+}
+
+.subtitulo {
+  margin: var(--espacio-1) 0 var(--espacio-4);
+  color: var(--color-texto-suave);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Son pocos planes y de nombre corto: la lista no necesita todo el ancho. */
+app-tabla {
+  max-width: 40rem;
+}

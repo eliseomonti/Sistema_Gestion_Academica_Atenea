@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Rol, rutaInicio } from '../core/seguridad/rol';
 import { Sesion } from '../core/seguridad/sesion';
+import { Icono } from '../shared/ui/icono/icono';
 
 const TITULOS: Record<Rol, string> = {
   ADMIN: 'Módulo de administración académica',
@@ -15,7 +16,7 @@ const TITULOS: Record<Rol, string> = {
 /** Una sola pantalla para los tres actores. El rol llega desde `data` de la ruta. */
 @Component({
   selector: 'app-login',
-  imports: [FormRoot, FormField],
+  imports: [FormRoot, FormField, Icono],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

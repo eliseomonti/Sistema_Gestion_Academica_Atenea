@@ -1,17 +1,26 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { rutaLogin } from '../seguridad/rol';
+import { Icono } from '../../shared/ui/icono/icono';
+import { Rol, rutaLogin } from '../seguridad/rol';
 import { Sesion } from '../seguridad/sesion';
 import { Menu } from './menu/menu';
 import { MENUS } from './menus';
 
+/** Nombre del módulo de cada actor, debajo del logo en el menú. */
+const MODULOS: Record<Rol, string> = {
+  ADMIN: 'Administración',
+  DOCENTE: 'Docentes',
+  ESTUDIANTE: 'Estudiantes',
+};
+
 /**
- * La estructura común de las pantallas de los tres actores: barra superior, menú según el rol y la
- * pantalla de la ruta activa. Envuelve a /admin, /docente y /estudiante desde app.routes.ts.
+ * La estructura común de las pantallas de los tres actores: menú lateral según el rol y la pantalla
+ * de la ruta activa. En celular y tablet, el menú se abre desde una barra superior.
+ * Envuelve a /admin, /docente y /estudiante desde app.routes.ts.
  */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, Menu],
+  imports: [RouterOutlet, Menu, Icono],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
   // Escucha los clics en toda la página, no sólo adentro del layout.
@@ -28,6 +37,7 @@ export class Layout {
   private readonly rol = this.sesion.rol() ?? 'ESTUDIANTE';
 
   protected readonly menu = MENUS[this.rol];
+  protected readonly modulo = MODULOS[this.rol];
 
   /** Si el menú está desplegado. Sólo importa en celular y tablet: en escritorio se ve siempre. */
   protected readonly menuAbierto = signal(false);

@@ -1,0 +1,47 @@
+@if (volverAPlanes()) {
+  <a class="volver" [routerLink]="['/admin/carreras', carreraId(), 'planes']">
+    <app-icono nombre="flecha-izquierda" />
+    Planes de estudio
+  </a>
+} @else {
+  <a class="volver" routerLink="/admin/carreras">
+    <app-icono nombre="flecha-izquierda" />
+    Carreras
+  </a>
+}
+
+<h1>Materias del plan</h1>
+@if (nombreCarrera() || nombrePlan()) {
+  <p class="subtitulo">
+    {{ nombreCarrera() }}
+    @if (nombreCarrera() && nombrePlan()) {
+      ·
+    }
+    {{ nombrePlan() }}
+  </p>
+}
+
+@if (materias.isLoading()) {
+  <p class="estado">Cargando materias…</p>
+} @else if (materias.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar las materias del plan.</p>
+  <button type="button" (click)="materias.reload()">Reintentar</button>
+} @else if (materias.value()?.length === 0) {
+  <p class="estado">El plan todavía no tiene materias cargadas.</p>
+} @else {
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="materias.value() ?? []"
+    [agrupar]="grupo"
+    [detalleGrupo]="cantidad"
+    [subagrupar]="periodo"
+    centrado
+  >
+    <ng-template appCelda="codigo" let-materia>
+      <span class="codigo">{{ materia.codigo }}</span>
+    </ng-template>
+    <ng-template appCelda="periodoLectivo" let-materia>
+      <span class="periodo">{{ periodo(materia) }}</span>
+    </ng-template>
+  </app-tabla>
+}
