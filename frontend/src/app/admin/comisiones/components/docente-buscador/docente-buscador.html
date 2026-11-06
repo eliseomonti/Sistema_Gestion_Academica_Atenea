@@ -1,0 +1,9 @@
+<input #texto type="search" placeholder="buscar docente" (input)="buscar.emit(texto.value)">
+<ul>
+    @for(docente of opcion(); track docente.personaId)
+    {
+        <li>
+            <button (click)="elegir.emit(docente)">{{docente.apellido}} {{docente.nombre}} {{docente.dni}}</button>
+        </li>
+    }
+</ul>
