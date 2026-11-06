@@ -1,0 +1,9 @@
+@if(totalPaginas() > 1)
+{
+    <nav>
+        <button (click)="cambio.emit(pagina() - 1)" [disabled]="pagina() === 0">Anterior</button>
+        <span>Pagina {{ pagina() + 1 }} de {{totalPaginas() }}</span>
+        <button (click)="cambio.emit(pagina() +1 )" [disabled]="pagina() +1 === totalPaginas()">Siguiente</button>
+
+    </nav>
+}

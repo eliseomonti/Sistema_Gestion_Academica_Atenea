@@ -1,0 +1,31 @@
+<h1>Docentes</h1>
+
+<div class="herramientas">
+  <input type="search" placeholder="Buscar docente" aria-label="Buscar docente" [formField]="filtrosForm.buscar" />
+  <select aria-label="Estado" [formField]="filtrosForm.estado">
+    <option value="ACTIVOS">Activos</option>
+    <option value="INACTIVOS">Dados de baja</option>
+  </select>
+</div>
+
+@if (docentes.isLoading()) 
+{
+  <p>Cargando docentes…</p>
+} @else if (docentes.error()) 
+{
+  <p role="alert">No se pudieron cargar los docentes.</p>
+} @else if (docentes.value(); as resultado)
+ {
+  @if (resultado.content.length === 0)
+   {
+    <p>No hay docentes para mostrar.</p>
+    } @else
+    {
+    <app-tabla [columnas]="columnas" [filas]="resultado.content" />
+    <app-paginador
+      [pagina]="resultado.page.number"
+      [totalPaginas]="resultado.page.totalPages"
+      (cambio)="pagina.set($event)"
+    />
+    }
+}
