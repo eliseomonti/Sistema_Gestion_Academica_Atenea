@@ -1,0 +1,8 @@
+<dialog open>
+  <h2>Docente creado</h2>
+  <p>Legajo: {{ credenciales().legajo }}</p>
+  <p>Usuario: <strong>{{ credenciales().username }}</strong></p>
+  <p>Contraseña temporal: <strong>{{ credenciales().passwordTemporal }}</strong></p>
+  <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
+  <button type="button" (click)="cerrar.emit()">Listo</button>
+</dialog>

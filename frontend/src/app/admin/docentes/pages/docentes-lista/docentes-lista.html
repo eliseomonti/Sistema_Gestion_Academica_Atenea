@@ -1,6 +1,8 @@
 <h1>Docentes</h1>
 
+
 <div class="herramientas">
+    <a class="nuevo" routerLink="nuevo">Nuevo docente</a>
   <input type="search" placeholder="Buscar docente" aria-label="Buscar docente" [formField]="filtrosForm.buscar" />
   <select aria-label="Estado" [formField]="filtrosForm.estado">
     <option value="ACTIVOS">Activos</option>
@@ -26,6 +28,6 @@
       [pagina]="resultado.page.number"
       [totalPaginas]="resultado.page.totalPages"
       (cambio)="pagina.set($event)"
-    />
-    }
+    />}
+
 }

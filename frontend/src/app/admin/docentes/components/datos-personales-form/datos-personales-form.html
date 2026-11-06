@@ -1,0 +1,45 @@
+<form [formRoot]="personaForm">
+  <p>DNI: {{ dni() }}</p>
+
+  <div class="campo">
+    <label for="nombre">Nombre</label>
+    <input id="nombre" type="text" [formField]="personaForm.nombre" />
+    @if (personaForm.nombre().touched() && personaForm.nombre().invalid()) {
+      <p class="error-campo">{{ personaForm.nombre().errors()[0].message }}</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label for="apellido">Apellido</label>
+    <input id="apellido" type="text" [formField]="personaForm.apellido" />
+    @if (personaForm.apellido().touched() && personaForm.apellido().invalid()) {
+      <p class="error-campo">{{ personaForm.apellido().errors()[0].message }}</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label for="telefono">Teléfono</label>
+    <input id="telefono" type="tel" [formField]="personaForm.telefono" />
+    @if (personaForm.telefono().touched() && personaForm.telefono().invalid()) {
+      <p class="error-campo">{{ personaForm.telefono().errors()[0].message }}</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label for="fecha-nacimiento">Fecha de nacimiento</label>
+    <input id="fecha-nacimiento" type="date" [formField]="personaForm.fechaNacimiento" />
+    @if (personaForm.fechaNacimiento().touched() && personaForm.fechaNacimiento().invalid()) {
+      <p class="error-campo">{{ personaForm.fechaNacimiento().errors()[0].message }}</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label for="email">Email</label>
+    <input id="email" type="email" [formField]="personaForm.email" />
+    @if (personaForm.email().touched() && personaForm.email().invalid()) {
+      <p class="error-campo">{{ personaForm.email().errors()[0].message }}</p>
+    }
+  </div>
+
+  <button type="submit" [disabled]="guardando()">Guardar</button>
+</form>

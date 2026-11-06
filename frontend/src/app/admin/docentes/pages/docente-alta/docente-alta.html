@@ -1,0 +1,17 @@
+<h1>Nuevo docente</h1>
+
+@if (credenciales(); as datos) {
+  <app-credenciales-dialogo [credenciales]="datos" (cerrar)="volverAlListado()" />
+} @else if (dniNuevo(); as dni) {
+  <app-datos-personales-form [dni]="dni" [guardando]="cargando()" (guardar)="guardar($event)" />
+} @else {
+  <app-dni-paso [buscando]="cargando()" (buscar)="buscar($event)" />
+
+  @if (personaExistente(); as persona) {
+    <p class="mensaje">Ya existe: {{ persona.apellido }}, {{ persona.nombre }}.</p>
+  }
+}
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}

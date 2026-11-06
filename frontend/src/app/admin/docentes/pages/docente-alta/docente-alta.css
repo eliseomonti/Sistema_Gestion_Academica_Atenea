@@ -1,0 +1,8 @@
+.mensaje {
+  margin-top: var(--espacio-3);
+}
+
+.error {
+  margin-top: var(--espacio-3);
+  color: var(--color-error);
+}

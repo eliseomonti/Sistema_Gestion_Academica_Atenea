@@ -1,4 +1,5 @@
 import { Component, inject, linkedSignal, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { DocentesApi } from '../../data/docentes-api';
 import { form, FormField } from '@angular/forms/signals';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -8,7 +9,7 @@ import { Paginador } from '../../../../shared/ui/paginador/paginador';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
 
 @Component({
-  imports: [FormField, Tabla, Paginador],
+  imports: [FormField, Tabla, Paginador, RouterLink],
   selector: 'app-docentes-lista',
   styleUrl: './docentes-lista.css',
   templateUrl: './docentes-lista.html',
