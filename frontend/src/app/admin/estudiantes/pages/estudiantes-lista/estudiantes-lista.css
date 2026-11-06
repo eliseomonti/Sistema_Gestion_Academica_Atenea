@@ -1,0 +1,24 @@
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Buscador contra el borde derecho, como en carreras. */
+.herramientas {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}
+
+.buscador {
+  flex: 0 1 20rem; /* hasta 20rem; en celular se achica */
+  min-width: 0;
+}
+
+.cargando {
+  opacity: 0.6;
+}

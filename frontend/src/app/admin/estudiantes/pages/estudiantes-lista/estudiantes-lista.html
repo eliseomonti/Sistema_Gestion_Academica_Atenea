@@ -1,0 +1,38 @@
+<h1>Estudiantes</h1>
+
+<!-- El buscador va siempre afuera de los @if: si desapareciera mientras carga, se perdería lo que
+     se está escribiendo. -->
+<div class="herramientas">
+  <input
+    type="search"
+    class="buscador"
+    placeholder="Buscar por nombre, DNI o legajo"
+    aria-label="Buscar estudiante por nombre, DNI o legajo"
+    [formField]="filtrosForm.busqueda"
+  />
+</div>
+
+@if (estudiantes.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar los estudiantes.</p>
+  <button type="button" (click)="estudiantes.reload()">Reintentar</button>
+} @else if (listado(); as listado) {
+  @if (listado.content.length === 0) {
+    <p class="estado">
+      {{ filtrosForm.busqueda().value() ? 'Ningún estudiante coincide con la búsqueda.' : 'Todavía no hay estudiantes inscriptos.' }}
+    </p>
+  } @else {
+    <!-- Mientras llega otra página, la anterior se ve más clara. -->
+    <app-tabla
+      [class.cargando]="estudiantes.isLoading()"
+      [columnas]="columnas"
+      [filas]="listado.content"
+    />
+    <app-paginador
+      [pagina]="listado.page.number"
+      [totalPaginas]="listado.page.totalPages"
+      (cambiar)="pagina.set($event)"
+    />
+  }
+} @else {
+  <p class="estado">Cargando estudiantes…</p>
+}
