@@ -1,0 +1,20 @@
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin: var(--espacio-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  width: 100%;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-divisor);
+  text-align: left;
+}
+
+button:hover {
+  background: var(--color-primario-claro);
+}
