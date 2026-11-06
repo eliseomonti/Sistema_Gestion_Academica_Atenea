@@ -1,0 +1,8 @@
+<form [formRoot]="dniForm">
+  <label for="dni">DNI</label>
+  <input id="dni" type="text" inputmode="numeric" [formField]="dniForm.dni" />
+  @if (dniForm.dni().touched() && dniForm.dni().invalid()) {
+    <p class="error-campo">{{ dniForm.dni().errors()[0].message }}</p>
+  }
+  <button type="submit" [disabled]="buscando()">Buscar</button>
+</form>

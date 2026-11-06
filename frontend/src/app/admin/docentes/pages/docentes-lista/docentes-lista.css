@@ -1,6 +1,22 @@
 .herramientas {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--espacio-2);
   margin-bottom: var(--espacio-3);
+}
+
+.nuevo {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: var(--radio);
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-primario);
+  text-decoration: none;
+}
+
+.nuevo:hover {
+  background: var(--color-primario-hover);
 }
