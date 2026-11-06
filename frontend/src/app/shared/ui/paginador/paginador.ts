@@ -5,7 +5,7 @@ import { Icono } from '../icono/icono';
  * Botones de página anterior y siguiente de un listado paginado. No pide datos: avisa qué página
  * se eligió y la pantalla la vuelve a pedir al backend. Con una sola página no muestra nada.
  *
- * <app-paginador [pagina]="pagina()" [totalPaginas]="total" (cambiar)="irA($event)" />
+ * <app-paginador [pagina]="pagina()" [totalPaginas]="total" (cambio)="irA($event)" />
  */
 @Component({
   selector: 'app-paginador',
@@ -19,5 +19,5 @@ export class Paginador {
   readonly totalPaginas = input.required<number>();
 
   /** La página nueva, también empezando en 0. */
-  readonly cambiar = output<number>();
+  readonly cambio = output<number>();
 }

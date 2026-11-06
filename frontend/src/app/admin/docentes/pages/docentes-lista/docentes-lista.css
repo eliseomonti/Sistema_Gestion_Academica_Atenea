@@ -1,0 +1,6 @@
+.herramientas {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}

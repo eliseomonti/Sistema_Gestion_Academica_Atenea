@@ -1,698 +1,58 @@
-SET NAMES utf8mb4;
-SET default_storage_engine = InnoDB;
-SET time_zone = '-03:00';
+-- =====================================================================================
+-- CARRERAS, PLANES DE ESTUDIO, MATERIAS Y CORRELATIVIDADES
+-- =====================================================================================
+-- Se corre después de atenea_db_script.sql. Reemplaza a sus secciones "INSERTS DE CARRERAS" y
+-- "CORRELATIVIDADES": hay que sacarlas de ese script, porque si no este falla por ids repetidos.
+--
+-- Las carreras 1 a 3 son las que estaban en el script de la base, copiadas sin cambios. Las 4 a 7
+-- son nuevas, de los PDF de UTN FRMDP de tp_final/recursos:
+--
+--   carrera  plan  materias   plan_materia
+--   1        1     1-48       1-48     Ingeniería Naval
+--   2        2     49-87      49-94    Ingeniería Pesquera (comparte 7 materias con Naval)
+--   3        3     88-105     95-112   TUP - Plan 2024
+--   3        4     106-126    113-133  TUP - Plan 2003
+--   4        5     127-152    134-159  Tecnicatura Superior en Interiorismo
+--   5        6     153-172    160-179  Tecnicatura Universitaria en Administración - Plan 2025
+--   6        7     173-197    180-204  Tecnicatura Universitaria en Procedimientos y Tecnologías Ambientales
+--   7        8     198-227    205-234  Tecnicatura Universitaria en Producción Textil
+--
+-- Notas sobre las carreras nuevas:
+-- * Los PDF de Interiorismo, Ambientales y Textil no dicen el año del plan: anio_inicio queda NULL.
+-- * Administración: el PDF de recursos (Ordenanza 2112) trae sólo las correlatividades. Las horas y
+--   el régimen (todas anuales) salen del plan de estudios de la Ordenanza 2111 que publica UTN FRGP:
+--   https://www.frgp.utn.edu.ar/public/files/Plan_de_Estudios_TUA_Plan_2025.pdf
+--   carga_horaria_total es la de interacción pedagógica (la de cursada), como en las otras carreras.
+-- * Las materias nuevas no se comparten con otras carreras aunque coincidan el nombre y las horas
+--   (Legislación de Interiorismo y de la TUP 2024, Inglés I de Ambientales y de la TUP 2024): son
+--   asignaturas distintas, y como el final es de la materia (examen_final.materia_id), compartirlas
+--   juntaría en la misma mesa a estudiantes de carreras distintas.
+-- =====================================================================================
 
-DROP DATABASE IF EXISTS atenea_db;
-CREATE DATABASE IF NOT EXISTS atenea_db
-    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET NAMES utf8mb4;
 USE atenea_db;
 
--- Unica tabla donde se guardan todas las personas. El manejo de roles (admin, docente o estudiante) queda a cargo de SpringSecurity y la tabla usuario_rol.
-CREATE TABLE persona (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    apellido VARCHAR(50) NOT NULL,
-	dni VARCHAR(10) NOT NULL UNIQUE,
-    telefono VARCHAR(50) NOT NULL,
-    fecha_nacimiento DATE NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-	legajo_estudiante BIGINT NULL UNIQUE,
-    legajo_docente BIGINT NULL UNIQUE,
-    legajo_admin BIGINT NULL UNIQUE,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,  -- Baja logica: una persona nunca se borra (el egresado, el que abandono y el docente
-    fecha_baja DATE NULL,					-- jubilado siguen existiendo).
-    CONSTRAINT chk_persona_baja CHECK (
-        (activo = TRUE AND fecha_baja IS NULL) OR (activo = FALSE AND fecha_baja IS NOT NULL)
-    ),
-    CONSTRAINT chk_persona_legajos CHECK (
-        (legajo_estudiante IS NULL OR legajo_estudiante > 0) AND
-        (legajo_docente    IS NULL OR legajo_docente    > 0) AND
-        (legajo_admin      IS NULL OR legajo_admin      > 0)
-    )
-);
-
--- SPRING SECURITY --
-
--- La tabla Usuario se encarga de darle las credenciales a la persona para loguearse.
-CREATE TABLE usuario (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    persona_id BIGINT NOT NULL UNIQUE,
-    username VARCHAR(50) NOT NULL UNIQUE, 
-    password VARCHAR(255) NOT NULL,    
-    enabled BOOLEAN NOT NULL DEFAULT TRUE,
-    account_non_locked BOOLEAN NOT NULL DEFAULT TRUE, -- bloqueo MANUAL, lo pone un admin y lo saca un admin.
-    intentos_fallidos TINYINT NOT NULL DEFAULT 0,
-	-- fecha_bloqueo     = bloqueo AUTOMATICO y temporal, por intentos fallidos. Se guarda cuando
-    --                    empezo el bloqueo y el vencimiento se deduce al consultar, en vez de
-    --                    dejar la cuenta trabada para siempre esperando que alguien la libere.
-    fecha_bloqueo DATETIME NULL,
-    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ultimo_acceso DATETIME NULL,          -- cuando entro por ultima vez
-    fecha_cambio_password DATETIME NULL,   -- para credentialsNonExpired; mide otra cosa que ultimo_acceso
-    FOREIGN KEY (persona_id) REFERENCES persona (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_usuario_intentos CHECK (intentos_fallidos >= 0)
-);
-
-CREATE TABLE rol (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL UNIQUE
-);
-
-INSERT INTO rol (nombre) VALUES ('ROLE_ADMIN'), ('ROLE_DOCENTE'), ('ROLE_ESTUDIANTE');
-
--- Se hace esta tabla para que un usuario pueda tener varios roles
-CREATE TABLE usuario_rol (
-    usuario_id BIGINT NOT NULL,
-    rol_id BIGINT NOT NULL,
-    PRIMARY KEY (usuario_id, rol_id),
-    FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
-    FOREIGN KEY (rol_id) REFERENCES rol (id) ON DELETE RESTRICT
-);
-
-CREATE TABLE refresh_token (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    usuario_id BIGINT NOT NULL,
-    token VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL UNIQUE,
-    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expiracion DATETIME NOT NULL,
-    revocado BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
-    CONSTRAINT chk_token_expiracion CHECK (expiracion > fecha_creacion)
-);
-
--- Token de un solo uso para "olvide mi contrasena". El flujo: el usuario lo pide, el backend
--- genera un valor aleatorio, guarda su HASH aca con vencimiento corto (15-30 min) y le manda el
--- valor en claro por mail. Al usarlo se valida que exista, no haya vencido y no se haya usado.
---
--- fecha_uso en vez de un booleano 'usado': "usado" es fecha_uso IS NOT NULL, y ademas queda
--- registrado CUANDO. Mismo criterio que el resto del esquema: guardar el hecho, deducir el estado.
-CREATE TABLE password_reset_token (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    usuario_id BIGINT NOT NULL,
-    token VARCHAR(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL UNIQUE,   -- el HASH del token, nunca el token en claro
-    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expiracion DATETIME NOT NULL,
-    fecha_uso DATETIME NULL,              -- NULL = todavia no se uso
-    FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
-    CONSTRAINT chk_prt_expiracion CHECK (expiracion > fecha_creacion),
-    CONSTRAINT chk_prt_uso CHECK (fecha_uso IS NULL OR fecha_uso >= fecha_creacion)
-);
-
--- CARRERAS Y PLANES DE ESTUDIO --
-
-CREATE TABLE carrera(
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(120) NOT NULL UNIQUE,	
-    duracion VARCHAR(20) NOT NULL,
-    titulo_otorgado VARCHAR(100) NOT NULL,
-    modalidad_carrera ENUM ('PRESENCIAL', 'VIRTUAL') NOT NULL,
-    -- Baja logica: una carrera se deja de dictar, pero sus egresados conservan el titulo.
-    activa BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_baja DATE NULL,
-    CONSTRAINT chk_carrera_baja CHECK (
-        (activa = TRUE AND fecha_baja IS NULL) OR (activa = FALSE AND fecha_baja IS NOT NULL)
-    )
-);
-	
--- Una carrera puede tener varios planes de estudios
-CREATE TABLE plan_estudio (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    carrera_id BIGINT NOT NULL,
-    nombre VARCHAR(50) NOT NULL,
-    anio_inicio SMALLINT,
-    -- Baja logica: el plan 2003 no se borra, se deja de ofrecer. 'vigente' es lo que impide
-    -- que alguien se inscriba hoy a un plan discontinuado.
-    vigente BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_baja DATE NULL,
-    FOREIGN KEY (carrera_id) REFERENCES carrera (id) ON DELETE RESTRICT,
-    UNIQUE (carrera_id, nombre),
-    CONSTRAINT chk_plan_baja CHECK (
-        (vigente = TRUE AND fecha_baja IS NULL) OR (vigente = FALSE AND fecha_baja IS NOT NULL)
-    ),
-    CONSTRAINT chk_plan_anio CHECK (anio_inicio IS NULL OR anio_inicio BETWEEN 1950 AND 2100)
-);	
-
--- Un plan de estudio tiene varias materias
-CREATE TABLE materia(
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(120) NOT NULL,
-    carga_horaria_semanal INT NOT NULL,
-    carga_horaria_total INT NOT NULL,
-    -- La semanal puede ser 0 (PPS, Trabajo Final: no tienen dictado semanal); la total no.
-    CONSTRAINT chk_materia_cargas CHECK (carga_horaria_semanal >= 0 AND carga_horaria_total > 0)
-);
-
--- Tabla intermedia entre plan y materia porque un plan tiene muchas materias y una materia puede estar en muchos planes
-CREATE TABLE plan_materia (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    plan_estudio_id BIGINT NOT NULL,
-    materia_id BIGINT NOT NULL,
-    codigo VARCHAR(10) NULL,
-    anio_cursado TINYINT NOT NULL, -- año de la carrera en que se ubica la materia
-    -- Mitad del año lectivo en que se dicta, NO el cuatrimestre de la carrera:
-    -- anio_cursado=2 + periodo_lectivo='SEGUNDO_CUATRIMESTRE' es el 4to cuatrimestre de la carrera.
-    periodo_lectivo ENUM('PRIMER_CUATRIMESTRE','SEGUNDO_CUATRIMESTRE','ANUAL') NOT NULL,
-    UNIQUE (plan_estudio_id, materia_id),
-    UNIQUE (plan_estudio_id, codigo),
-    -- Redundante contra la PK, pero necesario: es el destino de las FK compuestas de
-    -- correlatividad_materias, que son las que obligan a que una materia y su correlativa
-    -- sean del mismo plan.
-    UNIQUE uq_pm_plan_id (plan_estudio_id, id),
-    FOREIGN KEY (plan_estudio_id) REFERENCES plan_estudio (id) ON DELETE RESTRICT,
-    FOREIGN KEY (materia_id) REFERENCES materia (id) ON DELETE RESTRICT,
-    -- 7 y no 6 para dejar margen: la carrera mas larga del sistema (Naval) tiene 6 años.
-    CONSTRAINT chk_pm_anio_cursado CHECK (anio_cursado BETWEEN 1 AND 7),
-    -- Sin espacios ni vacio: '' no es "sin codigo", para eso esta el NULL.
-    CONSTRAINT chk_pm_codigo CHECK (codigo IS NULL OR codigo REGEXP '^[0-9A-Z][0-9A-Z-]*$')
-);
-
--- Tabla para guardar las correlatividades de las materias de un determinado plan
-CREATE TABLE correlatividad_materias (
-    plan_estudio_id BIGINT NOT NULL,            -- plan al que pertenecen las dos materias
-    plan_materia_id BIGINT NOT NULL,            -- la materia que requiere la correlativa
-    plan_materia_correlativa_id BIGINT NOT NULL, -- la correlativa requerida
-    estado_para_cursar ENUM('CURSADA','APROBADA') NULL,
-    estado_para_rendir ENUM('CURSADA','APROBADA') NULL,
-    PRIMARY KEY (plan_materia_id, plan_materia_correlativa_id),
-    -- Las dos FK son compuestas y comparten la columna plan_estudio_id. Eso es lo que obliga a que
-    -- la materia y su correlativa sean del MISMO plan: con FK simples a plan_materia_id la base
-    -- aceptaba "Probabilidad (plan Naval) requiere Programacion I (plan TUP 2003)".
-    -- Apuntan al UNIQUE uq_pm_plan_id de plan_materia, no a su PK.
-    -- El precio es la columna plan_estudio_id, que es redundante (ya sale de cualquiera de las dos
-    -- plan_materia), pero las FK garantizan que no pueda quedar desincronizada.
-    CONSTRAINT fk_corr_materia FOREIGN KEY (plan_estudio_id, plan_materia_id)
-        REFERENCES plan_materia (plan_estudio_id, id) ON DELETE CASCADE,
-    CONSTRAINT fk_corr_correlativa FOREIGN KEY (plan_estudio_id, plan_materia_correlativa_id)
-        REFERENCES plan_materia (plan_estudio_id, id) ON DELETE CASCADE,
-    CONSTRAINT chk_no_autocorrelativa CHECK (plan_materia_id <> plan_materia_correlativa_id),
-    CONSTRAINT chk_algun_estado CHECK (estado_para_cursar IS NOT NULL OR estado_para_rendir IS NOT NULL),
-    CONSTRAINT chk_corr_rendir_no_menor CHECK (
-        NOT (estado_para_cursar = 'APROBADA' AND estado_para_rendir = 'CURSADA')
-    )
-);
-
--- INSCRIPCIONES --
-
--- Guarda los datos de inscripcion de un estudiante a una carrera (y a su plan de estudio correspondiente)
-CREATE TABLE inscripcion_carrera (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    estudiante_id BIGINT NOT NULL,
-    plan_estudio_id BIGINT NOT NULL,
-    fecha_inscripcion DATE NOT NULL DEFAULT (CURRENT_DATE),
-    estado ENUM('ACTIVA','EGRESADO','BAJA') NOT NULL DEFAULT 'ACTIVA',
-    fecha_estado DATE NULL,  -- solo se usa con EGRESADO o BAJA
-    CONSTRAINT chk_inscripcion_estado_fecha CHECK (
-        (estado =  'ACTIVA' AND fecha_estado IS NULL) OR
-        (estado <> 'ACTIVA' AND fecha_estado IS NOT NULL)
-    ),
-    -- Nadie egresa ni se da de baja antes de haberse inscripto.
-    CONSTRAINT chk_inscripcion_fecha_estado_posterior CHECK (
-        fecha_estado IS NULL OR fecha_estado >= fecha_inscripcion
-    ),
-    FOREIGN KEY (estudiante_id) REFERENCES persona (id) ON DELETE RESTRICT,
-    FOREIGN KEY (plan_estudio_id) REFERENCES plan_estudio (id) ON DELETE RESTRICT,
-    -- Un estudiante no puede inscribirse dos veces al mismo plan: si no, las cuotas,
-    -- las cursadas y los finales quedan repartidos entre las dos inscripciones.
-    UNIQUE (estudiante_id, plan_estudio_id)
-);
-
--- Grupo de estudiantes de un plan que cursa junto las materias de un año de la carrera, en un turno
--- y año lectivo determinados. Las materias que cursa estan en comision_materia, cada una con su
--- periodo: un mismo grupo puede tener materias anuales y cuatrimestrales.
--- EJ: TUP Plan 2024, Comisión 1 de 2° año, turno mañana, 2026.
--- anio_cursado es parte del UNIQUE porque el numero se repite entre años: en un mismo año lectivo
--- conviven la Comisión 1 de 1° año (la "1/26", cohorte 2026) y la de 2° año (la "1/25").
-CREATE TABLE comision(
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    plan_estudio_id BIGINT NOT NULL,
-    anio_cursado TINYINT NOT NULL, -- año de la carrera, como plan_materia.anio_cursado
-    nro_comision INT NOT NULL,
-    turno ENUM('MANANA','MEDIA_MANANA','TARDE','NOCHE') NOT NULL,
-    anio_lectivo SMALLINT NOT NULL,
-    activa BOOLEAN NOT NULL DEFAULT TRUE, -- Baja logica
-    fecha_baja DATE NULL,
-    UNIQUE (plan_estudio_id, anio_cursado, nro_comision, anio_lectivo),
-    FOREIGN KEY (plan_estudio_id) REFERENCES plan_estudio (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_comision_baja CHECK (
-        (activa = TRUE AND fecha_baja IS NULL) OR (activa = FALSE AND fecha_baja IS NOT NULL)
-    ),
-    CONSTRAINT chk_comision_numeros CHECK (
-        nro_comision > 0 AND
-        anio_cursado BETWEEN 1 AND 7 AND
-        anio_lectivo BETWEEN 2000 AND 2100
-    )
-);
-
--- Una materia que se dicta en una comision, con su cupo. Es la unidad a la que se inscribe el
--- estudiante: un recursante puede cursar una materia en otra comision que el resto.
--- De aca cuelgan los docentes, los horarios, las evaluaciones y las inscripciones.
--- EJ: Programación II en la Comisión 1, segundo cuatrimestre, cupo 40 estudiantes.
-CREATE TABLE comision_materia (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    comision_id BIGINT NOT NULL,
-    materia_id BIGINT NOT NULL,
-    -- Copia de plan_materia.periodo_lectivo, que el backend pone al agregar la materia. Se guarda
-    -- aca porque comisiones lo consulta seguido (choques de aula y de docente, filtros) y
-    -- plan_materia es de otro modulo.
-    periodo_lectivo ENUM('PRIMER_CUATRIMESTRE','SEGUNDO_CUATRIMESTRE','ANUAL') NOT NULL,
-    cupo_maximo INT NULL, -- NULL = sin limite de cupo
-    UNIQUE (comision_id, materia_id),
-    FOREIGN KEY (comision_id) REFERENCES comision (id) ON DELETE CASCADE,
-    FOREIGN KEY (materia_id) REFERENCES materia (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_cm_cupo CHECK (cupo_maximo IS NULL OR cupo_maximo > 0)
-);
-
--- Guarda los datos de un docente en una determinada materia de una determinada comision.
-CREATE TABLE comision_docente (
-    comision_materia_id BIGINT NOT NULL,
-    docente_id BIGINT NOT NULL,
-    rol ENUM('TITULAR','AYUDANTE') NOT NULL,
-    PRIMARY KEY (comision_materia_id, docente_id),
-    FOREIGN KEY (comision_materia_id) REFERENCES comision_materia (id) ON DELETE CASCADE,
-    FOREIGN KEY (docente_id) REFERENCES persona (id) ON DELETE RESTRICT
-);
-
-CREATE TABLE aula (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(30) NOT NULL UNIQUE, 
-    capacidad INT NULL,          -- NULL si no esta relevada
-    activa BOOLEAN NOT NULL DEFAULT TRUE, -- Baja logica
-    fecha_baja DATE NULL,
-    CONSTRAINT chk_aula_baja CHECK (
-        (activa = TRUE AND fecha_baja IS NULL) OR (activa = FALSE AND fecha_baja IS NOT NULL)
-    ),
-    CONSTRAINT chk_aula_capacidad CHECK (capacidad IS NULL OR capacidad > 0)
-);
-
--- Guarda los datos de,dias que se cursa, horario de inicio, horario de fin y aula de una determinada materia en una determinada comisión
--- EJ: La Comisión 1 de Matemática 1 se cursa los martes de 8:30 a 10:30 en el aula 107, y los jueves de 11:00 a 13:00 en el aula 9
-CREATE TABLE comision_horario (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    comision_materia_id BIGINT NOT NULL,
-    dia_semana ENUM('LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO') NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-	aula_id BIGINT NULL, -- queda null por si la cursada es virtual
-    FOREIGN KEY (comision_materia_id) REFERENCES comision_materia (id) ON DELETE CASCADE,
-    FOREIGN KEY (aula_id) REFERENCES aula (id) ON DELETE RESTRICT,
-    -- Evita cargar dos veces el mismo horario para una materia de la comision. Ojo: los solapamientos
-    -- (lunes 8-10 y lunes 9-11) no los puede detectar un UNIQUE, quedan para el backend.
-    UNIQUE (comision_materia_id, dia_semana, hora_inicio),
-    CONSTRAINT chk_horario_valido CHECK (hora_fin > hora_inicio)
-);
-
-
--- Ventana de inscripcion de una carrera. Para las cursadas hay una por cuatrimestre;
--- para los finales, una por turno.
-CREATE TABLE periodo_inscripcion (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    carrera_id BIGINT NOT NULL,
-    tipo ENUM('CURSADA','FINAL') NOT NULL,
-    anio_lectivo SMALLINT NOT NULL,
-    periodo_lectivo ENUM('PRIMER_CUATRIMESTRE','SEGUNDO_CUATRIMESTRE','ANUAL') NULL, -- Campo que solo se utiliza si es inscripcion a cursada.
-    fecha_inicio DATETIME NOT NULL,
-    fecha_cierre DATETIME NOT NULL,
-    habilitada BOOLEAN NOT NULL DEFAULT TRUE,
-    FOREIGN KEY (carrera_id) REFERENCES carrera (id) ON DELETE RESTRICT,
-    UNIQUE (carrera_id, tipo, fecha_inicio),
-    -- Redundante contra la PK, pero es el destino de la FK compuesta de examen_final, que es la
-    -- que obliga a que una mesa de examen cuelgue de un periodo de tipo FINAL y no de una cursada.
-    UNIQUE uq_periodo_tipo (id, tipo),
-    CONSTRAINT chk_periodo_fechas CHECK (fecha_cierre > fecha_inicio),
-    CONSTRAINT chk_periodo_anio CHECK (anio_lectivo BETWEEN 2000 AND 2100),
-    -- Una ventana de cursada dice a que cuatrimestre corresponde; una de finales no lo necesita.
-    CONSTRAINT chk_periodo_tipo_lectivo CHECK (
-        (tipo = 'CURSADA' AND periodo_lectivo IS NOT NULL) OR
-        (tipo = 'FINAL'   AND periodo_lectivo IS NULL)
-    )
-);
-
--- Instancia de evaluacion de una cursada: pertenece a una materia de una comision (docente, materia y
--- año/cuatrimestre salen de comision_materia y de su comision).
-CREATE TABLE evaluacion_cursada (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    comision_materia_id BIGINT NOT NULL,
-    nombre VARCHAR(50) NOT NULL,
-    fecha DATE NOT NULL,
-    -- QUE instrumento es. No incluye 'RECUPERATORIO' a proposito: ser recuperatorio no es una
-    -- clase de evaluacion sino una relacion con otra, y esa relacion ya la expresa la columna de
-    -- abajo.
-    tipo ENUM('PARCIAL','TRABAJO_PRACTICO','TRABAJO_FINAL','EXPOSICION_ORAL','COLOQUIO')
-         NOT NULL DEFAULT 'PARCIAL',
-    -- A QUE evaluacion recupera. NULL = es una instancia original;
-    -- NO NULL = es el recuperatorio de aquella.
-    evaluacion_recuperada_id BIGINT NULL,
-    UNIQUE (comision_materia_id, nombre),
-    -- Redundante contra la PK, pero es el destino de la FK compuesta de abajo.
-    UNIQUE uq_eval_comision_materia_id (comision_materia_id, id),
-    FOREIGN KEY (comision_materia_id) REFERENCES comision_materia (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_eval_recuperada FOREIGN KEY (comision_materia_id, evaluacion_recuperada_id)
-        REFERENCES evaluacion_cursada (comision_materia_id, id) ON DELETE RESTRICT
-);
-
--- Final: institucional, pertenece a la materia
-CREATE TABLE examen_final (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    materia_id BIGINT NOT NULL,
-    periodo_id BIGINT NOT NULL,  -- Turno al que pertenece la mesa.
-    -- Columna generada, siempre 'FINAL': no se escribe, se calcula, asi que no puede tener otro
-    -- valor. Existe solo para poder armar la FK compuesta de abajo, que es la que impide colgar
-    -- una mesa de examen de un periodo de tipo CURSADA. No hace falta nombrarla en los INSERT.
-    tipo_periodo ENUM('CURSADA','FINAL') AS ('FINAL') STORED,
-    fecha DATE NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-    aula_id BIGINT NULL, -- null si la carrera es virtual
-    UNIQUE (materia_id, fecha, hora_inicio),
-    CONSTRAINT chk_horario_final_valido CHECK (hora_fin > hora_inicio),
-    FOREIGN KEY (materia_id) REFERENCES materia (id) ON DELETE RESTRICT,
-    FOREIGN KEY (aula_id) REFERENCES aula (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_final_periodo FOREIGN KEY (periodo_id, tipo_periodo)
-        REFERENCES periodo_inscripcion (id, tipo) ON DELETE RESTRICT
-);
-
--- Vincula examen final con los docentes que van a estar en la mesa.
-CREATE TABLE examen_final_docente (
-    examen_final_id BIGINT NOT NULL,
-    docente_id BIGINT NOT NULL,
-    PRIMARY KEY (examen_final_id, docente_id),
-    FOREIGN KEY (examen_final_id) REFERENCES examen_final (id) ON DELETE CASCADE,
-    FOREIGN KEY (docente_id) REFERENCES persona (id) ON DELETE RESTRICT
-);
-
-CREATE TABLE estudiante_inscripcion_comision (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    inscripcion_carrera_id BIGINT NOT NULL,
-    comision_materia_id BIGINT NOT NULL,
-    periodo_id BIGINT NOT NULL,   -- ventana de inscripcion en la que se anoto
-    -- Columna generada, siempre 'CURSADA': no se escribe, se calcula, asi que no puede tener otro
-    -- valor. Existe solo para armar la FK compuesta de abajo, que es la que impide anotarse a una
-    -- cursada usando un periodo de inscripcion a FINALES. No hace falta nombrarla en los INSERT.
-    -- Misma tecnica que examen_final.tipo_periodo, pero al reves: alla se fija 'FINAL'.
-    tipo_periodo ENUM('CURSADA','FINAL') AS ('CURSADA') STORED,
-    fecha_inscripcion DATE NOT NULL DEFAULT (CURRENT_DATE),
-    -- El estudiante puede darse de baja de la cursada. Antes la unica salida era borrar la fila, y eso
-    -- no dejaba rastro: no se distinguia "nunca se anoto" de "se anoto y se dio de baja en abril".
-    -- Ademas el DELETE deja de ser posible apenas hay una nota cargada (FK RESTRICT), asi que la
-    -- baja tardia no tenia forma de registrarse. Mismo patron que inscripcion_carrera.estado.
-    -- OJO: toda cuenta de inscriptos (el cupo, sobre todo) debe filtrar estado = 'INSCRIPTO'.
-    estado ENUM('INSCRIPTO','BAJA') NOT NULL DEFAULT 'INSCRIPTO',
-    fecha_baja DATE NULL,
-    CONSTRAINT chk_eic_baja CHECK (
-        (estado = 'INSCRIPTO' AND fecha_baja IS NULL) OR
-        (estado = 'BAJA'      AND fecha_baja IS NOT NULL)
-    ),
-    CONSTRAINT chk_eic_baja_posterior CHECK (fecha_baja IS NULL OR fecha_baja >= fecha_inscripcion),
-    UNIQUE (inscripcion_carrera_id, comision_materia_id),
-    -- Redundante contra la PK (id ya es unico por si solo), pero es el destino de la FK compuesta
-    -- de nota_evaluacion, que es la que obliga a que la nota y la evaluacion sean de la misma
-    -- materia de la misma comision. Una FK solo puede apuntar a columnas indexadas y unicas en la tabla destino.
-    UNIQUE uq_eic_comision_materia_id (comision_materia_id, id),
-    FOREIGN KEY (inscripcion_carrera_id) REFERENCES inscripcion_carrera (id) ON DELETE RESTRICT,
-    FOREIGN KEY (comision_materia_id) REFERENCES comision_materia (id) ON DELETE RESTRICT,
-    -- Apunta al UNIQUE uq_periodo_tipo de periodo_inscripcion, no a su PK. Reemplaza a la FK
-    -- simple contra periodo_inscripcion(id), que aceptaba cualquier periodo.
-    CONSTRAINT fk_eic_periodo FOREIGN KEY (periodo_id, tipo_periodo)
-        REFERENCES periodo_inscripcion (id, tipo) ON DELETE RESTRICT
-);
-	    
-CREATE TABLE estudiante_inscripcion_examen_final (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    inscripcion_carrera_id BIGINT NOT NULL,
-    examen_final_id BIGINT NOT NULL,
-    fecha_inscripcion DATE NOT NULL DEFAULT (CURRENT_DATE),
-    -- Baja logica, igual que en la cursada: el estudiante puede bajarse de la mesa y queda el rastro.
-    -- Las reglas que cruzan tablas van al backend: la baja tiene que ser ANTES de la fecha de la
-    -- mesa (examen_final.fecha), y una inscripcion en BAJA no puede tener nota_final.
-    -- OJO: el acta de la mesa y cualquier conteo de inscriptos deben filtrar estado = 'INSCRIPTO'.
-    estado ENUM('INSCRIPTO','BAJA') NOT NULL DEFAULT 'INSCRIPTO',
-    fecha_baja DATE NULL,
-    CONSTRAINT chk_eief_baja CHECK (
-        (estado = 'INSCRIPTO' AND fecha_baja IS NULL) OR
-        (estado = 'BAJA'      AND fecha_baja IS NOT NULL)
-    ),
-    CONSTRAINT chk_eief_baja_posterior CHECK (fecha_baja IS NULL OR fecha_baja >= fecha_inscripcion),
-    UNIQUE (inscripcion_carrera_id, examen_final_id),
-    FOREIGN KEY (inscripcion_carrera_id) REFERENCES inscripcion_carrera (id) ON DELETE RESTRICT,
-    FOREIGN KEY (examen_final_id) REFERENCES examen_final (id) ON DELETE RESTRICT
-);
-
-CREATE TABLE nota_final (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    inscripcion_examen_final_id BIGINT NOT NULL,
-    docente_id BIGINT NOT NULL,
-    condicion ENUM('PRESENTE','AUSENTE') NOT NULL DEFAULT 'PRESENTE',
-    nota TINYINT NULL, -- Escala entera 0..10. Si el estudiante esta ausente la nota puede ser nula.
-    fecha_registro DATE NOT NULL DEFAULT (CURRENT_DATE),
-    -- APPEND-ONLY, igual que cierre_cursada: la nota no se actualiza nunca. Corregir un 4 por un 7
-    -- es insertar otra fila apuntando a la anterior, y la vigente es la ultima de la cadena. Asi
-    -- queda el historial completo de correcciones, y el "quien" sale gratis: docente_id ya es una
-    -- columna de la fila, no hay que sacarlo de un trigger (donde solo se ve el usuario de la BD).
-    nota_rectificada_id BIGINT NULL,   -- la nota que esta corrige, si es una rectificacion
-    -- Vale 1 en las notas originales y NULL en las rectificaciones. Como dos NULL nunca chocan en
-    -- un indice unico, el UNIQUE de abajo permite muchas rectificaciones pero una sola nota
-    -- original por inscripcion: sin esto la cadena podria bifurcarse.
-    es_original TINYINT AS (IF(nota_rectificada_id IS NULL, 1, NULL)) VIRTUAL,
-    UNIQUE (inscripcion_examen_final_id, es_original),
-    UNIQUE (nota_rectificada_id),      -- una nota se rectifica una sola vez: la cadena es lineal
-    FOREIGN KEY (inscripcion_examen_final_id) REFERENCES estudiante_inscripcion_examen_final (id) ON DELETE RESTRICT,
-    FOREIGN KEY (nota_rectificada_id) REFERENCES nota_final (id) ON DELETE RESTRICT,
-    FOREIGN KEY (docente_id) REFERENCES persona (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_nota_final CHECK (nota BETWEEN 0 AND 10),
-    CONSTRAINT chk_condicion_nota_final CHECK (
-        (condicion = 'AUSENTE'  AND nota IS NULL) OR
-        (condicion = 'PRESENTE' AND nota IS NOT NULL)
-    )
-);
-
-CREATE TABLE nota_evaluacion (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    -- Materia de la comision a la que pertenecen TANTO la evaluacion COMO la inscripcion del estudiante. Es
-    -- redundante (sale de cualquiera de las dos), pero las dos FK compuestas de abajo la comparten
-    -- y por eso no puede quedar desincronizada
-    comision_materia_id BIGINT NOT NULL,
-    evaluacion_cursada_id BIGINT NOT NULL,
-    inscripcion_comision_id BIGINT NOT NULL,
-    docente_id BIGINT NOT NULL,
-    condicion ENUM('PRESENTE','AUSENTE') NOT NULL DEFAULT 'PRESENTE',
-    nota TINYINT NULL,   -- escala entera 0..10
-    fecha_registro DATE NOT NULL DEFAULT (CURRENT_DATE),
-    -- APPEND-ONLY, mismo criterio que nota_final y cierre_cursada. Ver el comentario de nota_final.
-    nota_rectificada_id BIGINT NULL,
-    es_original TINYINT AS (IF(nota_rectificada_id IS NULL, 1, NULL)) VIRTUAL,
-    UNIQUE (evaluacion_cursada_id, inscripcion_comision_id, es_original),
-    UNIQUE (nota_rectificada_id),
-    FOREIGN KEY (nota_rectificada_id) REFERENCES nota_evaluacion (id) ON DELETE RESTRICT,
-    -- Reemplazan a las dos FK simples contra evaluacion_cursada(id) y estudiante_inscripcion_comision(id).
-    -- Apuntan a uq_eval_comision_materia_id y uq_eic_comision_materia_id, no a las PK.
-    CONSTRAINT fk_nota_eval_evaluacion FOREIGN KEY (comision_materia_id, evaluacion_cursada_id)
-        REFERENCES evaluacion_cursada (comision_materia_id, id) ON DELETE RESTRICT,
-    CONSTRAINT fk_nota_eval_inscripcion FOREIGN KEY (comision_materia_id, inscripcion_comision_id)
-        REFERENCES estudiante_inscripcion_comision (comision_materia_id, id) ON DELETE RESTRICT,
-    FOREIGN KEY (docente_id) REFERENCES persona (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_nota_evaluacion CHECK (nota BETWEEN 0 AND 10),
-    CONSTRAINT chk_condicion_nota_evaluacion CHECK (
-        (condicion = 'AUSENTE'  AND nota IS NULL) OR
-        (condicion = 'PRESENTE' AND nota IS NOT NULL)
-    )
-);
-
--- CIERRE DE CURSADA (regularidad) --
-
--- Acta de cierre de cursada: el resultado de que un estudiante haya cursado una comision. 
-CREATE TABLE cierre_cursada (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    inscripcion_comision_id BIGINT NOT NULL,
-    docente_id BIGINT NOT NULL,         -- docente que firma el acta
-    condicion ENUM('REGULAR','PROMOCIONADO','NO_REGULAR') NOT NULL,
-    nota_cursada TINYINT NULL,                   -- escala entera 0..10: nota de promocion
-    fecha_cierre DATE NOT NULL,                  -- fecha del acta
-    -- Se guarda como dato del acta y no se calcula con la regla de hoy: asi un cambio de
-    -- reglamento no reescribe el pasado. Solo tiene sentido para REGULAR (la promocion no vence,
-    -- y NO_REGULAR es terminal).
-    fecha_vencimiento DATE NULL,
-    cierre_rectificado_id BIGINT NULL,   -- acta que esta corrige, si es una rectificacion
-    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    -- Columna generada: vale 1 en las actas originales y NULL en las rectificaciones. Como dos NULL
-    -- nunca chocan en un indice unico, el UNIQUE de abajo permite muchas rectificaciones pero una
-    -- sola acta original por cursada. Sin esto la cadena podria bifurcarse y no habria un
-    -- "acta vigente" bien definida.
-    es_original TINYINT AS (IF(cierre_rectificado_id IS NULL, 1, NULL)) VIRTUAL,
-    UNIQUE (inscripcion_comision_id, es_original),
-    UNIQUE (cierre_rectificado_id),               -- un acta se rectifica una sola vez: la cadena es lineal
-
-    FOREIGN KEY (inscripcion_comision_id) REFERENCES estudiante_inscripcion_comision (id) ON DELETE RESTRICT,
-    FOREIGN KEY (docente_id) REFERENCES persona (id) ON DELETE RESTRICT,
-    FOREIGN KEY (cierre_rectificado_id) REFERENCES cierre_cursada (id) ON DELETE RESTRICT,
-
-    CONSTRAINT chk_cierre_nota CHECK (nota_cursada BETWEEN 0 AND 10),
-    -- La promocion siempre lleva nota. REGULAR y NO_REGULAR pueden llevarla o no: NO_REGULAR
-    -- agrupa al que quedo libre por nota (tiene una) y al que abandono (no tiene ninguna).
-    CONSTRAINT chk_cierre_condicion_nota CHECK (
-        (condicion = 'PROMOCIONADO' AND nota_cursada IS NOT NULL) OR
-        (condicion IN ('REGULAR','NO_REGULAR'))
-    ),
-    -- Solo la regularidad vence.
-    CONSTRAINT chk_cierre_vencimiento CHECK (
-        (condicion =  'REGULAR' AND fecha_vencimiento IS NOT NULL AND fecha_vencimiento > fecha_cierre) OR
-        (condicion <> 'REGULAR' AND fecha_vencimiento IS NULL)
-    )
-);
-
--- AVISOS
-CREATE TABLE aviso (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    autor_id BIGINT NOT NULL,     -- quien publica el aviso
-    titulo VARCHAR(255) NOT NULL,
-    contenido TEXT NOT NULL,
-    fecha_publicacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    -- Hasta cuando tiene sentido mostrarlo. NULL = no vence. Sirve para que un aviso del tipo
-    -- "inscripcion abierta hasta el 15" se apague solo, sin que nadie tenga que acordarse de
-    -- ponerle activo = FALSE. 'activo' queda para bajarlo a mano antes de tiempo.
-    fecha_vencimiento DATETIME NULL,
-    alcance ENUM('GENERAL','CARRERA','COMISION') NOT NULL,  -- A quien va dirigido.
-    carrera_id BIGINT NULL,  -- solo si alcance = 'CARRERA'
-    comision_id BIGINT NULL,  -- solo si alcance = 'COMISION': va a todo el grupo, no a una sola materia
-    activo BOOLEAN NOT NULL DEFAULT TRUE, -- para bajar un aviso a mano, antes de que venza
-    FOREIGN KEY (autor_id) REFERENCES persona (id) ON DELETE RESTRICT,
-    FOREIGN KEY (carrera_id) REFERENCES carrera (id) ON DELETE RESTRICT,
-    FOREIGN KEY (comision_id) REFERENCES comision (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_aviso_vencimiento CHECK (
-        fecha_vencimiento IS NULL OR fecha_vencimiento > fecha_publicacion
-    ),
-    -- Cada alcance usa exactamente su columna y deja la otra en NULL. Sin esto se podria cargar
-    -- un aviso 'GENERAL' apuntando a una comision, o uno 'CARRERA' sin decir a cual.
-    CONSTRAINT chk_aviso_alcance CHECK (
-        (alcance = 'GENERAL'  AND carrera_id IS NULL     AND comision_id IS NULL) OR
-        (alcance = 'CARRERA'  AND carrera_id IS NOT NULL AND comision_id IS NULL) OR
-        (alcance = 'COMISION' AND carrera_id IS NULL     AND comision_id IS NOT NULL)
-    )
-);
-
--- CUOTAS
-
-CREATE TABLE cuota (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    inscripcion_carrera_id BIGINT NOT NULL,
-    mes TINYINT NOT NULL, -- 1..12 para las cuotas; 0 para la matricula, que es anual.
-    anio SMALLINT NOT NULL,
-    valor_cuota DECIMAL(10,2) NOT NULL,
-    fecha_vencimiento DATE NOT NULL,
-    fecha_emision DATE NOT NULL DEFAULT (CURRENT_DATE),
-    concepto_cuota ENUM('CUOTA','MATRICULA') NOT NULL,
-    FOREIGN KEY (inscripcion_carrera_id) REFERENCES inscripcion_carrera (id) ON DELETE RESTRICT,
-    UNIQUE (inscripcion_carrera_id, concepto_cuota, mes, anio),
-    CONSTRAINT chk_mes_valido CHECK (
-        (concepto_cuota = 'CUOTA' AND mes BETWEEN 1 AND 12) OR
-        (concepto_cuota = 'MATRICULA' AND mes = 0)
-  ),
-    CONSTRAINT chk_valor_positivo CHECK (valor_cuota > 0),
-    CONSTRAINT chk_cuota_anio CHECK (anio BETWEEN 2000 AND 2100)
-);
-
-CREATE TABLE pago_cuota (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    cuota_id BIGINT NOT NULL UNIQUE,
-    monto_pagado DECIMAL(10,2) NOT NULL,
-    fecha_pago DATE NOT NULL DEFAULT (CURRENT_DATE),
-    FOREIGN KEY (cuota_id) REFERENCES cuota (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_monto_positivo CHECK (monto_pagado > 0)
-);
-
--- ENCUESTAS --
-
--- Representa el lanzamiento de una encuesta para una materia de una comisión determinada.
-CREATE TABLE encuesta (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    comision_materia_id BIGINT NOT NULL,
-    fecha_apertura DATETIME NOT NULL,
-    fecha_cierre DATETIME NOT NULL,
-    FOREIGN KEY (comision_materia_id) REFERENCES comision_materia (id) ON DELETE RESTRICT,
-    UNIQUE (comision_materia_id),
-    CONSTRAINT chk_fechas_encuesta CHECK (fecha_cierre > fecha_apertura)
-);
-
--- Banco de preguntas fijas, global para todo el sistema. Se reutilizan en todas las encuestas.
-CREATE TABLE pregunta_encuesta (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    orden INT NOT NULL,
-    enunciado VARCHAR(300) NOT NULL,
-    -- Una pregunta que ya tiene respuestas no se puede borrar (la FK de respuesta_pregunta es
-    -- RESTRICT, y esta bien: se perderian las encuestas viejas). 'activa' es la forma de retirarla
-    -- del banco: las encuestas nuevas dejan de incluirla y las viejas quedan intactas.
-    activa BOOLEAN NOT NULL DEFAULT TRUE,
-    UNIQUE (orden),
-    CONSTRAINT chk_pregunta_orden CHECK (orden > 0)
-);
-
--- Representa que un estudiante (anónimo) completó una encuesta. hash_estudiante evita respuestas duplicadas
--- sin permitir reconstruir la identidad del estudiante.
-CREATE TABLE respuesta_encuesta (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    encuesta_id BIGINT NOT NULL,
-    hash_estudiante VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-    fecha_respuesta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    comentario_final VARCHAR(1000) NULL,
-    FOREIGN KEY (encuesta_id) REFERENCES encuesta (id) ON DELETE RESTRICT,
-    UNIQUE (encuesta_id, hash_estudiante)
-);
-
--- Detalle de calificaciones por pregunta dentro de una respuesta_encuesta.
-CREATE TABLE respuesta_pregunta (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    respuesta_encuesta_id BIGINT NOT NULL,
-    pregunta_encuesta_id BIGINT NOT NULL,
-    calificacion TINYINT NOT NULL,
-    FOREIGN KEY (respuesta_encuesta_id) REFERENCES respuesta_encuesta (id) ON DELETE CASCADE,
-    FOREIGN KEY (pregunta_encuesta_id) REFERENCES pregunta_encuesta (id) ON DELETE RESTRICT,
-    UNIQUE (respuesta_encuesta_id, pregunta_encuesta_id),
-    CONSTRAINT chk_calificacion CHECK (calificacion BETWEEN 1 AND 5)
-);
-
-INSERT INTO pregunta_encuesta (orden, enunciado) VALUES
-(1, '¿El docente cumplió con los temas del programa?'),
-(2, '¿El docente explicó con claridad?'),
-(3, '¿El docente estuvo disponible para consultas?'),
-(4, '¿La cursada cumplió tus expectativas generales?'),
-(5, '¿Recomendarías esta materia/comisión?');
-
--- BOLETO ESTUDIANTIL
-
-CREATE TABLE boleto_estudiantil (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    estudiante_id BIGINT NOT NULL,
-    estado ENUM('SOLICITADO','APROBADO','RECHAZADO') NOT NULL DEFAULT 'SOLICITADO',
-    fecha_solicitud DATE NOT NULL DEFAULT (CURRENT_DATE),
-    FOREIGN KEY (estudiante_id) REFERENCES persona (id) ON DELETE RESTRICT
-);
-
--- INSERTS DE SEGURIDAD --
-
--- Administrador inicial, para poder loguearse en un sistema vacio.
--- usuario: admin / contrasena: admin123 (hash BCrypt). SOLO PARA DESARROLLO: en produccion se
--- cambia la contrasena apenas se instala.
-INSERT INTO persona (id, nombre, apellido, dni, telefono, fecha_nacimiento, email, legajo_admin) VALUES
-(1, 'Administrador', 'Sistema', '00000000', '0000000000', '2000-01-01', 'admin@atenea.local', 1);
-
-INSERT INTO usuario (id, persona_id, username, password) VALUES
-(1, 1, 'admin', '$2a$10$N0Iz328VrX8JHJ5am0MYZ.Kb9rgTR9sCnqe6aTVCIXSVYZC8bt6ZK');
-
-INSERT INTO usuario_rol (usuario_id, rol_id)
-SELECT 1, id FROM rol WHERE nombre = 'ROLE_ADMIN';
-
--- INSERTS DE CARRERAS -- 
+-- CARRERAS --
 
 INSERT INTO carrera (id, nombre, duracion, titulo_otorgado, modalidad_carrera) VALUES
 (1, 'Ingeniería Naval', '6 años', 'Ingeniero Naval', 'PRESENCIAL'),
 (2, 'Ingeniería Pesquera (Orientación Procesamiento)', '5 años', 'Ingeniero Pesquero', 'PRESENCIAL'),
-(3, 'Tecnicatura Universitaria en Programación', '2 años', 'Técnico Universitario en Programación', 'PRESENCIAL');
- 
+(3, 'Tecnicatura Universitaria en Programación', '2 años', 'Técnico Universitario en Programación', 'PRESENCIAL'),
+(4, 'Tecnicatura Superior en Interiorismo', '3 años', 'Técnico Superior en Interiorismo', 'PRESENCIAL'),
+(5, 'Tecnicatura Universitaria en Administración', '2 años', 'Técnico Universitario en Administración', 'PRESENCIAL'),
+(6, 'Tecnicatura Universitaria en Procedimientos y Tecnologías Ambientales', '3 años', 'Técnico Universitario en Procedimientos y Tecnologías Ambientales', 'PRESENCIAL'),
+(7, 'Tecnicatura Universitaria en Producción Textil', '2 años y medio', 'Técnico Universitario en Producción Textil', 'PRESENCIAL');
+
 INSERT INTO plan_estudio (id, carrera_id, nombre, anio_inicio) VALUES
 (1, 1, 'Plan de Estudios Ingeniería Naval', 2004),
 (2, 2, 'Plan de Estudios Ingeniería Pesquera', 2004),
 (3, 3, 'Plan 2024', 2024),
-(4, 3, 'Plan 2003', 2003);
- 
+(4, 3, 'Plan 2003', 2003),
+(5, 4, 'Plan de Estudios Interiorismo', NULL),
+(6, 5, 'Plan 2025', 2025),
+(7, 6, 'Plan de Estudios Tecnologías Ambientales', NULL),
+(8, 7, 'Plan de Estudios Producción Textil', NULL);
+
 INSERT INTO materia (id, nombre, carga_horaria_semanal, carga_horaria_total) VALUES
 (1, 'Álgebra y Geometría Analítica', 5, 160),
 (2, 'Análisis Matemático I', 5, 160),
@@ -819,8 +179,113 @@ INSERT INTO materia (id, nombre, carga_horaria_semanal, carga_horaria_total) VAL
 (123, 'Diseño y Administración de Base de Datos', 6, 96),
 (124, 'Legislación', 6, 96),
 (125, 'Laboratorio de Computación IV', 6, 96),
-(126, 'Práctica Profesional', 0, 60);
- 
+(126, 'Práctica Profesional', 0, 60),
+-- Tecnicatura Superior en Interiorismo
+(127, 'Introducción al Diseño', 8, 128),
+(128, 'Nociones Básicas de Física y Matemática Aplicada', 4, 64),
+(129, 'Dibujo Técnico I', 4, 64),
+(130, 'Comunicación Visual I', 2, 32),
+(131, 'Introducción a la Historia del Diseño', 2, 32),
+(132, 'Diseño I "A"', 8, 128),
+(133, 'Dibujo Técnico II', 4, 64),
+(134, 'Historia del Diseño I', 2, 32),
+(135, 'Técnicas Constructivas I', 4, 64),
+(136, 'Seminario Integrador I', 3, 48),
+(137, 'Diseño I "B"', 8, 128),
+(138, 'Historia del Diseño II', 2, 32),
+(139, 'Dibujo Técnico III', 4, 64),
+(140, 'Comunicación Visual II', 2, 32),
+(141, 'Técnicas Constructivas II', 4, 64),
+(142, 'Diseño II "A"', 8, 128),
+(143, 'Comunicación Visual III', 2, 32),
+(144, 'Técnicas Constructivas III', 4, 64),
+(145, 'Seminario Integrador II', 3, 48),
+(146, 'Lenguajes Digitales', 2, 32),
+(147, 'Diseño II "B"', 8, 128),
+(148, 'Práctica Profesional', 8, 256),
+(149, 'Proyecto Final', 8, 256),
+(150, 'Seminario Integrador III', 3, 48),
+(151, 'Legislación', 2, 32),
+(152, 'Marketing', 2, 32),
+-- TUA - Plan 2025
+(153, 'Administración General I', 5, 120),
+(154, 'Matemática General', 3, 72),
+(155, 'Informática I', 3, 72),
+(156, 'Problemática Social Contemporánea', 3, 72),
+(157, 'Economía I', 3, 72),
+(158, 'Psicología de las Organizaciones', 2, 48),
+(159, 'Ambiente, Economía y Sociedad', 2, 48),
+(160, 'Legislación I', 2, 48),
+(161, 'Estado y Sociedad', 2, 48),
+(162, 'Seminario', 2, 48),
+(163, 'Administración General II', 5, 120),
+(164, 'Informática II', 3, 72),
+(165, 'Comportamiento Organizacional', 3, 72),
+(166, 'Estadística', 2, 48),
+(167, 'Economía II', 2, 48),
+(168, 'Legislación II', 2, 48),
+(169, 'Administración Estatal', 2, 48),
+(170, 'Gestión de Recursos Humanos', 2, 48),
+(171, 'Finanzas y Técnicas Contables', 2, 48),
+(172, 'Proyecto Final', 4, 96),
+-- Tecnicatura Universitaria en Procedimientos y Tecnologías Ambientales
+(173, 'Biología General', 5, 80),
+(174, 'Ciencias de la Tierra', 5, 80),
+(175, 'Físico-Química General', 5, 80),
+(176, 'Matemática', 5, 80),
+(177, 'Ecología General', 5, 80),
+(178, 'Química Ambiental', 5, 80),
+(179, 'Física', 5, 80),
+(180, 'Probabilidad y Estadística', 5, 80),
+(181, 'Principios de Derecho y Normativa Ambiental', 4, 64),
+(182, 'Calidad de Aguas Superficiales y Subterráneas', 5, 80),
+(183, 'Sistema de Tratamiento de Residuos y Efluentes', 5, 80),
+(184, 'Contaminación Atmosférica', 4, 64),
+(185, 'Gabinete de Electrónica', 3, 48),
+(186, 'Sistemas de Control y Gestión Ambiental', 4, 64),
+(187, 'Tecnologías de Muestreo, Medición y Control Ambiental', 5, 80),
+(188, 'Energía y Medio Ambiente', 4, 64),
+(189, 'Gabinete de informática', 3, 48),
+(190, 'Inglés I', 4, 64),
+(191, 'Evaluación de Impacto y Auditorias Ambientales', 4, 64),
+(192, 'Seguridad e Higiene Laboral', 4, 64),
+(193, 'Taller de Elaboración de Informes Técnicos', 3, 48),
+(194, 'Cartografía y GIS', 5, 80),
+(195, 'Problemática Ambiental Regional y Nacional', 4, 64),
+(196, 'Inglés II', 5, 80),
+(197, 'Práctica Profesional Supervisada / Trabajo Final Integrador', 5, 80),
+-- Tecnicatura Universitaria en Producción Textil
+(198, 'Matemáticas', 4, 64),
+(199, 'Química General', 4, 64),
+(200, 'Medios expresivos I', 3, 48),
+(201, 'Historia', 3, 48),
+(202, 'Seminario Integrador I', 3, 48),
+(203, 'Fundamentos Textiles', 5, 160),
+(204, 'Sistemas Productivos I', 3, 96),
+(205, 'Física I', 4, 64),
+(206, 'Química Orgánica', 4, 64),
+(207, 'Gestión de las Organizaciones', 3, 48),
+(208, 'Dibujo Técnico', 3, 48),
+(209, 'Seminario Integrador II', 3, 48),
+(210, 'Física II', 4, 64),
+(211, 'Química Textil I', 4, 64),
+(212, 'Medios expresivos II', 3, 48),
+(213, 'Seminario Integrador III', 3, 48),
+(214, 'Procesos Productivos Industriales', 5, 160),
+(215, 'Sistemas Productivos II', 3, 96),
+(216, 'Matemática Aplicada', 4, 64),
+(217, 'Química Textil II', 4, 64),
+(218, 'Emprendimientos Comerciales', 3, 48),
+(219, 'Historia de los Estilos', 3, 48),
+(220, 'Seminario Integrador IV', 3, 48),
+(221, 'Informática Aplicada', 3, 48),
+(222, 'Tintorería y Estampería', 5, 80),
+(223, 'Estrategias de Comercialización', 4, 64),
+(224, 'Inglés Técnico', 4, 64),
+(225, 'Gestión de Diseño', 3, 48),
+(226, 'Legislación', 3, 48),
+(227, 'Seminario Integrador V', 3, 48);
+
 -- Se cargan los id de forma explicita para poder referenciarlos
 -- directamente desde correlatividad_materias.
 INSERT INTO plan_materia (id, plan_estudio_id, materia_id, codigo, anio_cursado, periodo_lectivo) VALUES
@@ -963,8 +428,117 @@ INSERT INTO plan_materia (id, plan_estudio_id, materia_id, codigo, anio_cursado,
 (130, 4, 123, '95-1236', 2, 'SEGUNDO_CUATRIMESTRE'), -- Diseño y Administración de Base de Datos
 (131, 4, 124, '95-1209', 2, 'SEGUNDO_CUATRIMESTRE'), -- Legislación
 (132, 4, 125, '95-1237', 2, 'SEGUNDO_CUATRIMESTRE'), -- Laboratorio de Computación IV
-(133, 4, 126, NULL,      2, 'SEGUNDO_CUATRIMESTRE'); -- Práctica Profesional
- 
+(133, 4, 126, NULL,      2, 'SEGUNDO_CUATRIMESTRE'), -- Práctica Profesional
+
+-- Tecnicatura Superior en Interiorismo
+(134, 5, 127, '77-10-101', 1, 'PRIMER_CUATRIMESTRE'),  -- Introducción al Diseño
+(135, 5, 128, '77-10-102', 1, 'PRIMER_CUATRIMESTRE'),  -- Nociones Básicas de Física y Matemática Aplicada
+(136, 5, 129, '77-10-103', 1, 'PRIMER_CUATRIMESTRE'),  -- Dibujo Técnico I
+(137, 5, 130, '77-10-104', 1, 'PRIMER_CUATRIMESTRE'),  -- Comunicación Visual I
+(138, 5, 131, '77-10-105', 1, 'PRIMER_CUATRIMESTRE'),  -- Introducción a la Historia del Diseño
+(139, 5, 132, '77-10-201', 1, 'SEGUNDO_CUATRIMESTRE'), -- Diseño I "A"
+(140, 5, 133, '77-10-203', 1, 'SEGUNDO_CUATRIMESTRE'), -- Dibujo Técnico II
+(141, 5, 134, '77-10-205', 1, 'SEGUNDO_CUATRIMESTRE'), -- Historia del Diseño I
+(142, 5, 135, '77-10-206', 1, 'SEGUNDO_CUATRIMESTRE'), -- Técnicas Constructivas I
+(143, 5, 136, '77-10-207', 1, 'SEGUNDO_CUATRIMESTRE'), -- Seminario Integrador I
+(144, 5, 137, '77-10-202', 2, 'PRIMER_CUATRIMESTRE'),  -- Diseño I "B"
+(145, 5, 138, '77-10-305', 2, 'PRIMER_CUATRIMESTRE'),  -- Historia del Diseño II
+(146, 5, 139, '77-10-303', 2, 'PRIMER_CUATRIMESTRE'),  -- Dibujo Técnico III
+(147, 5, 140, '77-10-304', 2, 'PRIMER_CUATRIMESTRE'),  -- Comunicación Visual II
+(148, 5, 141, '77-10-306', 2, 'PRIMER_CUATRIMESTRE'),  -- Técnicas Constructivas II
+(149, 5, 142, '77-10-401', 2, 'SEGUNDO_CUATRIMESTRE'), -- Diseño II "A"
+(150, 5, 143, '77-10-404', 2, 'SEGUNDO_CUATRIMESTRE'), -- Comunicación Visual III
+(151, 5, 144, '77-10-406', 2, 'SEGUNDO_CUATRIMESTRE'), -- Técnicas Constructivas III
+(152, 5, 145, '77-10-407', 2, 'SEGUNDO_CUATRIMESTRE'), -- Seminario Integrador II
+(153, 5, 146, '77-10-408', 2, 'SEGUNDO_CUATRIMESTRE'), -- Lenguajes Digitales
+(154, 5, 147, '77-10-402', 3, 'PRIMER_CUATRIMESTRE'),  -- Diseño II "B"
+(155, 5, 148, '77-10-508', 3, 'ANUAL'),                -- Práctica Profesional
+(156, 5, 149, '77-10-509', 3, 'ANUAL'),                -- Proyecto Final
+(157, 5, 150, '77-10-607', 3, 'SEGUNDO_CUATRIMESTRE'), -- Seminario Integrador III
+(158, 5, 151, '77-10-611', 3, 'SEGUNDO_CUATRIMESTRE'), -- Legislación
+(159, 5, 152, '77-10-612', 3, 'SEGUNDO_CUATRIMESTRE'), -- Marketing
+
+-- TUA - Plan 2025
+(160, 6, 153, '1',       1, 'ANUAL'),                -- Administración General I
+(161, 6, 154, '2',       1, 'ANUAL'),                -- Matemática General
+(162, 6, 155, '3',       1, 'ANUAL'),                -- Informática I
+(163, 6, 156, '4',       1, 'ANUAL'),                -- Problemática Social Contemporánea
+(164, 6, 157, '5',       1, 'ANUAL'),                -- Economía I
+(165, 6, 158, '6',       1, 'ANUAL'),                -- Psicología de las Organizaciones
+(166, 6, 159, '7',       1, 'ANUAL'),                -- Ambiente, Economía y Sociedad
+(167, 6, 160, '8',       1, 'ANUAL'),                -- Legislación I
+(168, 6, 161, '9',       1, 'ANUAL'),                -- Estado y Sociedad
+(169, 6, 162, '10',      1, 'ANUAL'),                -- Seminario
+(170, 6, 163, '11',      2, 'ANUAL'),                -- Administración General II
+(171, 6, 164, '12',      2, 'ANUAL'),                -- Informática II
+(172, 6, 165, '13',      2, 'ANUAL'),                -- Comportamiento Organizacional
+(173, 6, 166, '14',      2, 'ANUAL'),                -- Estadística
+(174, 6, 167, '15',      2, 'ANUAL'),                -- Economía II
+(175, 6, 168, '16',      2, 'ANUAL'),                -- Legislación II
+(176, 6, 169, '17',      2, 'ANUAL'),                -- Administración Estatal
+(177, 6, 170, '18',      2, 'ANUAL'),                -- Gestión de Recursos Humanos
+(178, 6, 171, '19',      2, 'ANUAL'),                -- Finanzas y Técnicas Contables
+(179, 6, 172, '20',      2, 'ANUAL'),                -- Proyecto Final
+
+-- Tecnologías Ambientales
+(180, 7, 173, '01',      1, 'PRIMER_CUATRIMESTRE'),  -- Biología General
+(181, 7, 174, '02',      1, 'PRIMER_CUATRIMESTRE'),  -- Ciencias de la Tierra
+(182, 7, 175, '03',      1, 'PRIMER_CUATRIMESTRE'),  -- Físico-Química General
+(183, 7, 176, '04',      1, 'PRIMER_CUATRIMESTRE'),  -- Matemática
+(184, 7, 177, '05',      1, 'SEGUNDO_CUATRIMESTRE'), -- Ecología General
+(185, 7, 178, '06',      1, 'SEGUNDO_CUATRIMESTRE'), -- Química Ambiental
+(186, 7, 179, '07',      1, 'SEGUNDO_CUATRIMESTRE'), -- Física
+(187, 7, 180, '08',      1, 'SEGUNDO_CUATRIMESTRE'), -- Probabilidad y Estadística
+(188, 7, 181, '09',      2, 'PRIMER_CUATRIMESTRE'),  -- Principios de Derecho y Normativa Ambiental
+(189, 7, 182, '10',      2, 'PRIMER_CUATRIMESTRE'),  -- Calidad de Aguas Superficiales y Subterráneas
+(190, 7, 183, '11',      2, 'PRIMER_CUATRIMESTRE'),  -- Sistema de Tratamiento de Residuos y Efluentes
+(191, 7, 184, '12',      2, 'PRIMER_CUATRIMESTRE'),  -- Contaminación Atmosférica
+(192, 7, 185, '13',      2, 'PRIMER_CUATRIMESTRE'),  -- Gabinete de Electrónica
+(193, 7, 186, '14',      2, 'SEGUNDO_CUATRIMESTRE'), -- Sistemas de Control y Gestión Ambiental
+(194, 7, 187, '15',      2, 'SEGUNDO_CUATRIMESTRE'), -- Tecnologías de Muestreo, Medición y Control Ambiental
+(195, 7, 188, '16',      2, 'SEGUNDO_CUATRIMESTRE'), -- Energía y Medio Ambiente
+(196, 7, 189, '17',      2, 'SEGUNDO_CUATRIMESTRE'), -- Gabinete de informática
+(197, 7, 190, '18',      2, 'SEGUNDO_CUATRIMESTRE'), -- Inglés I
+(198, 7, 191, '19',      3, 'PRIMER_CUATRIMESTRE'),  -- Evaluación de Impacto y Auditorias Ambientales
+(199, 7, 192, '20',      3, 'PRIMER_CUATRIMESTRE'),  -- Seguridad e Higiene Laboral
+(200, 7, 193, '21',      3, 'PRIMER_CUATRIMESTRE'),  -- Taller de Elaboración de Informes Técnicos
+(201, 7, 194, '22',      3, 'PRIMER_CUATRIMESTRE'),  -- Cartografía y GIS
+(202, 7, 195, '23',      3, 'SEGUNDO_CUATRIMESTRE'), -- Problemática Ambiental Regional y Nacional
+(203, 7, 196, '24',      3, 'SEGUNDO_CUATRIMESTRE'), -- Inglés II
+(204, 7, 197, '25',      3, 'SEGUNDO_CUATRIMESTRE'), -- Práctica Profesional Supervisada / Trabajo Final Integrador
+
+-- Producción Textil
+(205, 8, 198, '01',      1, 'PRIMER_CUATRIMESTRE'),  -- Matemáticas
+(206, 8, 199, '02',      1, 'PRIMER_CUATRIMESTRE'),  -- Química General
+(207, 8, 200, '03',      1, 'PRIMER_CUATRIMESTRE'),  -- Medios expresivos I
+(208, 8, 201, '04',      1, 'PRIMER_CUATRIMESTRE'),  -- Historia
+(209, 8, 202, '31',      1, 'PRIMER_CUATRIMESTRE'),  -- Seminario Integrador I
+(210, 8, 203, '05',      1, 'ANUAL'),                -- Fundamentos Textiles
+(211, 8, 204, '06',      1, 'ANUAL'),                -- Sistemas Productivos I
+(212, 8, 205, '07',      1, 'SEGUNDO_CUATRIMESTRE'), -- Física I
+(213, 8, 206, '08',      1, 'SEGUNDO_CUATRIMESTRE'), -- Química Orgánica
+(214, 8, 207, '09',      1, 'SEGUNDO_CUATRIMESTRE'), -- Gestión de las Organizaciones
+(215, 8, 208, '10',      1, 'SEGUNDO_CUATRIMESTRE'), -- Dibujo Técnico
+(216, 8, 209, '32',      1, 'SEGUNDO_CUATRIMESTRE'), -- Seminario Integrador II
+(217, 8, 210, '11',      2, 'PRIMER_CUATRIMESTRE'),  -- Física II
+(218, 8, 211, '12',      2, 'PRIMER_CUATRIMESTRE'),  -- Química Textil I
+(219, 8, 212, '13',      2, 'PRIMER_CUATRIMESTRE'),  -- Medios expresivos II
+(220, 8, 213, '33',      2, 'PRIMER_CUATRIMESTRE'),  -- Seminario Integrador III
+(221, 8, 214, '14',      2, 'ANUAL'),                -- Procesos Productivos Industriales
+(222, 8, 215, '15',      2, 'ANUAL'),                -- Sistemas Productivos II
+(223, 8, 216, '16',      2, 'SEGUNDO_CUATRIMESTRE'), -- Matemática Aplicada
+(224, 8, 217, '17',      2, 'SEGUNDO_CUATRIMESTRE'), -- Química Textil II
+(225, 8, 218, '18',      2, 'SEGUNDO_CUATRIMESTRE'), -- Emprendimientos Comerciales
+(226, 8, 219, '19',      2, 'SEGUNDO_CUATRIMESTRE'), -- Historia de los Estilos
+(227, 8, 220, '34',      2, 'SEGUNDO_CUATRIMESTRE'), -- Seminario Integrador IV
+(228, 8, 221, '20',      3, 'PRIMER_CUATRIMESTRE'),  -- Informática Aplicada
+(229, 8, 222, '21',      3, 'PRIMER_CUATRIMESTRE'),  -- Tintorería y Estampería
+(230, 8, 223, '22',      3, 'PRIMER_CUATRIMESTRE'),  -- Estrategias de Comercialización
+(231, 8, 224, '23',      3, 'PRIMER_CUATRIMESTRE'),  -- Inglés Técnico
+(232, 8, 225, '24',      3, 'PRIMER_CUATRIMESTRE'),  -- Gestión de Diseño
+(233, 8, 226, '25',      3, 'PRIMER_CUATRIMESTRE'),  -- Legislación
+(234, 8, 227, '35',      3, 'PRIMER_CUATRIMESTRE');  -- Seminario Integrador V
+
 -- CORRELATIVIDADES --
 --
 -- Cargadas directamente contra plan_materia: cada fila referencia el id
@@ -1409,34 +983,363 @@ INSERT INTO correlatividad_materias
 (4, 132, 118, 'APROBADA', NULL),       -- Programación II
 (4, 132, 122, 'APROBADA', NULL);       -- Laboratorio de Computación II
 
+-- ============================================================
+-- Plan 5 - Tecnicatura Superior en Interiorismo
+-- ============================================================
+-- Los códigos son los del plan de estudios (77.10.xxx, con guiones porque chk_pm_codigo no acepta
+-- puntos). El PDF de correlatividades numera distinto a cuatro materias: Diseño I "B" (301),
+-- Diseño II "B" (501), Práctica Profesional (509) y Proyecto Final (510); sus filas se cargaron
+-- por el nombre de la materia. "TODAS" (Proyecto Final, para rendir) es el resto del plan.
+INSERT INTO correlatividad_materias
+    (plan_estudio_id, plan_materia_id, plan_materia_correlativa_id, estado_para_cursar, estado_para_rendir) VALUES
+-- Diseño I "A"
+(5, 139, 134, 'CURSADA',  'APROBADA'), -- Introducción al Diseño
+-- Dibujo Técnico II
+(5, 140, 136, 'CURSADA',  'APROBADA'), -- Dibujo Técnico I
+-- Historia del Diseño I
+(5, 141, 138, 'CURSADA',  'APROBADA'), -- Introducción a la Historia del Diseño
+-- Técnicas Constructivas I
+(5, 142, 135, 'CURSADA',  'APROBADA'), -- Nociones Básicas de Física y Matemática Aplicada
+-- Diseño I "B"
+(5, 144, 134, 'CURSADA',  NULL),       -- Introducción al Diseño
+(5, 144, 139, 'CURSADA',  'APROBADA'), -- Diseño I "A"
+-- Historia del Diseño II
+(5, 145, 138, 'CURSADA',  'APROBADA'), -- Introducción a la Historia del Diseño
+-- Dibujo Técnico III
+(5, 146, 140, 'CURSADA',  'APROBADA'), -- Dibujo Técnico II
+(5, 146, 136, 'APROBADA', NULL),       -- Dibujo Técnico I
+-- Comunicación Visual II
+(5, 147, 137, 'CURSADA',  'APROBADA'), -- Comunicación Visual I
+-- Técnicas Constructivas II
+(5, 148, 142, 'CURSADA',  'APROBADA'), -- Técnicas Constructivas I
+(5, 148, 135, 'APROBADA', NULL),       -- Nociones Básicas de Física y Matemática Aplicada
+-- Diseño II "A"
+(5, 149, 139, 'CURSADA',  'APROBADA'), -- Diseño I "A"
+(5, 149, 134, 'APROBADA', NULL),       -- Introducción al Diseño
+-- Comunicación Visual III
+(5, 150, 147, 'CURSADA',  'APROBADA'), -- Comunicación Visual II
+(5, 150, 136, 'APROBADA', NULL),       -- Dibujo Técnico I
+-- Técnicas Constructivas III
+(5, 151, 148, 'CURSADA',  'APROBADA'), -- Técnicas Constructivas II
+(5, 151, 142, 'APROBADA', NULL),       -- Técnicas Constructivas I
+-- Seminario Integrador II
+(5, 152, 134, NULL,       'APROBADA'), -- Introducción al Diseño
+(5, 152, 135, NULL,       'APROBADA'), -- Nociones Básicas de Física y Matemática Aplicada
+(5, 152, 136, NULL,       'APROBADA'), -- Dibujo Técnico I
+(5, 152, 137, NULL,       'APROBADA'), -- Comunicación Visual I
+(5, 152, 138, NULL,       'APROBADA'), -- Introducción a la Historia del Diseño
+-- Lenguajes Digitales
+(5, 153, 141, 'CURSADA',  'APROBADA'), -- Historia del Diseño I
+(5, 153, 140, 'APROBADA', NULL),       -- Dibujo Técnico II
+-- Diseño II "B"
+(5, 154, 149, 'CURSADA',  'APROBADA'), -- Diseño II "A"
+(5, 154, 144, 'APROBADA', NULL),       -- Diseño I "B"
+-- Práctica Profesional
+(5, 155, 139, 'CURSADA',  'APROBADA'), -- Diseño I "A"
+(5, 155, 134, 'APROBADA', NULL),       -- Introducción al Diseño
+-- Proyecto Final
+(5, 156, 149, 'CURSADA',  'APROBADA'), -- Diseño II "A"
+(5, 156, 150, 'CURSADA',  'APROBADA'), -- Comunicación Visual III
+(5, 156, 134, 'APROBADA', 'APROBADA'), -- Introducción al Diseño
+(5, 156, 135, 'APROBADA', 'APROBADA'), -- Nociones Básicas de Física y Matemática Aplicada
+(5, 156, 136, 'APROBADA', 'APROBADA'), -- Dibujo Técnico I
+(5, 156, 137, 'APROBADA', 'APROBADA'), -- Comunicación Visual I
+(5, 156, 138, 'APROBADA', 'APROBADA'), -- Introducción a la Historia del Diseño
+(5, 156, 139, NULL,       'APROBADA'), -- Diseño I "A"
+(5, 156, 140, NULL,       'APROBADA'), -- Dibujo Técnico II
+(5, 156, 141, NULL,       'APROBADA'), -- Historia del Diseño I
+(5, 156, 142, NULL,       'APROBADA'), -- Técnicas Constructivas I
+(5, 156, 143, NULL,       'APROBADA'), -- Seminario Integrador I
+(5, 156, 144, NULL,       'APROBADA'), -- Diseño I "B"
+(5, 156, 145, NULL,       'APROBADA'), -- Historia del Diseño II
+(5, 156, 146, NULL,       'APROBADA'), -- Dibujo Técnico III
+(5, 156, 147, NULL,       'APROBADA'), -- Comunicación Visual II
+(5, 156, 148, NULL,       'APROBADA'), -- Técnicas Constructivas II
+(5, 156, 151, NULL,       'APROBADA'), -- Técnicas Constructivas III
+(5, 156, 152, NULL,       'APROBADA'), -- Seminario Integrador II
+(5, 156, 153, NULL,       'APROBADA'), -- Lenguajes Digitales
+(5, 156, 154, NULL,       'APROBADA'), -- Diseño II "B"
+(5, 156, 155, NULL,       'APROBADA'), -- Práctica Profesional
+(5, 156, 157, NULL,       'APROBADA'), -- Seminario Integrador III
+(5, 156, 158, NULL,       'APROBADA'), -- Legislación
+(5, 156, 159, NULL,       'APROBADA'), -- Marketing
+-- Seminario Integrador III
+(5, 157, 141, 'CURSADA',  'APROBADA'), -- Historia del Diseño I
+(5, 157, 151, 'CURSADA',  'APROBADA'), -- Técnicas Constructivas III
+(5, 157, 138, NULL,       'APROBADA'), -- Introducción a la Historia del Diseño
+(5, 157, 139, NULL,       'APROBADA'), -- Diseño I "A"
+(5, 157, 142, NULL,       'APROBADA'), -- Técnicas Constructivas I
+(5, 157, 147, NULL,       'APROBADA'); -- Comunicación Visual II
 
--- -- TRIGGERS: hacen que los tres registros academicos sean realmente append-only.
--- -- Van de a pares (UPDATE y DELETE) por cada tabla. Todos hacen lo mismo: cortar con un error.
+-- ============================================================
+-- Plan 6 - TUA - Plan 2025
+-- ============================================================
+-- Formato "para cursar y rendir": se carga como la TUP 2024 (cursada -> CURSADA/CURSADA,
+-- aprobada -> APROBADA/APROBADA). Proyecto Final: pide Seminario cursada para empezar y todas
+-- las demás aprobadas para aprobarlo, igual que el Trabajo Final Integrador de la TUP 2024.
+INSERT INTO correlatividad_materias
+    (plan_estudio_id, plan_materia_id, plan_materia_correlativa_id, estado_para_cursar, estado_para_rendir) VALUES
+-- Administración General II
+(6, 170, 160, 'CURSADA',  'CURSADA'),  -- Administración General I
+-- Informática II
+(6, 171, 162, 'CURSADA',  'CURSADA'),  -- Informática I
+-- Comportamiento Organizacional
+(6, 172, 163, 'CURSADA',  'CURSADA'),  -- Problemática Social Contemporánea
+(6, 172, 165, 'CURSADA',  'CURSADA'),  -- Psicología de las Organizaciones
+-- Estadística
+(6, 173, 161, 'CURSADA',  'CURSADA'),  -- Matemática General
+(6, 173, 162, 'CURSADA',  'CURSADA'),  -- Informática I
+-- Economía II
+(6, 174, 161, 'CURSADA',  'CURSADA'),  -- Matemática General
+(6, 174, 164, 'CURSADA',  'CURSADA'),  -- Economía I
+-- Legislación II
+(6, 175, 160, 'CURSADA',  'CURSADA'),  -- Administración General I
+(6, 175, 167, 'CURSADA',  'CURSADA'),  -- Legislación I
+-- Administración Estatal
+(6, 176, 160, 'CURSADA',  'CURSADA'),  -- Administración General I
+(6, 176, 167, 'APROBADA', 'APROBADA'), -- Legislación I
+(6, 176, 168, 'APROBADA', 'APROBADA'), -- Estado y Sociedad
+-- Gestión de Recursos Humanos
+(6, 177, 160, 'CURSADA',  'CURSADA'),  -- Administración General I
+(6, 177, 163, 'CURSADA',  'CURSADA'),  -- Problemática Social Contemporánea
+(6, 177, 167, 'CURSADA',  'CURSADA'),  -- Legislación I
+(6, 177, 165, 'APROBADA', 'APROBADA'), -- Psicología de las Organizaciones
+(6, 177, 166, 'APROBADA', 'APROBADA'), -- Ambiente, Economía y Sociedad
+-- Finanzas y Técnicas Contables
+(6, 178, 162, 'CURSADA',  'CURSADA'),  -- Informática I
+(6, 178, 161, 'APROBADA', 'APROBADA'), -- Matemática General
+-- Proyecto Final
+(6, 179, 160, NULL,       'APROBADA'), -- Administración General I
+(6, 179, 161, NULL,       'APROBADA'), -- Matemática General
+(6, 179, 162, NULL,       'APROBADA'), -- Informática I
+(6, 179, 163, NULL,       'APROBADA'), -- Problemática Social Contemporánea
+(6, 179, 164, NULL,       'APROBADA'), -- Economía I
+(6, 179, 165, NULL,       'APROBADA'), -- Psicología de las Organizaciones
+(6, 179, 166, NULL,       'APROBADA'), -- Ambiente, Economía y Sociedad
+(6, 179, 167, NULL,       'APROBADA'), -- Legislación I
+(6, 179, 168, NULL,       'APROBADA'), -- Estado y Sociedad
+(6, 179, 169, 'CURSADA',  'APROBADA'), -- Seminario
+(6, 179, 170, NULL,       'APROBADA'), -- Administración General II
+(6, 179, 171, NULL,       'APROBADA'), -- Informática II
+(6, 179, 172, NULL,       'APROBADA'), -- Comportamiento Organizacional
+(6, 179, 173, NULL,       'APROBADA'), -- Estadística
+(6, 179, 174, NULL,       'APROBADA'), -- Economía II
+(6, 179, 175, NULL,       'APROBADA'), -- Legislación II
+(6, 179, 176, NULL,       'APROBADA'), -- Administración Estatal
+(6, 179, 177, NULL,       'APROBADA'), -- Gestión de Recursos Humanos
+(6, 179, 178, NULL,       'APROBADA'); -- Finanzas y Técnicas Contables
 
--- -- cierre_cursada (actas de cursada)
- CREATE TRIGGER trg_cierre_cursada_no_update BEFORE UPDATE ON cierre_cursada
- FOR EACH ROW SIGNAL SQLSTATE '45000'
-     SET MESSAGE_TEXT = 'cierre_cursada es append-only: para corregir un acta, insertar otra con cierre_rectificado_id.';
+-- ============================================================
+-- Plan 7 - Tecnicatura Universitaria en Procedimientos y Tecnologías Ambientales
+-- ============================================================
+-- Problemática Ambiental Regional y Nacional: el PDF dice "11-11-12-16" para cursar; se tomó
+-- 10-11-12-16, que es lo que pide para rendir. La PPS / Trabajo Final pide para empezar
+-- todas las del segundo año aprobadas, y nada para rendir.
+INSERT INTO correlatividad_materias
+    (plan_estudio_id, plan_materia_id, plan_materia_correlativa_id, estado_para_cursar, estado_para_rendir) VALUES
+-- Ecología General
+(7, 184, 180, 'CURSADA',  'APROBADA'), -- Biología General
+(7, 184, 181, 'CURSADA',  NULL),       -- Ciencias de la Tierra
+-- Química Ambiental
+(7, 185, 182, 'CURSADA',  'APROBADA'), -- Físico-Química General
+-- Física
+(7, 186, 182, 'CURSADA',  'APROBADA'), -- Físico-Química General
+(7, 186, 183, 'CURSADA',  'APROBADA'), -- Matemática
+-- Probabilidad y Estadística
+(7, 187, 183, 'CURSADA',  'APROBADA'), -- Matemática
+-- Principios de Derecho y Normativa Ambiental
+(7, 188, 181, 'CURSADA',  'APROBADA'), -- Ciencias de la Tierra
+-- Calidad de Aguas Superficiales y Subterráneas
+(7, 189, 181, 'CURSADA',  'APROBADA'), -- Ciencias de la Tierra
+(7, 189, 185, 'CURSADA',  'APROBADA'), -- Química Ambiental
+(7, 189, 182, 'APROBADA', NULL),       -- Físico-Química General
+-- Sistema de Tratamiento de Residuos y Efluentes
+(7, 190, 181, 'CURSADA',  'APROBADA'), -- Ciencias de la Tierra
+(7, 190, 185, 'CURSADA',  'APROBADA'), -- Química Ambiental
+(7, 190, 180, 'APROBADA', NULL),       -- Biología General
+(7, 190, 182, 'APROBADA', NULL),       -- Físico-Química General
+-- Contaminación Atmosférica
+(7, 191, 181, 'CURSADA',  'APROBADA'), -- Ciencias de la Tierra
+(7, 191, 185, 'CURSADA',  'APROBADA'), -- Química Ambiental
+(7, 191, 186, 'CURSADA',  'APROBADA'), -- Física
+(7, 191, 182, 'APROBADA', NULL),       -- Físico-Química General
+(7, 191, 183, 'APROBADA', NULL),       -- Matemática
+-- Gabinete de Electrónica
+(7, 192, 186, 'CURSADA',  'APROBADA'), -- Física
+(7, 192, 182, 'APROBADA', NULL),       -- Físico-Química General
+(7, 192, 183, 'APROBADA', NULL),       -- Matemática
+-- Sistemas de Control y Gestión Ambiental
+(7, 193, 188, 'CURSADA',  'APROBADA'), -- Principios de Derecho y Normativa Ambiental
+(7, 193, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+-- Tecnologías de Muestreo, Medición y Control Ambiental
+(7, 194, 189, 'CURSADA',  'APROBADA'), -- Calidad de Aguas Superficiales y Subterráneas
+(7, 194, 190, 'CURSADA',  'APROBADA'), -- Sistema de Tratamiento de Residuos y Efluentes
+(7, 194, 191, 'CURSADA',  'APROBADA'), -- Contaminación Atmosférica
+(7, 194, 192, 'CURSADA',  'APROBADA'), -- Gabinete de Electrónica
+(7, 194, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+(7, 194, 186, 'APROBADA', NULL),       -- Física
+(7, 194, 187, 'APROBADA', NULL),       -- Probabilidad y Estadística
+-- Energía y Medio Ambiente
+(7, 195, 188, 'CURSADA',  'APROBADA'), -- Principios de Derecho y Normativa Ambiental
+(7, 195, 191, 'CURSADA',  'APROBADA'), -- Contaminación Atmosférica
+(7, 195, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+(7, 195, 185, 'APROBADA', NULL),       -- Química Ambiental
+(7, 195, 186, 'APROBADA', NULL),       -- Física
+-- Gabinete de informática
+(7, 196, 187, 'CURSADA',  'APROBADA'), -- Probabilidad y Estadística
+(7, 196, 183, 'APROBADA', NULL),       -- Matemática
+-- Evaluación de Impacto y Auditorias Ambientales
+(7, 198, 188, 'CURSADA',  'APROBADA'), -- Principios de Derecho y Normativa Ambiental
+(7, 198, 193, 'CURSADA',  'APROBADA'), -- Sistemas de Control y Gestión Ambiental
+(7, 198, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+(7, 198, 184, 'APROBADA', NULL),       -- Ecología General
+(7, 198, 185, 'APROBADA', NULL),       -- Química Ambiental
+(7, 198, 187, 'APROBADA', NULL),       -- Probabilidad y Estadística
+-- Seguridad e Higiene Laboral
+(7, 199, 193, 'CURSADA',  'APROBADA'), -- Sistemas de Control y Gestión Ambiental
+(7, 199, 188, 'APROBADA', NULL),       -- Principios de Derecho y Normativa Ambiental
+-- Taller de Elaboración de Informes Técnicos
+(7, 200, 196, 'CURSADA',  'APROBADA'), -- Gabinete de informática
+(7, 200, 197, 'CURSADA',  'APROBADA'), -- Inglés I
+(7, 200, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+(7, 200, 184, 'APROBADA', NULL),       -- Ecología General
+(7, 200, 185, 'APROBADA', NULL),       -- Química Ambiental
+(7, 200, 187, 'APROBADA', NULL),       -- Probabilidad y Estadística
+-- Cartografía y GIS
+(7, 201, 196, 'CURSADA',  'APROBADA'), -- Gabinete de informática
+(7, 201, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+(7, 201, 187, 'APROBADA', NULL),       -- Probabilidad y Estadística
+-- Problemática Ambiental Regional y Nacional
+(7, 202, 189, 'CURSADA',  'APROBADA'), -- Calidad de Aguas Superficiales y Subterráneas
+(7, 202, 190, 'CURSADA',  'APROBADA'), -- Sistema de Tratamiento de Residuos y Efluentes
+(7, 202, 191, 'CURSADA',  'APROBADA'), -- Contaminación Atmosférica
+(7, 202, 195, 'CURSADA',  'APROBADA'), -- Energía y Medio Ambiente
+(7, 202, 181, 'APROBADA', NULL),       -- Ciencias de la Tierra
+(7, 202, 185, 'APROBADA', NULL),       -- Química Ambiental
+(7, 202, 188, 'APROBADA', NULL),       -- Principios de Derecho y Normativa Ambiental
+-- Inglés II
+(7, 203, 197, 'CURSADA',  'APROBADA'), -- Inglés I
+-- Práctica Profesional Supervisada / Trabajo Final Integrador
+(7, 204, 188, 'APROBADA', NULL),       -- Principios de Derecho y Normativa Ambiental
+(7, 204, 189, 'APROBADA', NULL),       -- Calidad de Aguas Superficiales y Subterráneas
+(7, 204, 190, 'APROBADA', NULL),       -- Sistema de Tratamiento de Residuos y Efluentes
+(7, 204, 191, 'APROBADA', NULL),       -- Contaminación Atmosférica
+(7, 204, 192, 'APROBADA', NULL),       -- Gabinete de Electrónica
+(7, 204, 193, 'APROBADA', NULL),       -- Sistemas de Control y Gestión Ambiental
+(7, 204, 194, 'APROBADA', NULL),       -- Tecnologías de Muestreo, Medición y Control Ambiental
+(7, 204, 195, 'APROBADA', NULL),       -- Energía y Medio Ambiente
+(7, 204, 196, 'APROBADA', NULL),       -- Gabinete de informática
+(7, 204, 197, 'APROBADA', NULL);       -- Inglés I
 
- CREATE TRIGGER trg_cierre_cursada_no_delete BEFORE DELETE ON cierre_cursada
- FOR EACH ROW SIGNAL SQLSTATE '45000'
-     SET MESSAGE_TEXT = 'cierre_cursada es append-only: un acta de cursada no se borra.';
+-- ============================================================
+-- Plan 8 - Tecnicatura Universitaria en Producción Textil
+-- ============================================================
+-- Seminario Integrador V pide "TODAS" para rendir: el resto del plan.
+INSERT INTO correlatividad_materias
+    (plan_estudio_id, plan_materia_id, plan_materia_correlativa_id, estado_para_cursar, estado_para_rendir) VALUES
+-- Física I
+(8, 212, 205, 'CURSADA',  'APROBADA'), -- Matemáticas
+-- Química Orgánica
+(8, 213, 206, 'CURSADA',  'APROBADA'), -- Química General
+-- Dibujo Técnico
+(8, 215, 207, 'CURSADA',  'APROBADA'), -- Medios expresivos I
+-- Física II
+(8, 217, 212, 'CURSADA',  'APROBADA'), -- Física I
+(8, 217, 205, 'APROBADA', NULL),       -- Matemáticas
+-- Química Textil I
+(8, 218, 210, 'CURSADA',  'APROBADA'), -- Fundamentos Textiles
+(8, 218, 212, 'CURSADA',  'APROBADA'), -- Física I
+(8, 218, 213, 'CURSADA',  'APROBADA'), -- Química Orgánica
+(8, 218, 206, 'APROBADA', NULL),       -- Química General
+-- Medios expresivos II
+(8, 219, 215, 'CURSADA',  'APROBADA'), -- Dibujo Técnico
+(8, 219, 207, 'APROBADA', NULL),       -- Medios expresivos I
+-- Procesos Productivos Industriales
+(8, 221, 210, 'CURSADA',  'APROBADA'), -- Fundamentos Textiles
+(8, 221, 211, 'CURSADA',  'APROBADA'), -- Sistemas Productivos I
+(8, 221, 215, 'CURSADA',  'APROBADA'), -- Dibujo Técnico
+-- Sistemas Productivos II
+(8, 222, 210, 'CURSADA',  'APROBADA'), -- Fundamentos Textiles
+(8, 222, 211, 'CURSADA',  'APROBADA'), -- Sistemas Productivos I
+-- Seminario Integrador III
+(8, 220, 210, 'CURSADA',  'APROBADA'), -- Fundamentos Textiles
+(8, 220, 211, 'CURSADA',  'APROBADA'), -- Sistemas Productivos I
+(8, 220, 215, 'CURSADA',  'APROBADA'), -- Dibujo Técnico
+(8, 220, 209, 'APROBADA', NULL),       -- Seminario Integrador I
+-- Matemática Aplicada
+(8, 223, 211, 'APROBADA', NULL),       -- Sistemas Productivos I
+(8, 223, 212, 'APROBADA', NULL),       -- Física I
+(8, 223, 213, 'APROBADA', NULL),       -- Química Orgánica
+-- Química Textil II
+(8, 224, 217, 'CURSADA',  'APROBADA'), -- Física II
+(8, 224, 218, 'CURSADA',  'APROBADA'), -- Química Textil I
+(8, 224, 210, 'APROBADA', NULL),       -- Fundamentos Textiles
+(8, 224, 212, 'APROBADA', NULL),       -- Física I
+-- Emprendimientos Comerciales
+(8, 225, 210, 'APROBADA', NULL),       -- Fundamentos Textiles
+(8, 225, 211, 'APROBADA', NULL),       -- Sistemas Productivos I
+(8, 225, 214, 'APROBADA', NULL),       -- Gestión de las Organizaciones
+-- Historia de los Estilos
+(8, 226, 207, 'APROBADA', NULL),       -- Medios expresivos I
+(8, 226, 208, 'APROBADA', NULL),       -- Historia
+-- Seminario Integrador IV
+(8, 227, 210, 'CURSADA',  'APROBADA'), -- Fundamentos Textiles
+(8, 227, 211, 'CURSADA',  'APROBADA'), -- Sistemas Productivos I
+(8, 227, 215, 'CURSADA',  'APROBADA'), -- Dibujo Técnico
+(8, 227, 216, 'APROBADA', NULL),       -- Seminario Integrador II
+-- Informática Aplicada
+(8, 228, 221, 'CURSADA',  'APROBADA'), -- Procesos Productivos Industriales
+(8, 228, 222, 'CURSADA',  'APROBADA'), -- Sistemas Productivos II
+(8, 228, 223, 'CURSADA',  'APROBADA'), -- Matemática Aplicada
+-- Tintorería y Estampería
+(8, 229, 223, 'CURSADA',  'APROBADA'), -- Matemática Aplicada
+(8, 229, 224, 'CURSADA',  'APROBADA'), -- Química Textil II
+-- Estrategias de Comercialización
+(8, 230, 225, 'CURSADA',  'APROBADA'), -- Emprendimientos Comerciales
+(8, 230, 221, NULL,       'APROBADA'), -- Procesos Productivos Industriales
+(8, 230, 222, NULL,       'APROBADA'), -- Sistemas Productivos II
+-- Gestión de Diseño
+(8, 232, 226, 'CURSADA',  'APROBADA'), -- Historia de los Estilos
+(8, 232, 219, 'APROBADA', NULL),       -- Medios expresivos II
+-- Legislación
+(8, 233, 221, 'CURSADA',  'APROBADA'), -- Procesos Productivos Industriales
+(8, 233, 222, 'CURSADA',  'APROBADA'), -- Sistemas Productivos II
+(8, 233, 225, 'CURSADA',  'APROBADA'), -- Emprendimientos Comerciales
+-- Seminario Integrador V
+(8, 234, 221, 'CURSADA',  'APROBADA'), -- Procesos Productivos Industriales
+(8, 234, 222, 'CURSADA',  'APROBADA'), -- Sistemas Productivos II
+(8, 234, 225, 'CURSADA',  'APROBADA'), -- Emprendimientos Comerciales
+(8, 234, 220, 'APROBADA', 'APROBADA'), -- Seminario Integrador III
+(8, 234, 205, NULL,       'APROBADA'), -- Matemáticas
+(8, 234, 206, NULL,       'APROBADA'), -- Química General
+(8, 234, 207, NULL,       'APROBADA'), -- Medios expresivos I
+(8, 234, 208, NULL,       'APROBADA'), -- Historia
+(8, 234, 209, NULL,       'APROBADA'), -- Seminario Integrador I
+(8, 234, 210, NULL,       'APROBADA'), -- Fundamentos Textiles
+(8, 234, 211, NULL,       'APROBADA'), -- Sistemas Productivos I
+(8, 234, 212, NULL,       'APROBADA'), -- Física I
+(8, 234, 213, NULL,       'APROBADA'), -- Química Orgánica
+(8, 234, 214, NULL,       'APROBADA'), -- Gestión de las Organizaciones
+(8, 234, 215, NULL,       'APROBADA'), -- Dibujo Técnico
+(8, 234, 216, NULL,       'APROBADA'), -- Seminario Integrador II
+(8, 234, 217, NULL,       'APROBADA'), -- Física II
+(8, 234, 218, NULL,       'APROBADA'), -- Química Textil I
+(8, 234, 219, NULL,       'APROBADA'), -- Medios expresivos II
+(8, 234, 223, NULL,       'APROBADA'), -- Matemática Aplicada
+(8, 234, 224, NULL,       'APROBADA'), -- Química Textil II
+(8, 234, 226, NULL,       'APROBADA'), -- Historia de los Estilos
+(8, 234, 227, NULL,       'APROBADA'), -- Seminario Integrador IV
+(8, 234, 228, NULL,       'APROBADA'), -- Informática Aplicada
+(8, 234, 229, NULL,       'APROBADA'), -- Tintorería y Estampería
+(8, 234, 230, NULL,       'APROBADA'), -- Estrategias de Comercialización
+(8, 234, 231, NULL,       'APROBADA'), -- Inglés Técnico
+(8, 234, 232, NULL,       'APROBADA'), -- Gestión de Diseño
+(8, 234, 233, NULL,       'APROBADA'); -- Legislación
 
--- -- nota_final (notas de examen final)
- CREATE TRIGGER trg_nota_final_no_update BEFORE UPDATE ON nota_final
- FOR EACH ROW SIGNAL SQLSTATE '45000'
-     SET MESSAGE_TEXT = 'nota_final es append-only: para corregir una nota, insertar otra con nota_rectificada_id.';
-
- CREATE TRIGGER trg_nota_final_no_delete BEFORE DELETE ON nota_final
- FOR EACH ROW SIGNAL SQLSTATE '45000'
-     SET MESSAGE_TEXT = 'nota_final es append-only: una nota de final no se borra.';
-
--- -- nota_evaluacion (notas de parciales, trabajos, coloquios)
- CREATE TRIGGER trg_nota_evaluacion_no_update BEFORE UPDATE ON nota_evaluacion
- FOR EACH ROW SIGNAL SQLSTATE '45000'
-     SET MESSAGE_TEXT = 'nota_evaluacion es append-only: para corregir una nota, insertar otra con nota_rectificada_id.';
-
- CREATE TRIGGER trg_nota_evaluacion_no_delete BEFORE DELETE ON nota_evaluacion
- FOR EACH ROW SIGNAL SQLSTATE '45000'
-     SET MESSAGE_TEXT = 'nota_evaluacion es append-only: una nota de evaluacion no se borra.';
-     
+-- Resumen: materias y correlatividades de cada plan
+SELECT c.id AS carrera_id, c.nombre AS carrera, p.id AS plan_id, p.nombre AS plan,
+       (SELECT COUNT(*) FROM plan_materia pm WHERE pm.plan_estudio_id = p.id) AS materias,
+       (SELECT COUNT(*) FROM correlatividad_materias cm WHERE cm.plan_estudio_id = p.id) AS correlatividades
+FROM carrera c
+JOIN plan_estudio p ON p.carrera_id = c.id
+ORDER BY c.id, p.id;

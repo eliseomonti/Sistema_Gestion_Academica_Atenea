@@ -4,7 +4,7 @@
       type="button"
       aria-label="Página anterior"
       [disabled]="pagina() === 0"
-      (click)="cambiar.emit(pagina() - 1)"
+      (click)="cambio.emit(pagina() - 1)"
     >
       <app-icono nombre="flecha-izquierda" />
     </button>
@@ -16,7 +16,7 @@
       type="button"
       aria-label="Página siguiente"
       [disabled]="pagina() >= totalPaginas() - 1"
-      (click)="cambiar.emit(pagina() + 1)"
+      (click)="cambio.emit(pagina() + 1)"
     >
       <app-icono nombre="flecha-derecha" />
     </button>
