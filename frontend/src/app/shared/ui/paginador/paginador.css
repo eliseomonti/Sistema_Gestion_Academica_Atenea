@@ -1,7 +1,28 @@
+/* Centrado debajo de la tabla: "‹  Página 2 de 7  ›". */
 nav {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: var(--espacio-3);
   margin-top: var(--espacio-3);
+}
+
+span {
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+/* Igual que el botón de filtro: cuadrado de 44px, blanco con borde. */
+button {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  padding: 0;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
+button:hover:not(:disabled) {
+  background: var(--color-primario-claro);
 }

@@ -1,9 +1,24 @@
-@if(totalPaginas() > 1)
-{
-    <nav>
-        <button (click)="cambio.emit(pagina() - 1)" [disabled]="pagina() === 0">Anterior</button>
-        <span>Pagina {{ pagina() + 1 }} de {{totalPaginas() }}</span>
-        <button (click)="cambio.emit(pagina() +1 )" [disabled]="pagina() +1 === totalPaginas()">Siguiente</button>
+@if (totalPaginas() > 1) {
+  <nav aria-label="Páginas">
+    <button
+      type="button"
+      aria-label="Página anterior"
+      [disabled]="pagina() === 0"
+      (click)="cambio.emit(pagina() - 1)"
+    >
+      <app-icono nombre="flecha-izquierda" />
+    </button>
 
-    </nav>
+    <!-- Para la persona, las páginas empiezan en 1. aria-live: el lector de pantalla lee el cambio. -->
+    <span aria-live="polite">Página {{ pagina() + 1 }} de {{ totalPaginas() }}</span>
+
+    <button
+      type="button"
+      aria-label="Página siguiente"
+      [disabled]="pagina() >= totalPaginas() - 1"
+      (click)="cambio.emit(pagina() + 1)"
+    >
+      <app-icono nombre="flecha-derecha" />
+    </button>
+  </nav>
 }
