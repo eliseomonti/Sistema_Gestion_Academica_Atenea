@@ -7,8 +7,16 @@
 } @else {
   <app-dni-paso [buscando]="cargando()" (buscar)="buscar($event)" />
 
-  @if (personaExistente(); as persona) {
-    <p class="mensaje">Ya existe: {{ persona.apellido }}, {{ persona.nombre }}.</p>
+  
+  @if(personaExistente(); as persona)
+  {
+    @if(persona.legajoDocente !== null)
+    {
+        <p class="mensaje">{{persona.apellido}} {{persona.nombre}} ya es un docente</p>
+    }@else {
+        <p class="mensaje">{{persona.apellido}} {{persona.nombre}} ya existe en el sistema, queres asignar el rol de docente?</p>
+        <button [disabled]="cargando()" (click)="asignarRol(persona.id)">Asignar rol docente</button>
+    }
   }
 }
 
