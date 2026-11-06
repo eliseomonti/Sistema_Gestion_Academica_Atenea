@@ -55,6 +55,18 @@ export class DocenteAlta {
     this.cargando.set(false);
   }
 
+  protected async asignarRol(personaId: number): Promise<void> {
+  this.error.set(null);
+  this.cargando.set(true);
+  try {
+    await firstValueFrom(this.docentesApi.asignarRol(personaId));
+    this.volverAlListado();
+  } catch (error) {
+    this.error.set(mensajeDeError(error));
+  }
+  this.cargando.set(false);
+}
+
   protected volverAlListado(): void {
     this.router.navigate(['/admin/docentes']);
   }
