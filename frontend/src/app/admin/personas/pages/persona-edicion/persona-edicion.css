@@ -27,3 +27,8 @@ button{
 .error{
     color: var(--color-error);
 }
+
+.baja{
+  margin-left: var(--espacio-2);
+  background: var(--color-error);
+}
