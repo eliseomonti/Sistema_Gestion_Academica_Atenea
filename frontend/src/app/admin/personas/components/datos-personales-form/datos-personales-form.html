@@ -26,6 +26,7 @@
   </div>
 
   <div class="campo">
+    <!-- El navegador muestra la fecha en el formato de su idioma: dd/mm/aaaa en español. -->
     <label for="fecha-nacimiento">Fecha de nacimiento</label>
     <input id="fecha-nacimiento" type="date" [formField]="personaForm.fechaNacimiento" />
     @if (personaForm.fechaNacimiento().touched() && personaForm.fechaNacimiento().invalid()) {

@@ -34,6 +34,8 @@ import java.time.Period;
 public class PersonaService {
 
     private static final int EDAD_MINIMA = 16;
+    // El tope ataja un año mal escrito (0023 en vez de 2023), que @Past deja pasar.
+    private static final int EDAD_MAXIMA = 100;
 
     // El id desempata a los homónimos: sin un orden total, una persona podría repetirse o
     // faltar al pasar de página.
@@ -147,8 +149,13 @@ public class PersonaService {
     }
 
     private void validarEdad(LocalDate fechaNacimiento) {
-        if (Period.between(fechaNacimiento, LocalDate.now()).getYears() < EDAD_MINIMA) {
+        int edad = Period.between(fechaNacimiento, LocalDate.now()).getYears();
+        if (edad < EDAD_MINIMA) {
             throw new ReglaNegocioException("La persona tiene que tener al menos " + EDAD_MINIMA + " años");
+        }
+        if (edad > EDAD_MAXIMA) {
+            throw new ReglaNegocioException("La persona no puede tener más de " + EDAD_MAXIMA
+                    + " años: revisá el año de nacimiento");
         }
     }
 }
