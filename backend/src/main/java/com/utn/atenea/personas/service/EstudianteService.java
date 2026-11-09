@@ -5,12 +5,7 @@ import com.utn.atenea.carreras.PlanEstudioResumen;
 import com.utn.atenea.compartido.exception.RecursoDuplicadoException;
 import com.utn.atenea.compartido.exception.RecursoNoEncontradoException;
 import com.utn.atenea.compartido.exception.ReglaNegocioException;
-import com.utn.atenea.personas.dto.AltaEstudianteRequest;
-import com.utn.atenea.personas.dto.EstudianteListadoResponse;
-import com.utn.atenea.personas.dto.AltaPersonaResponse;
-import com.utn.atenea.personas.dto.InscripcionCarreraRequest;
-import com.utn.atenea.personas.dto.InscripcionCarreraResponse;
-import com.utn.atenea.personas.dto.VerificacionInscripcionResponse;
+import com.utn.atenea.personas.dto.*;
 import com.utn.atenea.personas.mapper.InscripcionCarreraMapper;
 import com.utn.atenea.personas.mapper.PersonaMapper;
 import com.utn.atenea.personas.model.EstadoInscripcionCarrera;
@@ -110,6 +105,26 @@ public class EstudianteService {
                 new InscripcionCarrera(persona, plan.id(), LocalDate.now()));
         return inscripcionCarreraMapper.toResponse(inscripcion);
     }
+
+    @Transactional(readOnly = true)
+    public List<InscripcionCarreraDetalleResponse> listarInscripciones(Long personaId)
+    {
+        if(!personaRepository.existsById(personaId))
+        {
+            throw new RecursoNoEncontradoException("No existe la persona con id" + personaId);
+        }
+        return inscripcionCarreraRepository.findByEstudianteId(personaId).stream()
+                .map(inscripcion -> {
+                    PlanEstudioResumen plan = carrerasApi.buscarPlan(inscripcion.getPlanEstudioId())
+                            .orElseThrow();
+                    return new InscripcionCarreraDetalleResponse(inscripcion.getId(),
+                            plan.nombreCarrera(), plan.nombre(), inscripcion.getEstado(),
+                            inscripcion.getFechaInscripcion(), inscripcion.getFechaEstado());
+                })
+                .toList();
+    }
+
+
 
     /**
      * Si la persona se puede inscribir en el plan, y si no, por qué. Hace las mismas validaciones que

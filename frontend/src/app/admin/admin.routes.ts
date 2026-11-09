@@ -37,6 +37,14 @@ const routes: Routes = [
               ),
             title: 'Inscribir estudiante',
           },
+          {
+            path: ':personaId',
+            loadComponent: () =>
+              import('./personas/pages/persona-edicion/persona-edicion').then(
+                (m) => m.PersonaEdicion,
+              ),
+            title: 'Editar estudiante',
+          },
         ],
       },
     ],
@@ -58,8 +66,9 @@ const routes: Routes = [
       },
       {
         path: ':personaId',
-        loadComponent: () => import('./personas/pages/persona-edicion/persona-edicion').then((m) => m.PersonaEdicion),
-        title: 'Editar docente ',
+        loadComponent: () =>
+          import('./personas/pages/persona-edicion/persona-edicion').then((m) => m.PersonaEdicion),
+        title: 'Editar docente',
       },
     ],
   },
@@ -80,6 +89,12 @@ const routes: Routes = [
             (m) => m.EstudianteInscripcion,
           ),
         title: 'Inscribir estudiante',
+      },
+      {
+        path: ':personaId',
+        loadComponent: () =>
+          import('./personas/pages/persona-edicion/persona-edicion').then((m) => m.PersonaEdicion),
+        title: 'Editar estudiante',
       },
     ],
   },

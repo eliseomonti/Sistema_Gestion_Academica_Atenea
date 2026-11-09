@@ -32,3 +32,22 @@ button{
   margin-left: var(--espacio-2);
   background: var(--color-error);
 }
+
+h3{
+  margin-top: var(--espacio-4);
+  font-size: var(--texto-base);
+}
+
+.inscripciones{
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: 0;
+  list-style: none;
+}
+
+.inscripciones li{
+  padding: var(--espacio-2);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+}

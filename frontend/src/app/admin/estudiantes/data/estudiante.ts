@@ -51,3 +51,12 @@ export interface FiltrosEstudiantes {
   /** Empieza en 0. */
   pagina?: number;
 }
+
+export interface InscripcionCarreraDetalleResponse {
+  id: number;
+  nombreCarrera: string;
+  nombrePlan: string;
+  estado: EstadoInscripcionCarrera;
+  fechaInscripcion: string;
+  fechaEstado: string | null;
+}
