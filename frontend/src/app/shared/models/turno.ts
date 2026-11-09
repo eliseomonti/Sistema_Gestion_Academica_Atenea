@@ -1,0 +1,1 @@
+export type Turno = 'MANANA' | 'MEDIA_MANANA' | 'TARDE' | 'NOCHE'

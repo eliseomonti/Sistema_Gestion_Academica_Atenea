@@ -25,6 +25,7 @@ export class PlanDetalle {
   protected readonly pestanas = [
     { texto: 'Materias', ruta: 'materias' },
     { texto: 'Estudiantes', ruta: 'estudiantes' },
+    { texto: 'Comisiones', ruta: 'comisiones'},
   ];
 
   /**
