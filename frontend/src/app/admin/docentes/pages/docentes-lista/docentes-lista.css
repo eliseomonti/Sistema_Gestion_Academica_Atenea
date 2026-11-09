@@ -1,11 +1,20 @@
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Buscador contra el borde derecho, como en carreras. */
 .herramientas {
   display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--espacio-2);
   margin-bottom: var(--espacio-3);
 }
 
+/* El botón para agregar, a la izquierda del buscador. */
 .nuevo {
   display: flex;
   align-items: center;
@@ -15,8 +24,69 @@
   color: var(--color-texto-sobre-primario);
   background: var(--color-primario);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nuevo:hover {
   background: var(--color-primario-hover);
+}
+
+.buscador {
+  flex: 0 1 20rem; /* hasta 20rem; en celular se achica */
+  min-width: 0;
+}
+
+.cargando {
+  opacity: 0.6;
+}
+
+/* El botón y el panel de filtros, igual que en carreras. */
+.boton-filtro {
+  anchor-name: --filtro-docentes; /* el panel se ubica debajo de este botón */
+  display: grid;
+  place-items: center;
+  width: 2.75rem; /* 44px: el mínimo para tocar con el dedo */
+  padding: 0;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
+.boton-filtro:hover {
+  background: var(--color-primario-claro);
+}
+
+/* Con los inactivos, el botón se pinta: así se ve que no es la lista de siempre. */
+.boton-filtro.activo {
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+}
+
+.panel-filtros {
+  position-anchor: --filtro-docentes;
+  position-area: bottom span-left; /* debajo del botón, alineado a su borde derecho */
+  margin: var(--espacio-1) 0 0;
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+/* Sólo abierto: un display fijo le ganaría al display: none del popover cerrado. */
+.panel-filtros:popover-open {
+  display: grid;
+  gap: var(--espacio-1);
+  min-width: 12rem;
+}
+
+.panel-filtros label {
+  font-size: var(--texto-chico);
+  font-weight: 500;
+}
+
+.panel-filtros select {
+  min-width: 0;
+  background: var(--color-superficie);
 }
