@@ -47,6 +47,14 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'comisiones',
+        loadComponent: () =>
+          import('./comisiones/pages/comisiones-lista/comisiones-lista').then(
+            (m) => m.ComisionesLista,
+          ),
+        title: 'Comisiones del plan',
+      },
     ],
   },
   { path: 'carreras', loadChildren: () => import('./carreras/carreras.routes') },
@@ -96,6 +104,7 @@ const routes: Routes = [
           import('./personas/pages/persona-edicion/persona-edicion').then((m) => m.PersonaEdicion),
         title: 'Editar estudiante',
       },
+      
     ],
   },
 ];
