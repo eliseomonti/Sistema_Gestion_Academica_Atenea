@@ -27,6 +27,12 @@ public class PersonaController {
         return personaService.buscarPorDni(dni);
     }
 
+    @GetMapping("/{personaId}")
+    public PersonaResponse obtener(@PathVariable Long personaId)
+    {
+        return personaService.obtener(personaId);
+    }
+
     // Los datos personales son de la persona, no del rol: un solo endpoint para estudiantes y docentes.
     @PutMapping("/{personaId}")
     public PersonaResponse modificar(@PathVariable Long personaId, @Valid @RequestBody DatosPersonalesRequest request) {

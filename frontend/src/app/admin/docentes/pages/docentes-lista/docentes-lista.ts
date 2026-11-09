@@ -27,6 +27,7 @@ type FiltroEstado = 'ACTIVOS' | 'INACTIVOS';
 })
 export class DocentesLista {
   private readonly api = inject(DocentesApi);
+  protected readonly enlace = (docente: DocenteListadoResponse) => [docente.personaId];
 
   /** El buscador y el desplegable de estado escriben acá, a través de `filtrosForm`. */
   private readonly filtros = signal<{ busqueda: string; estado: FiltroEstado }>({

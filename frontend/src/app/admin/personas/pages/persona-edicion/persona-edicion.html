@@ -1,0 +1,25 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+    <h2>Editar datos personales</h2>
+
+    @if(guardado())
+    {
+        <p class="bien">Se guardaron los cambios</p>
+        <button (click)="cerrar()">Listo</button>
+    }@else if(persona.value(); as datos) 
+    {
+        <app-datos-personales-form [dni]="datos.dni" [inicial]="datos" [guardando]="cargando()" (guardar)="guardar($event)"/>
+        <button (click)="cerrar()">Cancelar</button>
+    }@else if(persona.error()) 
+    {
+        <p class="error">No se pudo cargar la persona</p>
+    }@else 
+    {
+        <p>Cargando..</p>
+    }
+
+    @if(error())
+    {
+        <p class="error">{{error()}}</p>
+    }
+
+</dialog>

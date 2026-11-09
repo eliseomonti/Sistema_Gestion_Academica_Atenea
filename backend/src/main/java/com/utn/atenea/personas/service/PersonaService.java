@@ -53,6 +53,12 @@ public class PersonaService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe una persona con DNI " + dni));
     }
 
+    @Transactional(readOnly = true)
+    public PersonaResponse obtener(Long personaId)
+    {
+        return personaMapper.toResponse(buscar(personaId));
+    }
+
     /** La persona a la que se le va a dar un rol nuevo: tiene que existir y no estar dada de baja. */
     public Persona buscarActiva(Long personaId) {
         Persona persona = buscar(personaId);
