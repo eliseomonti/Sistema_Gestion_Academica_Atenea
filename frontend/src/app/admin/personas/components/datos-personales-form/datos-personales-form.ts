@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, linkedSignal } from '@angular/core';
 import {
   email,
   form,
@@ -9,7 +9,7 @@ import {
   pattern,
   required,
 } from '@angular/forms/signals';
-import { DatosPersonalesRequest } from '../../data/persona';
+import { DatosPersonalesRequest, PersonaResponse} from '../../data/persona';
 
 /** Las mismas que valida el backend (PersonaService): acá es para avisar antes de guardar. */
 const EDAD_MINIMA = 16;
@@ -26,17 +26,21 @@ export class DatosPersonalesForm {
   readonly dni = input.required<string>();
   readonly guardando = input(false);
   readonly guardar = output<DatosPersonalesRequest>();
+  readonly inicial = input<PersonaResponse | null>(null);
 
   /**
    * La fecha de nacimiento es un Date (null mientras está vacía): así [formField] la toma del
    * calendario del navegador, y minDate y maxDate limitan las fechas que se pueden elegir.
    */
-  private readonly datos = signal({
-    nombre: '',
-    apellido: '',
-    telefono: '',
-    fechaNacimiento: null as Date | null,
-    email: '',
+  private readonly datos = linkedSignal(() => {
+    const persona = this.inicial();
+    return {
+      nombre: persona?.nombre ?? '',
+      apellido: persona?.apellido ?? '',
+      telefono: persona?.telefono ?? '',
+      fechaNacimiento: persona ? new Date(persona.fechaNacimiento) : null,
+      email: persona?.email ?? '',
+    };
   });
 
   protected readonly personaForm = form(

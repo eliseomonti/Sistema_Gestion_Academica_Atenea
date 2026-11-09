@@ -56,6 +56,11 @@ const routes: Routes = [
           import('./personas/pages/docente-alta/docente-alta').then((m) => m.DocenteAlta),
         title: 'Nuevo docente',
       },
+      {
+        path: ':personaId',
+        loadComponent: () => import('./personas/pages/persona-edicion/persona-edicion').then((m) => m.PersonaEdicion),
+        title: 'Editar docente ',
+      },
     ],
   },
   {
