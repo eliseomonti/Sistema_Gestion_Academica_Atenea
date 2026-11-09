@@ -8,6 +8,7 @@ import {
   AltaEstudianteRequest,
   EstudianteListadoResponse,
   FiltrosEstudiantes,
+  InscripcionCarreraDetalleResponse,
   InscripcionCarreraRequest,
   InscripcionCarreraResponse,
   VerificacionInscripcionResponse,
@@ -70,4 +71,18 @@ export class EstudiantesApi {
       request,
     );
   }
+
+  listarInscripciones(personaId: number): Observable<InscripcionCarreraDetalleResponse[]>
+  {
+    return this.http.get<InscripcionCarreraDetalleResponse[]>(`${this.url}/${personaId}/inscripciones`)
+  }
+
+  darDeBajaInscripcion(personaId: number, inscripcionId: number): Observable<InscripcionCarreraResponse>
+  {
+    return this.http.post<InscripcionCarreraResponse>(`${this.url}/${personaId}/inscripciones/${inscripcionId}/baja`,null);
+  }
+
+
+
+
 }

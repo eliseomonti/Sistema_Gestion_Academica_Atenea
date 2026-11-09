@@ -7,6 +7,8 @@ import { DatosPersonalesRequest, PersonaResponse } from '../../data/persona';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatosPersonalesForm } from '../../components/datos-personales-form/datos-personales-form';
 import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
+import { EstudiantesApi } from '../../../estudiantes/data/estudiantes-api';
+import { InscripcionCarreraDetalleResponse } from '../../../estudiantes/data/estudiante';
 
 @Component({
   imports: [DatosPersonalesForm, ConfirmarDialog],
@@ -30,11 +32,19 @@ export class PersonaEdicion {
   protected readonly confirmadoBaja = signal(false);
   protected readonly dadoDeBaja = signal(false);
 
+  private readonly estudiantesApi = inject(EstudiantesApi);
+
   protected readonly persona = rxResource({
     params: () => Number(this.personaId()),
     stream: ({params}) => this.personasApi.obtener(params)
   }
   )
+
+  protected readonly inscripciones = rxResource({
+    params: () => Number(this.personaId()),
+    stream: ({params}) => this.estudiantesApi.listarInscripciones(params)
+  })
+  protected readonly inscripcionABajar = signal<InscripcionCarreraDetalleResponse | null>(null);
 
   constructor()
   {
@@ -71,6 +81,30 @@ export class PersonaEdicion {
     }
     this.cargando.set(false);
     this.confirmadoBaja.set(false);
+  }
+
+
+  protected mensajeBajaInscripcion(inscripcion: InscripcionCarreraDetalleResponse): string
+  {
+    return `Se dio de baja la inscripcion a ${inscripcion.nombreCarrera}, queda en el historial` 
+  }
+
+  protected async darDeBajaInscripcion(inscripcion: InscripcionCarreraDetalleResponse):
+  Promise<void>
+  {
+    this.error.set(null);
+    this.cargando.set(true)
+    try{
+      await
+      firstValueFrom(this.estudiantesApi.darDeBajaInscripcion(Number(this.personaId()), inscripcion.id));
+      this.inscripcionABajar.set(null);
+      this.inscripciones.reload();
+    }
+    catch(error)
+    {
+      this.error.set(mensajeDeError(error))
+    }
+    this.cargando.set(false)
   }
 
 

@@ -113,4 +113,7 @@ export class EstudiantesLista {
     { clave: 'dni', titulo: 'DNI', tituloEnLista: true },
     { clave: 'email', titulo: 'Email' },
   ];
+
+
+  protected readonly enlace = (estudiante: EstudianteListadoResponse) => [estudiante.personaId];
 }

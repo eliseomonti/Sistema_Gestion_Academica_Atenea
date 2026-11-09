@@ -1,11 +1,6 @@
 package com.utn.atenea.personas.controller;
 
-import com.utn.atenea.personas.dto.AltaEstudianteRequest;
-import com.utn.atenea.personas.dto.EstudianteListadoResponse;
-import com.utn.atenea.personas.dto.AltaPersonaResponse;
-import com.utn.atenea.personas.dto.InscripcionCarreraRequest;
-import com.utn.atenea.personas.dto.InscripcionCarreraResponse;
-import com.utn.atenea.personas.dto.VerificacionInscripcionResponse;
+import com.utn.atenea.personas.dto.*;
 import com.utn.atenea.personas.model.EstadoInscripcionCarrera;
 import com.utn.atenea.personas.service.EstudianteService;
 import jakarta.validation.Valid;
@@ -22,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/estudiantes")
@@ -55,6 +52,12 @@ public class EstudianteController {
     public InscripcionCarreraResponse inscribir(@PathVariable Long personaId,
                                                 @Valid @RequestBody InscripcionCarreraRequest request) {
         return estudianteService.inscribir(personaId, request);
+    }
+
+    @GetMapping("/{personaId}/inscripciones")
+    public List<InscripcionCarreraDetalleResponse> listarInscripciones(@PathVariable Long personaId)
+    {
+        return estudianteService.listarInscripciones(personaId);
     }
 
     // Antes de inscribir, si se puede y si no, por qué. No guarda nada.

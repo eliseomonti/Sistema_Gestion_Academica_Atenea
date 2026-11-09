@@ -26,7 +26,34 @@
                 <button class="baja" (click)="confirmadoBaja.set(true)">Dar de baja</button>
             }
         }
+        @if(inscripciones.value(); as lista)
+        {
+            @if(lista.length > 0)
+            {
+                <h3>Inscripciones a carrera</h3>
+                <ul class="inscripciones">
+                    @for(inscripcion of lista; track inscripcion.id)
+                    {
+                        <li>
+                            <strong>{{inscripcion.nombreCarrera}}</strong> ({{inscripcion.nombrePlan}})
+                            <br />
+                            {{inscripcion.estado}} desde {{inscripcion.fechaEstado ?? inscripcion.fechaInscripcion}}
 
+                            @if(inscripcion.estado === 'ACTIVA')
+                            {
+                                @if(inscripcionABajar()?.id === inscripcion.id)
+                                {
+                                    <app-confirmar-dialog [mensaje]="mensajeBajaInscripcion(inscripcion)" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBajaInscripcion(inscripcion)" (cancelar)="inscripcionABajar.set(null)" />
+                                }@else
+                                {
+                                    <button class="baja" (click)="inscripcionABajar.set(inscripcion)">Dar de baja</button>
+                                }
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        }
     }@else if(persona.error()) 
     {
         <p class="error">No se pudo cargar la persona</p>
