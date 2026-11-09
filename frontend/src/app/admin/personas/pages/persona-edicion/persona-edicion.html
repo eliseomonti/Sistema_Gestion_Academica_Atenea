@@ -1,7 +1,12 @@
 <dialog #dialogo class="ventana" (close)="volver()">
     <h2>Editar datos personales</h2>
 
-    @if(guardado())
+    @if(dadoDeBaja())
+    {
+        <p class="bien">Se dio de baja a la persona</p>
+        <button (click)="cerrar()">Listo</button>
+
+    }@else if(guardado())
     {
         <p class="bien">Se guardaron los cambios</p>
         <button (click)="cerrar()">Listo</button>
@@ -9,6 +14,19 @@
     {
         <app-datos-personales-form [dni]="datos.dni" [inicial]="datos" [guardando]="cargando()" (guardar)="guardar($event)"/>
         <button (click)="cerrar()">Cancelar</button>
+
+        @if(datos.activo)
+        {
+            @if(confirmadoBaja())
+            {
+                <app-confirmar-dialog [mensaje]="mensajeBaja(datos)" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBaja()" (cancelar)="confirmadoBaja.set(false)" />
+
+            }@else
+            {
+                <button class="baja" (click)="confirmadoBaja.set(true)">Dar de baja</button>
+            }
+        }
+
     }@else if(persona.error()) 
     {
         <p class="error">No se pudo cargar la persona</p>

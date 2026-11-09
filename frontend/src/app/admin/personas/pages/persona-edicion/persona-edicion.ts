@@ -1,14 +1,15 @@
-import { afterEveryRender, afterNextRender, Component, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { PersonasApi } from '../../data/personas-api';
 import { ActivatedRoute, Router } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { DatosPersonalesRequest } from '../../data/persona';
+import { DatosPersonalesRequest, PersonaResponse } from '../../data/persona';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatosPersonalesForm } from '../../components/datos-personales-form/datos-personales-form';
+import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
 
 @Component({
-  imports: [DatosPersonalesForm],
+  imports: [DatosPersonalesForm, ConfirmarDialog],
   selector: 'app-persona-edicion',
   styleUrl: './persona-edicion.css',
   templateUrl: './persona-edicion.html',
@@ -25,6 +26,9 @@ export class PersonaEdicion {
   protected readonly guardado = signal(false)
   protected readonly cargando = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly confirmadoBaja = signal(false);
+  protected readonly dadoDeBaja = signal(false);
 
   protected readonly persona = rxResource({
     params: () => Number(this.personaId()),
@@ -48,8 +52,28 @@ export class PersonaEdicion {
       this.error.set(mensajeDeError(error))
     }
     this.cargando.set(false);
-  
   }
+
+
+  protected mensajeBaja(persona: PersonaResponse): string
+  {
+    return `Se da de baja a ${persona.nombre} ${persona.apellido}. Pierde el acceso al sistema`
+  }
+
+  protected async darDeBaja(): Promise<void> {
+    this.error.set(null);
+    this.cargando.set(true);
+    try {
+      await firstValueFrom(this.personasApi.darDeBajaPersona(Number(this.personaId())));
+      this.dadoDeBaja.set(true);
+    } catch (error) {
+      this.error.set(mensajeDeError(error));
+    }
+    this.cargando.set(false);
+    this.confirmadoBaja.set(false);
+  }
+
+
 
 
   protected cerrar(): void

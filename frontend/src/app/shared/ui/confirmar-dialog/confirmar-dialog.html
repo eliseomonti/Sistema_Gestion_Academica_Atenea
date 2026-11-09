@@ -1,0 +1,7 @@
+<div class="confirmar" role="alertdialog">
+    <p>{{mensaje()}}</p>
+    <div class="boton">
+    <button (click)="cancelar.emit()" class="secundario">Cancelar</button>
+    <button class="peligro" [disabled]="procesando()" (click)="confirmar.emit()">{{confirmarTexto()}}</button>
+    </div>
+</div>

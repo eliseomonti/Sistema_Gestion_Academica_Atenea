@@ -1,4 +1,4 @@
-import { Component, input, output, signal, linkedSignal } from '@angular/core';
+import { Component, input, output, linkedSignal } from '@angular/core';
 import {
   email,
   form,
