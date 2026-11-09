@@ -1,6 +1,6 @@
 import { Component, input, output, signal } from '@angular/core';
 import { email, form, FormField, FormRoot, pattern, required } from '@angular/forms/signals';
-import { DatosPersonalesRequest } from '../../../personas/data/persona';
+import { DatosPersonalesRequest } from '../../data/persona';
 
 @Component({
   imports: [FormRoot, FormField],

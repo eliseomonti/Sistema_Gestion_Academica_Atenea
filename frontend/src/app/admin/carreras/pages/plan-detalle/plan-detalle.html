@@ -1,0 +1,28 @@
+@if (volverAPlanes()) {
+  <a class="volver" [routerLink]="['/admin/carreras', carreraId(), 'planes']">
+    <app-icono nombre="flecha-izquierda" />
+    Planes de estudio
+  </a>
+} @else {
+  <a class="volver" routerLink="/admin/carreras">
+    <app-icono nombre="flecha-izquierda" />
+    Carreras
+  </a>
+}
+
+<!-- Mientras llega el nombre de la carrera, el título dice "Plan de estudio". -->
+<h1>{{ nombreCarrera() ?? 'Plan de estudio' }}</h1>
+@if (nombrePlan(); as nombre) {
+  <p class="subtitulo">{{ nombre }}</p>
+}
+
+<nav class="pestanas" aria-label="Secciones del plan">
+  @for (pestana of pestanas; track pestana.ruta) {
+    <a [routerLink]="pestana.ruta" routerLinkActive="activa" ariaCurrentWhenActive="page">
+      {{ pestana.texto }}
+    </a>
+  }
+</nav>
+
+<!-- Acá se muestra la pantalla de la pestaña elegida. -->
+<router-outlet />

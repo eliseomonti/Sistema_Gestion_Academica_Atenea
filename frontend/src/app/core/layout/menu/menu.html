@@ -5,6 +5,7 @@
         <a
           [routerLink]="item.ruta"
           routerLinkActive="activo"
+          [routerLinkActiveOptions]="{ exact: item.exacta ?? false }"
           ariaCurrentWhenActive="page"
           (click)="elegido.emit()"
         >

@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import { PersonasApi } from '../../../personas/data/personas-api';
-import { DocentesApi } from '../../data/docentes-api';
+import { PersonasApi } from '../../data/personas-api';
+import { DocentesApi } from '../../../docentes/data/docentes-api';
 import { Router } from '@angular/router';
-import { AltaPersonaResponse, DatosPersonalesRequest, PersonaResponse } from '../../../personas/data/persona';
+import { AltaPersonaResponse, DatosPersonalesRequest, PersonaResponse } from '../../data/persona';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DniPaso } from '../../components/dni-paso/dni-paso';

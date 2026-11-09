@@ -1,8 +1,15 @@
-<h1>Estudiantes</h1>
+<!-- En la pestaña de un plan, el título ya lo pone la pantalla del plan. -->
+@if (planId() === undefined) {
+  <h1>Estudiantes</h1>
+}
 
 <!-- El buscador va siempre afuera de los @if: si desapareciera mientras carga, se perdería lo que
      se está escribiendo. -->
 <div class="herramientas">
+  <!-- Sólo en la pestaña de un plan: la inscripción necesita saber a qué plan. -->
+  @if (planId() !== undefined) {
+    <a class="nuevo" routerLink="nuevo">Inscribir estudiante</a>
+  }
   <input
     type="search"
     class="buscador"
@@ -10,6 +17,34 @@
     aria-label="Buscar estudiante por nombre, DNI o legajo"
     [formField]="filtrosForm.busqueda"
   />
+
+  <!-- Sólo en /admin/estudiantes: en la pestaña de un plan la carrera ya está elegida. -->
+  @if (planId() === undefined) {
+    <!-- popover: el navegador lo abre y lo cierra, y también lo cierra con Esc o al tocar afuera. -->
+    <button
+      type="button"
+      class="boton-filtro"
+      [class.activo]="filtrosForm.carreraId().value() !== ''"
+      popovertarget="filtros-estudiantes"
+      aria-label="Filtros"
+    >
+      <app-icono nombre="filtro" />
+    </button>
+    <div #panelFiltros id="filtros-estudiantes" class="panel-filtros" popover>
+      <label for="filtro-carrera">Carrera</label>
+      <!-- Al elegir una opción, el panel se cierra: el valor ya lo guardó [formField]. -->
+      <select
+        id="filtro-carrera"
+        [formField]="filtrosForm.carreraId"
+        (change)="panelFiltros.hidePopover()"
+      >
+        <option value="">Todas</option>
+        @for (carrera of opcionesCarrera(); track carrera.id) {
+          <option [value]="carrera.id">{{ carrera.nombre }}</option>
+        }
+      </select>
+    </div>
+  }
 </div>
 
 @if (estudiantes.error()) {
@@ -18,7 +53,7 @@
 } @else if (listado(); as listado) {
   @if (listado.content.length === 0) {
     <p class="estado">
-      {{ filtrosForm.busqueda().value() ? 'Ningún estudiante coincide con la búsqueda.' : 'Todavía no hay estudiantes inscriptos.' }}
+      {{ hayFiltro() ? 'Ningún estudiante coincide con la búsqueda.' : 'Todavía no hay estudiantes inscriptos.' }}
     </p>
   } @else {
     <!-- Mientras llega otra página, la anterior se ve más clara. -->
@@ -36,3 +71,7 @@
 } @else {
   <p class="estado">Cargando estudiantes…</p>
 }
+
+<!-- Acá se abre la ventana de inscripción (…/estudiantes/nuevo). Al cerrarse, la lista se vuelve a
+     pedir, para que aparezca el estudiante recién inscripto. -->
+<router-outlet (deactivate)="estudiantes.reload()" />

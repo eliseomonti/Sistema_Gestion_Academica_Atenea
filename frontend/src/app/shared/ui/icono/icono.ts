@@ -17,7 +17,8 @@ export type NombreIcono =
   | 'calendario'
   | 'editar'
   | 'portapapeles'
-  | 'medalla';
+  | 'medalla'
+  | 'casa';
 
 /**
  * Ícono de Feather Icons (MIT), salvo `birrete`, que es de Lucide (ISC) y tiene el mismo diseño.

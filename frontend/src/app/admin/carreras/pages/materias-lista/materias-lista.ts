@@ -1,7 +1,5 @@
-import { Component, computed, inject, input, numberAttribute } from '@angular/core';
+import { Component, inject, input, numberAttribute } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
-import { Icono } from '../../../../shared/ui/icono/icono';
 import { Celda } from '../../../../shared/ui/tabla/celda';
 import { Columna } from '../../../../shared/ui/tabla/columna';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
@@ -21,11 +19,12 @@ function ordinal(numero: number): string {
 
 /**
  * Las materias de un plan de estudio, agrupadas por año. El backend ya las devuelve ordenadas por
- * año, período y nombre, que es lo que necesita la tabla para agruparlas.
+ * año, período y nombre, que es lo que necesita la tabla para agruparlas. Es la pestaña Materias
+ * de la pantalla del plan (PlanDetalle).
  */
 @Component({
   selector: 'app-materias-lista',
-  imports: [RouterLink, Tabla, Celda, Icono],
+  imports: [Tabla, Celda],
   templateUrl: './materias-lista.html',
   styleUrl: './materias-lista.css',
 })
@@ -40,31 +39,6 @@ export class MateriasLista {
     params: () => ({ carreraId: this.carreraId(), planId: this.planId() }),
     stream: ({ params }) => this.api.listarMaterias(params.carreraId, params.planId),
   });
-
-  /**
-   * Para el subtítulo (carrera y plan) y para saber a dónde vuelve el link. El backend no tiene
-   * endpoints para una sola carrera o un solo plan: se buscan en las listas, que son chicas.
-   */
-  private readonly carreras = rxResource({ stream: () => this.api.listarCarreras() });
-  private readonly planes = rxResource({
-    params: () => this.carreraId(),
-    stream: ({ params: carreraId }) => this.api.listarPlanes(carreraId),
-  });
-
-  protected readonly nombreCarrera = computed(
-    () => this.carreras.value()?.find((carrera) => carrera.id === this.carreraId())?.nombre,
-  );
-  protected readonly nombrePlan = computed(
-    () => this.planes.value()?.find((plan) => plan.id === this.planId())?.nombre,
-  );
-
-  /**
-   * Con un solo plan vigente, la lista de planes redirige a esta pantalla: volver ahí sería
-   * rebotar. En ese caso el link vuelve a Carreras.
-   */
-  protected readonly volverAPlanes = computed(
-    () => (this.planes.value() ?? []).filter((plan) => plan.vigente).length > 1,
-  );
 
   /** En celular, el título de la fila es la materia y el código va debajo. */
   protected readonly columnas: Columna<PlanMateriaResponse>[] = [

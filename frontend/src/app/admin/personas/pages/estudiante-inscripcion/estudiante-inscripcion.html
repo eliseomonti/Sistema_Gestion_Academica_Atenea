@@ -1,0 +1,43 @@
+<!-- Se abre con showModal() al entrar. Al cerrarse (la ✕, Listo, Esc) se vuelve a la lista. -->
+<dialog #dialogo class="ventana" aria-labelledby="titulo-ventana" (close)="volver()">
+  @if (credenciales(); as datos) {
+    <h2 id="titulo-ventana">Estudiante inscripto</h2>
+    <p>Legajo: {{ datos.legajo }}</p>
+    <p>Usuario: <strong>{{ datos.username }}</strong></p>
+    <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
+    <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
+    <button type="button" (click)="cerrar()">Listo</button>
+  } @else if (dniNuevo(); as dni) {
+    <h2 id="titulo-ventana">Inscribir estudiante</h2>
+    <p class="estado">Nadie tiene ese DNI. Al guardar, se crea el estudiante ya inscripto en este plan.</p>
+    <app-datos-personales-form [dni]="dni" [guardando]="cargando()" (guardar)="guardar($event)" />
+  } @else {
+    <h2 id="titulo-ventana">Inscribir estudiante</h2>
+    <app-dni-paso [buscando]="cargando()" (buscar)="buscar($event)" />
+
+    @if (personaExistente(); as persona) {
+      <!-- Ya existe: no hace falta cargar sus datos, sólo inscribirla. -->
+      <p class="persona" role="status">
+        <strong>{{ persona.apellido }}, {{ persona.nombre }}</strong> ya está en el sistema
+        @if (persona.legajoEstudiante !== null) {
+          como estudiante (legajo {{ persona.legajoEstudiante }}).
+        } @else {
+          pero todavía no es estudiante.
+        }
+      </p>
+      <button type="button" [disabled]="cargando()" (click)="inscribir(persona.id)">
+        Inscribir en este plan
+      </button>
+    }
+  }
+
+  @if (error(); as mensaje) {
+    <p class="error" role="alert">{{ mensaje }}</p>
+  }
+
+  <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+       al primer campo y no a la ✕. -->
+  <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+    <app-icono nombre="cerrar" />
+  </button>
+</dialog>
