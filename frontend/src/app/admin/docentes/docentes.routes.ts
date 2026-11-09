@@ -1,10 +1,9 @@
 import { Routes } from '@angular/router';
 import { DocentesLista } from './pages/docentes-lista/docentes-lista';
-import { DocenteAlta } from './pages/docente-alta/docente-alta';
 
+// El alta (/admin/docentes/nuevo) está en admin.routes.ts: su pantalla es de la feature personas.
 const routes: Routes = [
     { path: '', component: DocentesLista, title: 'Docentes' },
-    {path: 'nuevo', component: DocenteAlta, title: 'Docente Nuevo'},
 ];
 
 export default routes;

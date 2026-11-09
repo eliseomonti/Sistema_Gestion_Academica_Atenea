@@ -47,25 +47,30 @@ public class EstudianteService {
     private final InscripcionCarreraMapper inscripcionCarreraMapper;
 
     /**
-     * Estudiantes con al menos una inscripción en ese estado, de la carrera indicada o de cualquiera,
-     * que coinciden con el texto buscado. El orden es siempre por apellido y nombre: el que venga
+     * Estudiantes con al menos una inscripción en ese estado, de la carrera y el plan indicados (o de
+     * cualquiera), que coinciden con el texto buscado. Los filtros se combinan: un plan que no es de
+     * la carrera indicada da una lista vacía. El orden es siempre por apellido y nombre: el que venga
      * en el request se ignora.
      */
-    public Page<EstudianteListadoResponse> listar(String buscar, Long carreraId, EstadoInscripcionCarrera estado,
-                                              Pageable pageable) {
+    public Page<EstudianteListadoResponse> listar(String buscar, Long carreraId, Long planEstudioId,
+                                              EstadoInscripcionCarrera estado, Pageable pageable) {
         List<Specification<Persona>> filtros = new ArrayList<>(List.of(esEstudiante()));
         if (buscar != null && !buscar.isBlank()) {
             filtros.add(estudianteCoincideCon(buscar));
         }
 
-        List<Long> planesDeLaCarrera = null;
+        // null: de cualquier plan.
+        List<Long> planes = null;
         if (carreraId != null) {
-            planesDeLaCarrera = carrerasApi.idsDePlanes(carreraId);
-            if (planesDeLaCarrera.isEmpty()) {
-                return Page.empty(pageable);
-            }
+            planes = carrerasApi.idsDePlanes(carreraId);
         }
-        filtros.add(conInscripcion(estado, planesDeLaCarrera));
+        if (planEstudioId != null) {
+            planes = planes == null || planes.contains(planEstudioId) ? List.of(planEstudioId) : List.of();
+        }
+        if (planes != null && planes.isEmpty()) {
+            return Page.empty(pageable);
+        }
+        filtros.add(conInscripcion(estado, planes));
 
         return personaRepository.findAll(Specification.allOf(filtros), PersonaService.ordenAlfabetico(pageable))
                 .map(personaMapper::toEstudianteListado);

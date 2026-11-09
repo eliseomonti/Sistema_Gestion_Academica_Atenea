@@ -8,8 +8,8 @@ import { PlanEstudioResponse } from '../../data/carrera';
 import { CarrerasApi } from '../../data/carreras-api';
 
 /**
- * Los planes vigentes de una carrera. Si tiene uno solo, no muestra la lista: va directo a las
- * materias de ese plan.
+ * Los planes vigentes de una carrera. Si tiene uno solo, no muestra la lista: va directo a ese
+ * plan.
  */
 @Component({
   selector: 'app-planes-lista',
@@ -31,10 +31,6 @@ export class PlanesLista {
     stream: ({ params: carreraId }) => this.api.listarPlanes(carreraId),
   });
 
-  /**
-   * El backend no tiene un endpoint para una sola carrera: el nombre se busca en la lista, que es
-   * chica. Si todavía no llegó, el título se muestra sin el nombre.
-   */
   private readonly carreras = rxResource({ stream: () => this.api.listarCarreras() });
   protected readonly nombreCarrera = computed(
     () => this.carreras.value()?.find((carrera) => carrera.id === this.carreraId())?.nombre,
@@ -52,15 +48,18 @@ export class PlanesLista {
     { clave: 'nombre', titulo: 'Plan' },
   ];
 
-  /** Cada fila lleva a las materias del plan: /admin/carreras/:carreraId/planes/:planId/materias. */
-  protected readonly enlace = (plan: PlanEstudioResponse) => [plan.id, 'materias'];
+  /**
+   * Cada fila lleva a la pantalla del plan: /admin/carreras/:carreraId/planes/:planId. Qué pestaña
+   * se abre primero lo decide la ruta (admin.routes.ts), no esta lista.
+   */
+  protected readonly enlace = (plan: PlanEstudioResponse) => [plan.id];
 
   constructor() {
     effect(() => {
       const vigentes = this.vigentes();
       if (vigentes.length === 1) {
         // replaceUrl: esta pantalla no queda en el historial, así "atrás" vuelve a Carreras.
-        void this.router.navigate([vigentes[0].id, 'materias'], {
+        void this.router.navigate([vigentes[0].id], {
           relativeTo: this.ruta,
           replaceUrl: true,
         });

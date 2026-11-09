@@ -1,26 +1,4 @@
-@if (volverAPlanes()) {
-  <a class="volver" [routerLink]="['/admin/carreras', carreraId(), 'planes']">
-    <app-icono nombre="flecha-izquierda" />
-    Planes de estudio
-  </a>
-} @else {
-  <a class="volver" routerLink="/admin/carreras">
-    <app-icono nombre="flecha-izquierda" />
-    Carreras
-  </a>
-}
-
-<h1>Materias del plan</h1>
-@if (nombreCarrera() || nombrePlan()) {
-  <p class="subtitulo">
-    {{ nombreCarrera() }}
-    @if (nombreCarrera() && nombrePlan()) {
-      ·
-    }
-    {{ nombrePlan() }}
-  </p>
-}
-
+<!-- El link de volver, el título y las pestañas los pone la pantalla del plan (PlanDetalle). -->
 @if (materias.isLoading()) {
   <p class="estado">Cargando materias…</p>
 } @else if (materias.error()) {

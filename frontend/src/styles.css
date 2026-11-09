@@ -19,6 +19,7 @@
   --color-fondo: #f4f6f9;
   --color-superficie: #ffffff;
   --color-fondo-marca: var(--color-marca); /* login */
+  --color-velo: rgb(31 41 51 / 0.5); /* detrás de una ventana: --color-texto a media opacidad */
 
   /* Bordes */
   --color-borde: #7a8594; /* inputs */

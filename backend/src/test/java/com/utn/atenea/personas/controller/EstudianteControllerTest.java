@@ -274,6 +274,28 @@ class EstudianteControllerTest {
     }
 
     @Test
+    void filtraPorPlanSoloOJuntoConSuCarrera() throws Exception {
+        altaEstudiante("99000011", "Lucía", "Gómez", planVigente);
+        altaEstudiante("99000012", "Ana", "Álvarez", otroPlanVigenteDeLaMismaCarrera);
+        altaEstudiante("99000013", "Carla", "Benítez", planDeOtraCarrera);
+
+        listar("planEstudioId", planVigente.toString())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].apellido").value(contains("Gómez")));
+        listar("carreraId", carreraId.toString(), "planEstudioId", otroPlanVigenteDeLaMismaCarrera.toString())
+                .andExpect(jsonPath("$.content[*].apellido").value(contains("Álvarez")));
+    }
+
+    @Test
+    void unPlanDeOtraCarreraDevuelveListaVacia() throws Exception {
+        altaEstudiante("99000013", "Carla", "Benítez", planDeOtraCarrera);
+
+        listar("carreraId", carreraId.toString(), "planEstudioId", planDeOtraCarrera.toString())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(0));
+    }
+
+    @Test
     void estadoInvalidoDevuelve400() throws Exception {
         listar("estado", "CUALQUIERA").andExpect(status().isBadRequest());
     }

@@ -1,0 +1,61 @@
+/* En celular ocupa casi todo el ancho; en pantallas grandes, hasta 28rem. Si no entra de alto,
+   se desplaza adentro. */
+.ventana {
+  width: min(100% - 2rem, 28rem);
+  max-height: calc(100% - 2rem);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+/* Lo que queda detrás de la ventana. */
+.ventana::backdrop {
+  background: var(--color-velo);
+}
+
+h2 {
+  margin-top: 0;
+  padding-right: 2.75rem; /* el lugar de la ✕ */
+  font-size: var(--texto-grande);
+}
+
+/* La ✕: sin el fondo azul de los botones, para no competir con la acción principal. */
+.cerrar {
+  position: absolute;
+  top: var(--espacio-2);
+  right: var(--espacio-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px, lo mínimo para tocar con el dedo */
+  padding: 0;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.cerrar:hover {
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.persona {
+  padding: var(--espacio-3);
+  border-radius: var(--radio);
+  background: var(--color-primario-claro);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.aviso {
+  color: var(--color-alerta);
+  font-size: var(--texto-chico);
+}

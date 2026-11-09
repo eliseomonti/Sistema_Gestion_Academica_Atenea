@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { AltaPersonaResponse } from '../../../personas/data/persona';
+import { AltaPersonaResponse } from '../../data/persona';
 
 @Component({
   imports: [],

@@ -30,14 +30,16 @@ public class EstudianteController {
     private final EstudianteService estudianteService;
 
     // Ejemplo: GET /api/admin/estudiantes?carreraId=3&buscar=gomez&page=0&size=20
+    // Los de un solo plan: GET /api/admin/estudiantes?planEstudioId=5
     // PagedModel le da a la respuesta una forma fija: {"content": [...], "page": {"size", "number", "totalElements", "totalPages"}}.
     @GetMapping
     public PagedModel<EstudianteListadoResponse> listar(
             @RequestParam(required = false) String buscar,
             @RequestParam(required = false) Long carreraId,
+            @RequestParam(required = false) Long planEstudioId,
             @RequestParam(defaultValue = "ACTIVA") EstadoInscripcionCarrera estado,
             @PageableDefault(size = 20) Pageable pageable) {
-        return new PagedModel<>(estudianteService.listar(buscar, carreraId, estado, pageable));
+        return new PagedModel<>(estudianteService.listar(buscar, carreraId, planEstudioId, estado, pageable));
     }
 
     @PostMapping

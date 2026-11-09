@@ -3,7 +3,14 @@ import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../../../core/http/api-url';
 import { Pagina } from '../../../shared/models/pagina';
-import { EstudianteListadoResponse, FiltrosEstudiantes } from './estudiante';
+import { AltaPersonaResponse } from '../../personas/data/persona';
+import {
+  AltaEstudianteRequest,
+  EstudianteListadoResponse,
+  FiltrosEstudiantes,
+  InscripcionCarreraRequest,
+  InscripcionCarreraResponse,
+} from './estudiante';
 
 /** Endpoints de /api/admin/estudiantes. */
 @Service()
@@ -21,6 +28,9 @@ export class EstudiantesApi {
     if (filtros.carreraId !== undefined) {
       params = params.set('carreraId', filtros.carreraId);
     }
+    if (filtros.planEstudioId !== undefined) {
+      params = params.set('planEstudioId', filtros.planEstudioId);
+    }
     if (filtros.estado) {
       params = params.set('estado', filtros.estado);
     }
@@ -28,5 +38,24 @@ export class EstudiantesApi {
       params = params.set('page', filtros.pagina);
     }
     return this.http.get<Pagina<EstudianteListadoResponse>>(this.url, { params });
+  }
+
+  /** Una persona nueva, que queda ya inscripta al plan. Devuelve su usuario y contraseña temporal. */
+  alta(request: AltaEstudianteRequest): Observable<AltaPersonaResponse> {
+    return this.http.post<AltaPersonaResponse>(this.url, request);
+  }
+
+  /**
+   * Inscribe al plan a una persona que ya existe: un estudiante que suma una carrera, o alguien que
+   * todavía no es estudiante (por ejemplo, un docente).
+   */
+  inscribir(
+    personaId: number,
+    request: InscripcionCarreraRequest,
+  ): Observable<InscripcionCarreraResponse> {
+    return this.http.post<InscripcionCarreraResponse>(
+      `${this.url}/${personaId}/inscripciones`,
+      request,
+    );
   }
 }
