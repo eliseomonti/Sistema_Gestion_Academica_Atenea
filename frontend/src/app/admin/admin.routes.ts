@@ -51,7 +51,26 @@ const routes: Routes = [
   },
   { path: 'carreras', loadChildren: () => import('./carreras/carreras.routes') },
   { path: 'docentes', loadChildren: () => import('./docentes/docentes.routes') },
-  { path: 'estudiantes', loadChildren: () => import('./estudiantes/estudiantes.routes') },
+  {
+    // Acá y no en un estudiantes.routes.ts: la ventana de inscripción es de la feature personas, y
+    // sólo este archivo puede cargar pantallas de otra feature.
+    path: 'estudiantes',
+    loadComponent: () =>
+      import('./estudiantes/pages/estudiantes-lista/estudiantes-lista').then(
+        (m) => m.EstudiantesLista,
+      ),
+    title: 'Estudiantes',
+    children: [
+      {
+        path: 'nuevo',
+        loadComponent: () =>
+          import('./personas/pages/estudiante-inscripcion/estudiante-inscripcion').then(
+            (m) => m.EstudianteInscripcion,
+          ),
+        title: 'Inscribir estudiante',
+      },
+    ],
+  },
 ];
 
 export default routes;

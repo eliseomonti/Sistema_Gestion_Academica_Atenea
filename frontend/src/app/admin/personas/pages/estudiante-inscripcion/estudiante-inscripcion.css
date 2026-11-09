@@ -41,8 +41,35 @@ h2 {
   background: var(--color-fondo);
 }
 
-.estado {
+/* La carrera y el plan elegidos, debajo del título. */
+.contexto {
+  margin-top: calc(-1 * var(--espacio-2));
   color: var(--color-texto-suave);
+  font-size: var(--texto-chico);
+}
+
+/* Primer paso en /admin/estudiantes: carrera y plan, uno debajo del otro. */
+.eleccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.campo select {
+  min-width: 0;
+  background: var(--color-superficie);
+}
+
+.error-campo {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--texto-chico);
 }
 
 .persona {
@@ -55,7 +82,45 @@ h2 {
   color: var(--color-error);
 }
 
+/* Por qué no se puede inscribir: una advertencia, no un error del sistema. */
+.motivo {
+  padding: var(--espacio-3);
+  border-radius: var(--radio);
+  color: var(--color-alerta);
+  background: var(--color-alerta-fondo);
+}
+
 .aviso {
   color: var(--color-alerta);
   font-size: var(--texto-chico);
+}
+
+.exito {
+  padding: var(--espacio-3);
+  border-radius: var(--radio);
+  color: var(--color-ok);
+  background: var(--color-ok-fondo);
+}
+
+.pregunta {
+  margin-bottom: 0;
+}
+
+/* Cancelar a la izquierda de la acción principal, contra el borde derecho. */
+.botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-4);
+}
+
+/* Cancelar: con borde y sin el fondo azul, para que Inscribir sea la acción principal. */
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
 }

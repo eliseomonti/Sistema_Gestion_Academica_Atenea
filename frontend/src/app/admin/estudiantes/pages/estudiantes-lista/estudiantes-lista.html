@@ -6,10 +6,8 @@
 <!-- El buscador va siempre afuera de los @if: si desapareciera mientras carga, se perdería lo que
      se está escribiendo. -->
 <div class="herramientas">
-  <!-- Sólo en la pestaña de un plan: la inscripción necesita saber a qué plan. -->
-  @if (planId() !== undefined) {
-    <a class="nuevo" routerLink="nuevo">Inscribir estudiante</a>
-  }
+  <!-- En /admin/estudiantes no hay plan: la ventana pide primero la carrera y el plan. -->
+  <a class="nuevo" routerLink="nuevo">Inscribir estudiante</a>
   <input
     type="search"
     class="buscador"

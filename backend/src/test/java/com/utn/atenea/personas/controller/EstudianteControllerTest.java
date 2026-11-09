@@ -185,6 +185,48 @@ class EstudianteControllerTest {
         inscribir(-1L, planVigente).andExpect(status().isNotFound());
     }
 
+    // --- Verificación antes de inscribir ---
+
+    @Test
+    void verificarDiceQueSePuedeYNoInscribe() throws Exception {
+        long personaId = altaEstudiante(planVigente);
+
+        verificar(personaId, planDeOtraCarrera)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.puedeInscribirse").value(true))
+                .andExpect(jsonPath("$.motivo").doesNotExist());
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM inscripcion_carrera WHERE estudiante_id = ?",
+                Integer.class, personaId)).isEqualTo(1);
+    }
+
+    @Test
+    void verificarDiceQueNoSePuedeInscribirDosVecesEnElMismoPlan() throws Exception {
+        long personaId = altaEstudiante(planVigente);
+
+        verificar(personaId, planVigente)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.puedeInscribirse").value(false))
+                .andExpect(jsonPath("$.motivo")
+                        .value("Ya tiene una inscripción en este plan de estudio, activa o anterior."));
+    }
+
+    @Test
+    void verificarDiceQueNoSePuedeConUnaInscripcionActivaEnLaMismaCarrera() throws Exception {
+        long personaId = altaEstudiante(planVigente);
+
+        verificar(personaId, otroPlanVigenteDeLaMismaCarrera)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.puedeInscribirse").value(false))
+                .andExpect(jsonPath("$.motivo")
+                        .value("Ya tiene una inscripción activa en otro plan de esta carrera."));
+    }
+
+    @Test
+    void verificarConPersonaInexistenteDevuelve404() throws Exception {
+        verificar(-1L, planVigente).andExpect(status().isNotFound());
+    }
+
     // --- Listado ---
 
     @Test
@@ -407,6 +449,11 @@ class EstudianteControllerTest {
         return mvc.perform(post("/api/admin/estudiantes/{personaId}/inscripciones", personaId).with(admin())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"planEstudioId\": " + planEstudioId + "}"));
+    }
+
+    private ResultActions verificar(long personaId, Long planEstudioId) throws Exception {
+        return mvc.perform(get("/api/admin/estudiantes/{personaId}/inscripciones/verificacion", personaId)
+                .param("planEstudioId", String.valueOf(planEstudioId)).with(admin()));
     }
 
     private List<String> roles(String username, String password) throws Exception {
