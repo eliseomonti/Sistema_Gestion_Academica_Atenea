@@ -1,7 +1,7 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Icono } from '../../shared/ui/icono/icono';
-import { Rol, rutaLogin } from '../seguridad/rol';
+import { Rol, rutaInicio, rutaLogin } from '../seguridad/rol';
 import { Sesion } from '../seguridad/sesion';
 import { Menu } from './menu/menu';
 import { MENUS } from './menus';
@@ -20,7 +20,7 @@ const MODULOS: Record<Rol, string> = {
  */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, Menu, Icono],
+  imports: [RouterOutlet, RouterLink, Menu, Icono],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
   // Escucha los clics en toda la página, no sólo adentro del layout.
@@ -38,6 +38,8 @@ export class Layout {
 
   protected readonly menu = MENUS[this.rol];
   protected readonly modulo = MODULOS[this.rol];
+  /** A dónde lleva la marca (logo y letras): el inicio del actor, como después del login. */
+  protected readonly inicio = rutaInicio(this.rol);
 
   /** Si el menú está desplegado. Sólo importa en celular y tablet: en escritorio se ve siempre. */
   protected readonly menuAbierto = signal(false);

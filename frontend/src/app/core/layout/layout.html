@@ -10,23 +10,24 @@
   >
     <app-icono [nombre]="menuAbierto() ? 'cerrar' : 'menu'" />
   </button>
-  <!-- En la barra, la marca va en horizontal: el logo al lado del texto. -->
-  <div class="marca">
+  <!-- En la barra, la marca va en horizontal: el logo al lado del texto. Lleva al inicio. -->
+  <a class="marca" [routerLink]="inicio" aria-label="Atenea: ir al inicio">
     <img class="marca-icono" src="img/atenea-icono-blanco.svg" alt="" />
     <div>
       <img class="marca-letras" src="img/atenea-letras.svg" alt="Atenea" />
       <p class="marca-modulo">{{ modulo }}</p>
     </div>
-  </div>
+  </a>
 </header>
 
 <aside id="menu-principal" class="lateral" [class.abierto]="menuAbierto()">
-  <!-- En el menú, la marca va en vertical y centrada. En celular ya está en la barra. -->
-  <div class="marca-lateral">
+  <!-- En el menú, la marca va en vertical y centrada. En celular ya está en la barra. Lleva al
+       inicio. -->
+  <a class="marca-lateral" [routerLink]="inicio" aria-label="Atenea: ir al inicio">
     <img class="lateral-icono" src="img/atenea-icono-blanco.svg" alt="" />
     <img class="lateral-letras" src="img/atenea-letras.svg" alt="Atenea" />
     <p class="lateral-modulo">{{ modulo }}</p>
-  </div>
+  </a>
 
   <app-menu [items]="menu" (elegido)="menuAbierto.set(false)" />
 
