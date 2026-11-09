@@ -1,4 +1,5 @@
 package com.utn.atenea.personas.dto;
+import java.time.LocalDate;
 
 /**
  * Persona encontrada por DNI. Angular la usa antes de un alta: si ya existe, en vez del
@@ -9,6 +10,8 @@ public record PersonaResponse(
         String nombre,
         String apellido,
         String dni,
+        String telefono,
+        LocalDate fechaNacimiento,
         String email,
         Long legajoEstudiante,
         Long legajoDocente,
