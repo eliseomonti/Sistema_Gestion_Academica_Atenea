@@ -5,6 +5,7 @@ import com.utn.atenea.personas.dto.EstudianteListadoResponse;
 import com.utn.atenea.personas.dto.AltaPersonaResponse;
 import com.utn.atenea.personas.dto.InscripcionCarreraRequest;
 import com.utn.atenea.personas.dto.InscripcionCarreraResponse;
+import com.utn.atenea.personas.dto.VerificacionInscripcionResponse;
 import com.utn.atenea.personas.model.EstadoInscripcionCarrera;
 import com.utn.atenea.personas.service.EstudianteService;
 import jakarta.validation.Valid;
@@ -54,6 +55,13 @@ public class EstudianteController {
     public InscripcionCarreraResponse inscribir(@PathVariable Long personaId,
                                                 @Valid @RequestBody InscripcionCarreraRequest request) {
         return estudianteService.inscribir(personaId, request);
+    }
+
+    // Antes de inscribir, si se puede y si no, por qué. No guarda nada.
+    @GetMapping("/{personaId}/inscripciones/verificacion")
+    public VerificacionInscripcionResponse verificarInscripcion(@PathVariable Long personaId,
+                                                                @RequestParam Long planEstudioId) {
+        return estudianteService.verificarInscripcion(personaId, planEstudioId);
     }
 
     // La inscripción no se borra: queda en BAJA con la fecha de hoy y sigue en el historial.

@@ -13,6 +13,12 @@ export interface InscripcionCarreraRequest {
   planEstudioId: number;
 }
 
+/** Igual que `VerificacionInscripcionResponse` del backend. `motivo` es null cuando se puede. */
+export interface VerificacionInscripcionResponse {
+  puedeInscribirse: boolean;
+  motivo: string | null;
+}
+
 /** Igual que `InscripcionCarreraResponse` del backend. */
 export interface InscripcionCarreraResponse {
   id: number;

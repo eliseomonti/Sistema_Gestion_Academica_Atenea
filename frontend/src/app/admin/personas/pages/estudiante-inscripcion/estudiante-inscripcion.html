@@ -1,33 +1,81 @@
-<!-- Se abre con showModal() al entrar. Al cerrarse (la ✕, Listo, Esc) se vuelve a la lista. -->
+<!-- Se abre con showModal() al entrar. Al cerrarse (la ✕, Listo, Esc) se vuelve a la lista.
+     Pasos: carrera y plan (sólo sin plan en la URL) → DNI → pregunta (si ya existe) o datos
+     personales (si es nueva) → éxito. -->
 <dialog #dialogo class="ventana" aria-labelledby="titulo-ventana" (close)="volver()">
-  @if (credenciales(); as datos) {
-    <h2 id="titulo-ventana">Estudiante inscripto</h2>
-    <p>Legajo: {{ datos.legajo }}</p>
-    <p>Usuario: <strong>{{ datos.username }}</strong></p>
-    <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
-    <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
-    <button type="button" (click)="cerrar()">Listo</button>
+  <h2 id="titulo-ventana">{{ inscripta() ? 'Estudiante inscripto' : 'Inscribir estudiante' }}</h2>
+  @if (contexto(); as contexto) {
+    <p class="contexto">{{ contexto }}</p>
+  }
+
+  @if (inscripta(); as nombre) {
+    <!-- Éxito, en los dos casos. Si fue un alta, también el usuario y la contraseña. -->
+    <p class="exito" role="status">Se inscribió a {{ nombre }} en este plan.</p>
+    @if (credenciales(); as datos) {
+      <p>Legajo: {{ datos.legajo }}</p>
+      <p>Usuario: <strong>{{ datos.username }}</strong></p>
+      <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
+      <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
+    }
+    <div class="botones">
+      <button type="button" (click)="cerrar()">Listo</button>
+    </div>
+  } @else if (planEstudioId() === null || planEstudioId() === undefined) {
+    <!-- Sólo en /admin/estudiantes: en la pestaña de un plan, el plan ya viene en la URL. -->
+    <form class="eleccion" [formRoot]="eleccionForm">
+      <div class="campo">
+        <label for="carrera">Carrera</label>
+        <select id="carrera" [formField]="eleccionForm.carreraId">
+          <option value="" disabled>Elegí una carrera</option>
+          @for (carrera of carrerasActivas(); track carrera.id) {
+            <option [value]="carrera.id">{{ carrera.nombre }}</option>
+          }
+        </select>
+        @if (eleccionForm.carreraId().touched() && eleccionForm.carreraId().invalid()) {
+          <p class="error-campo">{{ eleccionForm.carreraId().errors()[0].message }}</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="plan">Plan de estudio</label>
+        <select id="plan" [formField]="eleccionForm.planId">
+          <option value="" disabled>Elegí un plan</option>
+          @for (plan of planesVigentes(); track plan.id) {
+            <option [value]="plan.id">{{ plan.nombre }}</option>
+          }
+        </select>
+        @if (sinPlanesVigentes()) {
+          <p class="error-campo">Esta carrera no tiene planes vigentes.</p>
+        } @else if (eleccionForm.planId().touched() && eleccionForm.planId().invalid()) {
+          <p class="error-campo">{{ eleccionForm.planId().errors()[0].message }}</p>
+        }
+      </div>
+
+      <div class="botones">
+        <button type="submit">Siguiente</button>
+      </div>
+    </form>
   } @else if (dniNuevo(); as dni) {
-    <h2 id="titulo-ventana">Inscribir estudiante</h2>
-    <p class="estado">Nadie tiene ese DNI. Al guardar, se crea el estudiante ya inscripto en este plan.</p>
     <app-datos-personales-form [dni]="dni" [guardando]="cargando()" (guardar)="guardar($event)" />
+  } @else if (verificacion()?.puedeInscribirse && personaExistente(); as persona) {
+    <!-- Ya existe y se puede inscribir: se pregunta antes de hacerlo. -->
+    <!-- El mismo recuadro que cuando no se puede inscribir. -->
+    <p class="persona">
+      <strong>{{ persona.apellido }}, {{ persona.nombre }}</strong> ya está en el sistema.
+    </p>
+    <p class="pregunta">¿Querés inscribir a {{ persona.nombre }} {{ persona.apellido }} en este plan?</p>
+    <div class="botones">
+      <button type="button" class="secundario" (click)="volverAlDni()">Cancelar</button>
+      <button type="button" [disabled]="cargando()" (click)="inscribir(persona)">Inscribir</button>
+    </div>
   } @else {
-    <h2 id="titulo-ventana">Inscribir estudiante</h2>
     <app-dni-paso [buscando]="cargando()" (buscar)="buscar($event)" />
 
     @if (personaExistente(); as persona) {
-      <!-- Ya existe: no hace falta cargar sus datos, sólo inscribirla. -->
-      <p class="persona" role="status">
-        <strong>{{ persona.apellido }}, {{ persona.nombre }}</strong> ya está en el sistema
-        @if (persona.legajoEstudiante !== null) {
-          como estudiante (legajo {{ persona.legajoEstudiante }}).
-        } @else {
-          pero todavía no es estudiante.
-        }
+      <!-- Ya existe pero no se puede inscribir: el backend dice por qué, y no hay botón. -->
+      <p class="persona">
+        <strong>{{ persona.apellido }}, {{ persona.nombre }}</strong> ya está en el sistema.
       </p>
-      <button type="button" [disabled]="cargando()" (click)="inscribir(persona.id)">
-        Inscribir en este plan
-      </button>
+      <p class="motivo" role="alert">{{ verificacion()?.motivo }}</p>
     }
   }
 

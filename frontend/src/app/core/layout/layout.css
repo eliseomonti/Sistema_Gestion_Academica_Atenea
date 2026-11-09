@@ -60,7 +60,17 @@
   background: var(--color-primario-hover);
 }
 
+/* La marca es un link al inicio, pero se ve igual que antes: sin subrayado ni color de link. */
+.marca,
+.marca-lateral {
+  color: var(--color-texto-sobre-primario);
+  text-decoration: none;
+  border-radius: var(--radio); /* para el contorno del foco */
+}
+
 /* Sobre el azul de la marca, el foco tiene que ser blanco. */
+.marca:focus-visible,
+.marca-lateral:focus-visible,
 .hamburguesa:focus-visible,
 .salir:focus-visible {
   outline: 2px solid var(--color-texto-sobre-primario);

@@ -1,25 +1,55 @@
-<h1>Nuevo docente</h1>
+<!-- Se abre con showModal() al entrar. Al cerrarse (la ✕, Listo, Esc) se vuelve a la lista.
+     Pasos: DNI → pregunta (si ya existe) o datos personales (si es nueva) → éxito. -->
+<dialog #dialogo class="ventana" aria-labelledby="titulo-ventana" (close)="volver()">
+  <h2 id="titulo-ventana">{{ agregado() ? 'Docente agregado' : 'Nuevo docente' }}</h2>
 
-@if (credenciales(); as datos) {
-  <app-credenciales-dialogo [credenciales]="datos" (cerrar)="volverAlListado()" />
-} @else if (dniNuevo(); as dni) {
-  <app-datos-personales-form [dni]="dni" [guardando]="cargando()" (guardar)="guardar($event)" />
-} @else {
-  <app-dni-paso [buscando]="cargando()" (buscar)="buscar($event)" />
+  @if (agregado(); as nombre) {
+    <!-- Éxito, en los dos casos. Si fue un alta, también el usuario y la contraseña. -->
+    @if (credenciales(); as datos) {
+      <p class="exito" role="status">Se dio de alta a {{ nombre }} como docente.</p>
+      <p>Legajo: {{ datos.legajo }}</p>
+      <p>Usuario: <strong>{{ datos.username }}</strong></p>
+      <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
+      <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
+    } @else {
+      <p class="exito" role="status">Se le asignó el rol de docente a {{ nombre }}.</p>
+    }
+    <div class="botones">
+      <button type="button" (click)="cerrar()">Listo</button>
+    </div>
+  } @else if (dniNuevo(); as dni) {
+    <app-datos-personales-form [dni]="dni" [guardando]="cargando()" (guardar)="guardar($event)" />
+  } @else if (aAsignar(); as persona) {
+    <!-- Ya existe y puede ser docente: se pregunta antes de darle el rol. -->
+    <p class="persona">
+      <strong>{{ persona.apellido }}, {{ persona.nombre }}</strong> ya está en el sistema.
+    </p>
+    <p class="pregunta">
+      ¿Querés darle el rol de docente a {{ persona.nombre }} {{ persona.apellido }}?
+    </p>
+    <div class="botones">
+      <button type="button" class="secundario" (click)="volverAlDni()">Cancelar</button>
+      <button type="button" [disabled]="cargando()" (click)="asignarRol(persona)">Asignar rol</button>
+    </div>
+  } @else {
+    <app-dni-paso [buscando]="cargando()" (buscar)="buscar($event)" />
 
-  
-  @if(personaExistente(); as persona)
-  {
-    @if(persona.legajoDocente !== null)
-    {
-        <p class="mensaje">{{persona.apellido}} {{persona.nombre}} ya es un docente</p>
-    }@else {
-        <p class="mensaje">{{persona.apellido}} {{persona.nombre}} ya existe en el sistema, queres asignar el rol de docente?</p>
-        <button [disabled]="cargando()" (click)="asignarRol(persona.id)">Asignar rol docente</button>
+    @if (personaExistente(); as persona) {
+      <!-- Ya existe pero no puede ser docente: se dice por qué, y no hay botón. -->
+      <p class="persona">
+        <strong>{{ persona.apellido }}, {{ persona.nombre }}</strong> ya está en el sistema.
+      </p>
+      <p class="motivo" role="alert">{{ motivo() }}</p>
     }
   }
-}
 
-@if (error()) {
-  <p class="error" role="alert">{{ error() }}</p>
-}
+  @if (error(); as mensaje) {
+    <p class="error" role="alert">{{ mensaje }}</p>
+  }
+
+  <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+       al primer campo y no a la ✕. -->
+  <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+    <app-icono nombre="cerrar" />
+  </button>
+</dialog>

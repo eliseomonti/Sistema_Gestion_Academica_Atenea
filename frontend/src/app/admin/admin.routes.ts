@@ -41,17 +41,43 @@ const routes: Routes = [
       },
     ],
   },
-  {
-    // Va antes de 'docentes': las pantallas de alta son de personas, que comparte sus partes con el
-    // alta de estudiantes.
-    path: 'docentes/nuevo',
-    loadComponent: () =>
-      import('./personas/pages/docente-alta/docente-alta').then((m) => m.DocenteAlta),
-    title: 'Docente Nuevo',
-  },
   { path: 'carreras', loadChildren: () => import('./carreras/carreras.routes') },
-  { path: 'docentes', loadChildren: () => import('./docentes/docentes.routes') },
-  { path: 'estudiantes', loadChildren: () => import('./estudiantes/estudiantes.routes') },
+  {
+    // Igual que estudiantes: la ventana de alta es de la feature personas, y sólo este archivo
+    // puede cargar pantallas de otra feature.
+    path: 'docentes',
+    loadComponent: () =>
+      import('./docentes/pages/docentes-lista/docentes-lista').then((m) => m.DocentesLista),
+    title: 'Docentes',
+    children: [
+      {
+        path: 'nuevo',
+        loadComponent: () =>
+          import('./personas/pages/docente-alta/docente-alta').then((m) => m.DocenteAlta),
+        title: 'Nuevo docente',
+      },
+    ],
+  },
+  {
+    // Acá y no en un estudiantes.routes.ts: la ventana de inscripción es de la feature personas, y
+    // sólo este archivo puede cargar pantallas de otra feature.
+    path: 'estudiantes',
+    loadComponent: () =>
+      import('./estudiantes/pages/estudiantes-lista/estudiantes-lista').then(
+        (m) => m.EstudiantesLista,
+      ),
+    title: 'Estudiantes',
+    children: [
+      {
+        path: 'nuevo',
+        loadComponent: () =>
+          import('./personas/pages/estudiante-inscripcion/estudiante-inscripcion').then(
+            (m) => m.EstudianteInscripcion,
+          ),
+        title: 'Inscribir estudiante',
+      },
+    ],
+  },
 ];
 
 export default routes;

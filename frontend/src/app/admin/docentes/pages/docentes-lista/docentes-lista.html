@@ -1,33 +1,66 @@
 <h1>Docentes</h1>
 
-
+<!-- El buscador va siempre afuera de los @if: si desapareciera mientras carga, se perdería lo que
+     se está escribiendo. -->
 <div class="herramientas">
-    <a class="nuevo" routerLink="nuevo">Nuevo docente</a>
-  <input type="search" placeholder="Buscar docente" aria-label="Buscar docente" [formField]="filtrosForm.buscar" />
-  <select aria-label="Estado" [formField]="filtrosForm.estado">
-    <option value="ACTIVOS">Activos</option>
-    <option value="INACTIVOS">Dados de baja</option>
-  </select>
+  <a class="nuevo" routerLink="nuevo">Nuevo docente</a>
+  <input
+    type="search"
+    class="buscador"
+    placeholder="Buscar por nombre, DNI o legajo"
+    aria-label="Buscar docente por nombre, DNI o legajo"
+    [formField]="filtrosForm.busqueda"
+  />
+
+  <!-- popover: el navegador lo abre y lo cierra, y también lo cierra con Esc o al tocar afuera. -->
+  <button
+    type="button"
+    class="boton-filtro"
+    [class.activo]="hayFiltro()"
+    popovertarget="filtros-docentes"
+    aria-label="Filtros"
+  >
+    <app-icono nombre="filtro" />
+  </button>
+  <div #panelFiltros id="filtros-docentes" class="panel-filtros" popover>
+    <label for="filtro-estado">Estado</label>
+    <!-- Al elegir una opción, el panel se cierra: el valor ya lo guardó [formField]. -->
+    <select
+      id="filtro-estado"
+      [formField]="filtrosForm.estado"
+      (change)="panelFiltros.hidePopover()"
+    >
+      <option value="ACTIVOS">Activos</option>
+      <option value="INACTIVOS">Inactivos</option>
+    </select>
+  </div>
 </div>
 
-@if (docentes.isLoading()) 
-{
-  <p>Cargando docentes…</p>
-} @else if (docentes.error()) 
-{
-  <p role="alert">No se pudieron cargar los docentes.</p>
-} @else if (docentes.value(); as resultado)
- {
-  @if (resultado.content.length === 0)
-   {
-    <p>No hay docentes para mostrar.</p>
-    } @else
-    {
-    <app-tabla [columnas]="columnas" [filas]="resultado.content" />
+@if (docentes.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar los docentes.</p>
+  <button type="button" (click)="docentes.reload()">Reintentar</button>
+} @else if (listado(); as listado) {
+  @if (listado.content.length === 0) {
+    <p class="estado">
+      {{ filtrosForm.busqueda().value() ? 'Ningún docente coincide con la búsqueda.' : 'No hay docentes para mostrar.' }}
+    </p>
+  } @else {
+    <!-- Mientras llega otra página, la anterior se ve más clara. -->
+    <app-tabla
+      [class.cargando]="docentes.isLoading()"
+      [columnas]="columnas"
+      [filas]="listado.content"
+    />
     <app-paginador
-      [pagina]="resultado.page.number"
-      [totalPaginas]="resultado.page.totalPages"
+      [pagina]="listado.page.number"
+      [totalPaginas]="listado.page.totalPages"
       (cambio)="pagina.set($event)"
-    />}
-
+    />
+  }
+} @else {
+  <p class="estado">Cargando docentes…</p>
 }
+
+<!-- Acá se abre la ventana de alta (…/docentes/nuevo). Al cerrarse, la lista se vuelve a pedir,
+     para que aparezca el docente nuevo. -->
+<router-outlet (deactivate)="docentes.reload()" />

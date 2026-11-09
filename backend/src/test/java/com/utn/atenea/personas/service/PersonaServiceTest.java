@@ -110,6 +110,33 @@ class PersonaServiceTest {
     }
 
     @Test
+    void masDe100DevuelveReglaNegocio() {
+        LocalDate cumplio101Hoy = LocalDate.now().minusYears(101);
+
+        assertThatThrownBy(() -> service.crear(datos(cumplio101Hoy)))
+                .isInstanceOf(ReglaNegocioException.class);
+        verify(personaRepository, never()).save(any());
+    }
+
+    @Test
+    void unAnioMalEscritoDevuelveReglaNegocio() {
+        // 0023 en vez de 2023: es una fecha pasada, así que @Past la deja pasar.
+        assertThatThrownBy(() -> service.crear(datos(LocalDate.of(23, 5, 10))))
+                .isInstanceOf(ReglaNegocioException.class);
+        verify(personaRepository, never()).save(any());
+    }
+
+    @Test
+    void quienTiene100PuedeDarseDeAlta() {
+        when(personaRepository.save(any())).thenAnswer(invocacion -> invocacion.getArgument(0));
+        LocalDate cumple101Maniana = LocalDate.now().minusYears(101).plusDays(1);
+
+        Persona persona = service.crear(datos(cumple101Maniana));
+
+        assertThat(persona.getFechaNacimiento()).isEqualTo(cumple101Maniana);
+    }
+
+    @Test
     void asignaElLegajoSiguienteAlUltimo() {
         Persona persona = persona();
         when(personaRepository.ultimoLegajoDocente()).thenReturn(41L);

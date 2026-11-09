@@ -10,6 +10,7 @@ import com.utn.atenea.personas.dto.EstudianteListadoResponse;
 import com.utn.atenea.personas.dto.AltaPersonaResponse;
 import com.utn.atenea.personas.dto.InscripcionCarreraRequest;
 import com.utn.atenea.personas.dto.InscripcionCarreraResponse;
+import com.utn.atenea.personas.dto.VerificacionInscripcionResponse;
 import com.utn.atenea.personas.mapper.InscripcionCarreraMapper;
 import com.utn.atenea.personas.mapper.PersonaMapper;
 import com.utn.atenea.personas.model.EstadoInscripcionCarrera;
@@ -110,6 +111,21 @@ public class EstudianteService {
         return inscripcionCarreraMapper.toResponse(inscripcion);
     }
 
+    /**
+     * Si la persona se puede inscribir en el plan, y si no, por qué. Hace las mismas validaciones que
+     * {@link #inscribir}, pero no guarda nada: así la regla está en un solo lugar.
+     */
+    public VerificacionInscripcionResponse verificarInscripcion(Long personaId, Long planEstudioId) {
+        try {
+            Persona persona = personaService.buscarActiva(personaId);
+            validarQuePuedeInscribirse(persona, buscarPlanQueAdmiteInscripciones(planEstudioId));
+            return VerificacionInscripcionResponse.permitida();
+        } catch (RecursoDuplicadoException | ReglaNegocioException e) {
+            // Una persona o un plan que no existen no se atrapan: siguen siendo un 404.
+            return VerificacionInscripcionResponse.rechazada(e.getMessage());
+        }
+    }
+
     /** El estudiante deja una carrera. Conserva el legajo, el usuario y sus otras inscripciones. */
     @Transactional
     public InscripcionCarreraResponse darDeBajaInscripcion(Long personaId, Long inscripcionId) {
@@ -127,15 +143,16 @@ public class EstudianteService {
 
     // inscripcion_carrera guarda el plan, no la carrera: para saber si ya cursa esa carrera se
     // buscan sus inscripciones activas entre todos los planes de la carrera.
+    // Los mensajes los ve el admin en la pantalla (también como motivo de verificarInscripcion):
+    // van sin ids.
     private void validarQuePuedeInscribirse(Persona persona, PlanEstudioResumen plan) {
         if (inscripcionCarreraRepository.existsByEstudianteIdAndPlanEstudioId(persona.getId(), plan.id())) {
-            throw new RecursoDuplicadoException("La persona " + persona.getId()
-                    + " ya está o estuvo inscripta al plan de estudio " + plan.id());
+            throw new RecursoDuplicadoException(
+                    "Ya tiene una inscripción en este plan de estudio, activa o anterior.");
         }
         if (inscripcionCarreraRepository.existsByEstudianteIdAndPlanEstudioIdInAndEstado(
                 persona.getId(), carrerasApi.idsDePlanes(plan.carreraId()), EstadoInscripcionCarrera.ACTIVA)) {
-            throw new ReglaNegocioException("La persona " + persona.getId()
-                    + " ya tiene una inscripción activa en otro plan de esa carrera");
+            throw new ReglaNegocioException("Ya tiene una inscripción activa en otro plan de esta carrera.");
         }
     }
 
@@ -143,8 +160,8 @@ public class EstudianteService {
         PlanEstudioResumen plan = carrerasApi.buscarPlan(planEstudioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe el plan de estudio con id " + planEstudioId));
         if (!plan.admiteInscripciones()) {
-            throw new ReglaNegocioException("El plan de estudio " + planEstudioId
-                    + " no admite inscripciones: está discontinuado o su carrera está dada de baja");
+            throw new ReglaNegocioException(
+                    "El plan de estudio no admite inscripciones: está discontinuado o su carrera está dada de baja.");
         }
         return plan;
     }

@@ -10,6 +10,7 @@ import {
   FiltrosEstudiantes,
   InscripcionCarreraRequest,
   InscripcionCarreraResponse,
+  VerificacionInscripcionResponse,
 } from './estudiante';
 
 /** Endpoints de /api/admin/estudiantes. */
@@ -43,6 +44,17 @@ export class EstudiantesApi {
   /** Una persona nueva, que queda ya inscripta al plan. Devuelve su usuario y contraseña temporal. */
   alta(request: AltaEstudianteRequest): Observable<AltaPersonaResponse> {
     return this.http.post<AltaPersonaResponse>(this.url, request);
+  }
+
+  /** Si la persona se puede inscribir en el plan, sin inscribirla. Si no se puede, trae el motivo. */
+  verificarInscripcion(
+    personaId: number,
+    planEstudioId: number,
+  ): Observable<VerificacionInscripcionResponse> {
+    return this.http.get<VerificacionInscripcionResponse>(
+      `${this.url}/${personaId}/inscripciones/verificacion`,
+      { params: { planEstudioId } },
+    );
   }
 
   /**
