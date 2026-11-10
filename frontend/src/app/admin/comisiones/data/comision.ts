@@ -21,3 +21,28 @@ export interface ComisionesFiltros{
     turno?: Turno;
     activa?: boolean;
 }
+
+export interface AltaComisionRequest{
+    planEstudioId: number;
+    anioCursado: number;
+    nroComision: number;
+    turno: Turno;
+    anioLectivo: number;
+}
+
+export interface ModificacionComisionRequest {
+  nroComision: number;
+  turno: Turno;
+}
+
+export interface ComisionDetalleResponse{
+    id: number;
+    nombre: string;
+    planEstudioId: number;
+    anioCursado: number;
+    nroComision: number;
+    turno: Turno;
+    anioLectivo: number;
+    activa: boolean;
+    fechaBaja: string | null;
+}

@@ -1,4 +1,5 @@
 <div class="herramientas">
+    <a class="nuevo" routerLink="nueva">Nueva comisión</a>
     <label>
         Año lectivo
         <input type="number" class="anio" [formField]="filtrosForm.anioLectivo"/>
@@ -46,12 +47,13 @@
         <p class="estado">No hay comision con este filtro</p>
     }@else
     {
-        <app-tabla [columnas]="columnas" [filas]="lista">
+        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
         <ng-template appCelda="turno" let-comision>{{comision.turno | turno}}</ng-template>
         </app-tabla>
     }
 }@else
 {
     <p class="estado">Cargando comisiones</p>
-
 }
+
+<router-outlet (deactivate)="comisiones.reload()" />
