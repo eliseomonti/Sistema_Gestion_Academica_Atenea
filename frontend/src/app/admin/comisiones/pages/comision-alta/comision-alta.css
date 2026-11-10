@@ -1,0 +1,36 @@
+label{
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+.ventana{
+  width: min(100% - 2rem, 28rem);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+.ventana::backdrop{
+  background: var(--color-velo);
+}
+
+h2{
+  margin-top: 0;
+  font-size: var(--texto-grande);
+}
+
+button{
+  margin-right: var(--espacio-2);
+}
+
+.bien{
+  color: var(--color-ok);
+}
+
+.error{
+  color: var(--color-error);
+}

@@ -1,4 +1,5 @@
 <div class="herramientas">
+    <a class="nuevo" routerLink="nueva">Nueva comisión</a>
     <label>
         Año lectivo
         <input type="number" class="anio" [formField]="filtrosForm.anioLectivo"/>
@@ -53,5 +54,6 @@
 }@else
 {
     <p class="estado">Cargando comisiones</p>
-
 }
+
+<router-outlet (deactivate)="comisiones.reload()" />

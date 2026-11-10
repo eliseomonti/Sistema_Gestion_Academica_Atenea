@@ -54,6 +54,16 @@ const routes: Routes = [
             (m) => m.ComisionesLista,
           ),
         title: 'Comisiones del plan',
+        children: [
+          {
+            path: 'nueva',
+            loadComponent: () =>
+              import('./comisiones/pages/comision-alta/comision-alta').then(
+                (m) => m.ComisionAlta,
+              ),
+            title: 'Nueva comisión',
+          },
+        ],
       },
     ],
   },

@@ -8,10 +8,11 @@ import { Turno } from '../../../../shared/models/turno';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { Celda } from '../../../../shared/ui/tabla/celda';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 
 @Component({
-  imports: [FormField,Tabla, Celda,TurnoPipe],
+  imports: [FormField,Tabla, Celda,TurnoPipe, RouterLink, RouterOutlet],
   selector: 'app-comisiones-lista',
   styleUrl: './comisiones-lista.css',
   templateUrl: './comisiones-lista.html',
