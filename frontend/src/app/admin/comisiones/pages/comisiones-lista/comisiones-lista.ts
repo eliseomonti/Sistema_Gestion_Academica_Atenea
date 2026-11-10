@@ -53,5 +53,7 @@ export class ComisionesLista {
     { clave: 'cantidadMaterias', titulo: 'Materias', tituloEnLista: true },
   ];
 
+  protected readonly enlace = (comision: ComisionResponse) => [comision.id];
+
 
 }

@@ -34,3 +34,15 @@ export interface ModificacionComisionRequest {
   nroComision: number;
   turno: Turno;
 }
+
+export interface ComisionDetalleResponse{
+    id: number;
+    nombre: string;
+    planEstudioId: number;
+    anioCursado: number;
+    nroComision: number;
+    turno: Turno;
+    anioLectivo: number;
+    activa: boolean;
+    fechaBaja: string | null;
+}

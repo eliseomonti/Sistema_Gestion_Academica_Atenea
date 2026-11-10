@@ -47,7 +47,7 @@
         <p class="estado">No hay comision con este filtro</p>
     }@else
     {
-        <app-tabla [columnas]="columnas" [filas]="lista">
+        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
         <ng-template appCelda="turno" let-comision>{{comision.turno | turno}}</ng-template>
         </app-tabla>
     }

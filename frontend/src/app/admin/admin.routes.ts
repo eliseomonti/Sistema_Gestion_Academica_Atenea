@@ -61,7 +61,15 @@ const routes: Routes = [
               import('./comisiones/pages/comision-alta/comision-alta').then(
                 (m) => m.ComisionAlta,
               ),
-            title: 'Nueva comisión',
+            title: 'Nueva comision',
+          },
+          {
+            path: ':comisionId',
+            loadComponent: () =>
+              import('./comisiones/pages/comision-edicion/comision-edicion').then(
+                (m) => m.ComisionEdicion,
+              ),
+            title: 'Editar comision',
           },
         ],
       },

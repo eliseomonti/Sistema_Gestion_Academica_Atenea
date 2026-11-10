@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
-import { AltaComisionRequest, ComisionesFiltros, ComisionResponse, ModificacionComisionRequest } from "./comision";
+import { AltaComisionRequest, ComisionDetalleResponse, ComisionesFiltros, ComisionResponse, ModificacionComisionRequest } from "./comision";
 import { Observable } from "rxjs";
 import { API_URL } from "../../../core/http/api-url";
 
@@ -41,5 +41,10 @@ export class ComisionesAPi{
     darDeBajaComision(comisionId: number): Observable<ComisionResponse>
     {
         return this.http.post<ComisionResponse>(`${this.url}/${comisionId}/baja`,null);
+    }
+
+    obtenerComision(comisionId: number): Observable<ComisionDetalleResponse>
+    {
+        return this.http.get<ComisionDetalleResponse>(`${this.url}/${comisionId}`)
     }
 }

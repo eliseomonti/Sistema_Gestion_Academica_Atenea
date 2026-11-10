@@ -1,0 +1,48 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+    <h2>Editar comisión</h2>
+
+    @if(guardado())
+    {
+        <p class="bien">Se guardaron los cambios</p>
+        <button type="button" (click)="cerrar()">Listo</button>
+    }@else if(comision.value(); as datos)
+    {
+        <p>Comisión {{datos.nombre}} · {{datos.anioCursado}}° año</p>
+
+        <form [formRoot]="comisionForm">
+            <label>
+                Número
+                <input type="number" [formField]="comisionForm.nroComision"/>
+            </label>
+
+            <label>
+                Turno
+                <select [formField]="comisionForm.turno">
+                    @for(turno of turnos; track turno)
+                    {
+                        <option [value]="turno">{{turno | turno}}</option>
+                    }
+                </select>
+            </label>
+
+            @if(comisionForm().touched() && comisionForm().invalid())
+            {
+                <p class="error">Completa todos los datos</p>
+            }
+
+            <button [disabled]="cargando()">Guardar</button>
+            <button type="button" (click)="cerrar()">Cancelar</button>
+        </form>
+    }@else if(comision.error())
+    {
+        <p class="error">No se pudo cargar la comisión</p>
+    }@else
+    {
+        <p>Cargando...</p>
+    }
+
+    @if(error())
+    {
+        <p class="error">{{error()}}</p>
+    }
+</dialog>
