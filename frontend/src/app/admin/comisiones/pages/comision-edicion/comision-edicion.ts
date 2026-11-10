@@ -7,10 +7,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, FormRoot, min, required } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
+import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
 
 
 @Component({
-  imports: [FormRoot, FormField, TurnoPipe],
+  imports: [FormRoot, FormField, TurnoPipe,ConfirmarDialog],
   selector: 'app-comision-edicion',
   styleUrl: './comision-edicion.css',
   templateUrl: './comision-edicion.html',
@@ -25,7 +26,9 @@ export class ComisionEdicion {
   
   protected readonly turnos: Turno[] = ['MANANA', 'MEDIA_MANANA', 'TARDE', 'NOCHE']
 
-  protected readonly guardado = signal(false)
+  protected readonly mensaje = signal<string | null>(null)
+  protected readonly confirmarBorrado = signal(false)
+  protected readonly confirmarBaja = signal(false)
   protected readonly cargando = signal(false)
   protected readonly error = signal<string | null>(null)
 
@@ -71,12 +74,56 @@ export class ComisionEdicion {
         nroComision: this.datos().nroComision,
         turno: this.datos().turno as Turno,
       }));
-      this.guardado.set(true);
+      this.mensaje.set('Se guardo el cambio');
     } catch (error) {
       this.error.set(mensajeDeError(error));
     }
     this.cargando.set(false);
   }
+
+  protected async borrar(): Promise<void>
+  {
+    this.error.set(null)
+    this.cargando.set(true)
+    try
+    {
+      await firstValueFrom(this.api.borrarComision(Number(this.comisionId())));
+      this.mensaje.set('Se borro la comision')
+    }catch(error)
+    {
+      if (error instanceof HttpErrorResponse && error.status === 409)
+      {
+        this.error.set('La comisión tiene un historial y no se puede borrar, podes darla de baja')
+        this.confirmarBaja.set(true)
+      }else
+      {
+        this.error.set(mensajeDeError(error))
+      }
+    }
+
+    this.confirmarBorrado.set(false)
+    this.cargando.set(false)
+  }
+
+  protected async darDeBaja(): Promise<void>
+  {
+    this.error.set(null);
+    this.cargando.set(true);
+    try
+    {
+      await firstValueFrom(this.api.darDeBajaComision(Number(this.comisionId())))
+      this.mensaje.set('Se dio de baja la comision')
+    }catch(error)
+    {
+      this.mensaje.set(mensajeDeError(error))
+    }
+
+    this.confirmarBaja.set(false)
+    this.cargando.set(false)
+
+  }
+
+
 
   protected cerrar(): void
   {

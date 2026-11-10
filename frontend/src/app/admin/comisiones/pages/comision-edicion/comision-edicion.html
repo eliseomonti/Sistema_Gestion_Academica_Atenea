@@ -1,7 +1,7 @@
 <dialog #dialogo class="ventana" (close)="volver()">
     <h2>Editar comisión</h2>
 
-    @if(guardado())
+    @if(mensaje())
     {
         <p class="bien">Se guardaron los cambios</p>
         <button type="button" (click)="cerrar()">Listo</button>
@@ -33,6 +33,21 @@
             <button [disabled]="cargando()">Guardar</button>
             <button type="button" (click)="cerrar()">Cancelar</button>
         </form>
+
+    @if(datos.activa)
+    {
+        @if(confirmarBorrado())
+        {
+            <app-confirmar-dialog mensaje="Se va a borrar la comision, NO se puede deshacer" confirmarTexto="Borrar" [procesando]="cargando()" (confirmar)="borrar()" (cancelar)="confirmarBorrado.set(false)" />
+            }@else if(confirmarBaja())
+            {
+                <app-confirmar-dialog mensaje="La comision queda guardada pero ya no se usa" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBaja()" (cancelar)="confirmarBaja.set(false)" />
+            }@else
+            {
+                <button type="button" class="baja" (click)="confirmarBorrado.set(true)">Borrar</button>
+                <button type="button" class="baja" (click)="confirmarBaja.set(true)">Dar de baja</button>
+            }
+        }
     }@else if(comision.error())
     {
         <p class="error">No se pudo cargar la comisión</p>
