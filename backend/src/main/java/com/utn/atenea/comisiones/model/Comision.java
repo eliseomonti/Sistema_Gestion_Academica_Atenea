@@ -67,13 +67,8 @@ public class Comision {
         this.anioLectivo = anioLectivo;
     }
 
-    /**
-     * Como figura en la planilla: el número y los dos últimos dígitos de la cohorte, el año en que
-     * entró el grupo. Por ejemplo, la comisión 1 de 2° año en 2026 es la "1/25".
-     */
     public String getNombre() {
-        int cohorte = anioLectivo - anioCursado + 1;
-        return nroComision + "/" + String.format("%02d", cohorte % 100);
+        return String.valueOf(nroComision);
     }
 
     public List<ComisionMateria> getMaterias() {

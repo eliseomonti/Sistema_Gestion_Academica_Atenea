@@ -105,7 +105,7 @@ class NotasEstudianteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].inscripcionComisionId").value(cursada))
                 .andExpect(jsonPath("$[0].nombreMateria").value("Álgebra de prueba notas"))
-                .andExpect(jsonPath("$[0].nombreComision").value("1/" + String.format("%02d", ANIO % 100)))
+                .andExpect(jsonPath("$[0].nombreComision").value("1"))
                 .andExpect(jsonPath("$[0].anioLectivo").value(ANIO))
                 .andExpect(jsonPath("$[0].evaluaciones[*].nombre").value(
                         contains("Primer parcial", "Recuperatorio primer parcial", "Segundo parcial")))

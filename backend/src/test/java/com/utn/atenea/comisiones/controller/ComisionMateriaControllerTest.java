@@ -149,7 +149,7 @@ class ComisionMateriaControllerTest {
 
         agregar(programacion, null, List.of(), List.of())
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value("Programación II de prueba ya está en la comisión 1/26"));
+                .andExpect(jsonPath("$.detail").value("Programación II de prueba ya está en la comisión 1"));
     }
 
     @Test

@@ -43,6 +43,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ComisionControllerTest {
 
     private static final String URL = "/api/admin/comisiones";
+    /** El alta siempre usa el año actual. */
+    private static final int ANIO = LocalDate.now().getYear();
 
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
@@ -78,45 +80,57 @@ class ComisionControllerTest {
     // --- Alta ---
 
     @Test
-    void altaCreaLaComisionConSuNombreDePlanilla() throws Exception {
-        alta(plan, 2, 1, "MANANA", 2026)
+    void altaCreaLaComision() throws Exception {
+        alta(plan, 2, 1, "MANANA")
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nombre").value("1/25"))
+                .andExpect(jsonPath("$.nroComision").value(1))
                 .andExpect(jsonPath("$.planEstudioId").value(plan))
                 .andExpect(jsonPath("$.anioCursado").value(2))
                 .andExpect(jsonPath("$.turno").value("MANANA"))
+                .andExpect(jsonPath("$.anioLectivo").value(ANIO))
                 .andExpect(jsonPath("$.cantidadMaterias").value(0))
                 .andExpect(jsonPath("$.activa").value(true));
     }
 
     @Test
+    void elAnioLectivoEsSiempreElActualAunqueSeMandeOtro() throws Exception {
+        // Un cliente viejo que todavía manda el año: se ignora.
+        mvc.perform(post(URL).with(admin()).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"planEstudioId": %d, "anioCursado": 1, "nroComision": 1, "turno": "MANANA",
+                         "anioLectivo": 2020}
+                        """.formatted(plan)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.anioLectivo").value(ANIO));
+    }
+
+    @Test
     void elMismoNumeroSePuedeUsarEnOtroAnioDeLaCarrera() throws Exception {
-        alta(plan, 1, 1, "MANANA", 2026).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nombre").value("1/26"));
-        alta(plan, 2, 1, "MANANA", 2026).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nombre").value("1/25"));
+        alta(plan, 1, 1, "MANANA").andExpect(status().isCreated())
+                .andExpect(jsonPath("$.anioCursado").value(1));
+        alta(plan, 2, 1, "MANANA").andExpect(status().isCreated())
+                .andExpect(jsonPath("$.anioCursado").value(2));
     }
 
     @Test
     void numeroRepetidoEnElMismoAnioDevuelve409() throws Exception {
-        alta(plan, 1, 1, "MANANA", 2026).andExpect(status().isCreated());
+        alta(plan, 1, 1, "MANANA").andExpect(status().isCreated());
 
-        alta(plan, 1, 1, "NOCHE", 2026)
+        alta(plan, 1, 1, "NOCHE")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value(
-                        "Ya existe la comisión 1 de 1° año en el plan de estudio " + plan + " para 2026"));
+                        "Ya existe la comisión 1 de 1° año en el plan de estudio " + plan + " para " + ANIO));
     }
 
     @Test
     void planInexistenteDevuelve404() throws Exception {
-        alta(-1L, 1, 1, "MANANA", 2026)
+        alta(-1L, 1, 1, "MANANA")
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("No existe el plan de estudio con id -1"));
     }
 
     @Test
     void anioDeLaCarreraQueElPlanNoTieneDevuelve409() throws Exception {
-        alta(plan, 3, 1, "MANANA", 2026)
+        alta(plan, 3, 1, "MANANA")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value(
                         "El plan de estudio " + plan + " tiene 2 años: no tiene materias de 3° año"));
@@ -124,7 +138,7 @@ class ComisionControllerTest {
 
     @Test
     void planSinMateriasDevuelve409() throws Exception {
-        alta(planSinMaterias, 1, 1, "MANANA", 2026)
+        alta(planSinMaterias, 1, 1, "MANANA")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value(
                         "El plan de estudio " + planSinMaterias + " no tiene materias cargadas"));
@@ -133,7 +147,7 @@ class ComisionControllerTest {
     @Test
     void requestSinTurnoDevuelve400ConElCampo() throws Exception {
         mvc.perform(post(URL).with(admin()).contentType(MediaType.APPLICATION_JSON).content("""
-                        {"planEstudioId": %d, "anioCursado": 1, "nroComision": 1, "anioLectivo": 2026}
+                        {"planEstudioId": %d, "anioCursado": 1, "nroComision": 1}
                         """.formatted(plan)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errores[0].campo").value("turno"));
@@ -143,25 +157,25 @@ class ComisionControllerTest {
 
     @Test
     void modificarCambiaNumeroYTurno() throws Exception {
-        long id = altaId(plan, 1, 1, "MANANA", 2026);
+        long id = altaId(plan, 1, 1, "MANANA");
 
         modificar(id, 7, "NOCHE")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("7/26"))
+                .andExpect(jsonPath("$.nroComision").value(7))
                 .andExpect(jsonPath("$.turno").value("NOCHE"));
     }
 
     @Test
     void modificarConservandoSuPropioNumeroNoChocaConsigoMisma() throws Exception {
-        long id = altaId(plan, 1, 1, "MANANA", 2026);
+        long id = altaId(plan, 1, 1, "MANANA");
 
         modificar(id, 1, "TARDE").andExpect(status().isOk());
     }
 
     @Test
     void modificarAlNumeroDeOtraComisionDevuelve409() throws Exception {
-        altaId(plan, 1, 1, "MANANA", 2026);
-        long otra = altaId(plan, 1, 2, "TARDE", 2026);
+        altaId(plan, 1, 1, "MANANA");
+        long otra = altaId(plan, 1, 2, "TARDE");
 
         modificar(otra, 1, "TARDE")
                 .andExpect(status().isConflict())
@@ -170,7 +184,7 @@ class ComisionControllerTest {
 
     @Test
     void unaComisionDadaDeBajaNoSePuedeModificar() throws Exception {
-        long id = altaId(plan, 1, 1, "MANANA", 2026);
+        long id = altaId(plan, 1, 1, "MANANA");
         mvc.perform(post(URL + "/{id}/baja", id).with(admin())).andExpect(status().isOk());
 
         modificar(id, 2, "MANANA")
@@ -182,7 +196,7 @@ class ComisionControllerTest {
 
     @Test
     void bajaLaDejaInactivaYNoSePuedeRepetir() throws Exception {
-        long id = altaId(plan, 1, 1, "MANANA", 2026);
+        long id = altaId(plan, 1, 1, "MANANA");
 
         mvc.perform(post(URL + "/{id}/baja", id).with(admin()))
                 .andExpect(status().isOk())
@@ -237,28 +251,30 @@ class ComisionControllerTest {
 
     @Test
     void listaLasComisionesDeLaCarreraOrdenadasPorAnioYNumero() throws Exception {
-        altaId(plan, 2, 1, "MANANA", 2026);
-        altaId(plan, 1, 2, "TARDE", 2026);
-        altaId(plan, 1, 1, "MANANA", 2026);
-        altaId(otroPlanDeLaCarrera, 1, 5, "NOCHE", 2026);
-        altaId(planDeOtraCarrera, 1, 1, "MANANA", 2026);
-        altaId(plan, 1, 3, "MANANA", 2025);
+        altaId(plan, 2, 1, "MANANA");
+        altaId(plan, 1, 2, "TARDE");
+        altaId(plan, 1, 1, "MANANA");
+        altaId(otroPlanDeLaCarrera, 1, 5, "NOCHE");
+        altaId(planDeOtraCarrera, 1, 1, "MANANA");
+        // El alta no crea comisiones de años pasados: ésta se guarda directo.
+        comisionRepository.save(new Comision(plan, 1, 3, Turno.MANANA, ANIO - 1));
 
-        listar("carreraId", carreraId, "anioLectivo", 2026)
+        listar("carreraId", carreraId, "anioLectivo", ANIO)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].nombre", contains("1/26", "2/26", "5/26", "1/25")));
+                .andExpect(jsonPath("$[*].nroComision", contains(1, 2, 5, 1)))
+                .andExpect(jsonPath("$[*].anioCursado", contains(1, 1, 1, 2)));
     }
 
     @Test
     void filtraPorPlanAnioDeLaCarreraYTurno() throws Exception {
-        altaId(plan, 1, 1, "MANANA", 2026);
-        altaId(plan, 1, 2, "TARDE", 2026);
-        altaId(plan, 2, 1, "MANANA", 2026);
-        altaId(otroPlanDeLaCarrera, 1, 5, "MANANA", 2026);
+        altaId(plan, 1, 1, "MANANA");
+        altaId(plan, 1, 2, "TARDE");
+        altaId(plan, 2, 1, "MANANA");
+        altaId(otroPlanDeLaCarrera, 1, 5, "MANANA");
 
-        listar("carreraId", carreraId, "anioLectivo", 2026, "planEstudioId", plan, "anioCursado", 1, "turno", "MANANA")
+        listar("carreraId", carreraId, "anioLectivo", ANIO, "planEstudioId", plan, "anioCursado", 1, "turno", "MANANA")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].nombre", contains("1/26")));
+                .andExpect(jsonPath("$[*].nroComision", contains(1)));
     }
 
     @Test
@@ -272,17 +288,15 @@ class ComisionControllerTest {
 
         listar("carreraId", carreraId, "anioLectivo", 2026, "periodoLectivo", "SEGUNDO_CUATRIMESTRE")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].nombre", contains("1/26")))
+                .andExpect(jsonPath("$[*].nroComision", contains(1)))
                 .andExpect(jsonPath("$[0].cantidadMaterias").value(1));
     }
-
     @Test
     void sinAnioLectivoTomaElActualYSinActivaLasActivas() throws Exception {
-        int actual = LocalDate.now().getYear();
-        altaId(plan, 1, 1, "MANANA", actual);
-        long dadaDeBaja = altaId(plan, 1, 2, "MANANA", actual);
+        altaId(plan, 1, 1, "MANANA");
+        long dadaDeBaja = altaId(plan, 1, 2, "MANANA");
         mvc.perform(post(URL + "/{id}/baja", dadaDeBaja).with(admin())).andExpect(status().isOk());
-        altaId(plan, 1, 3, "MANANA", actual - 1);
+        comisionRepository.save(new Comision(plan, 1, 3, Turno.MANANA, ANIO - 1));
 
         listar("carreraId", carreraId)
                 .andExpect(jsonPath("$[*].nroComision", contains(1)));
@@ -324,7 +338,7 @@ class ComisionControllerTest {
 
         mvc.perform(get(URL + "/{id}", comision.getId()).with(admin()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("1/26"))
+                .andExpect(jsonPath("$.nroComision").value(1))
                 // Primero el 1° cuatrimestre.
                 .andExpect(jsonPath("$.materias[*].nombreMateria", contains("Inglés I de prueba", "Programación II de prueba")))
                 .andExpect(jsonPath("$.materias[1].cupoMaximo").value(40))
@@ -348,21 +362,18 @@ class ComisionControllerTest {
 
     // --- Ayudantes ---
 
-    private ResultActions alta(Long planEstudioId, int anioCursado, int nroComision, String turno, int anioLectivo)
-            throws Exception {
+    private ResultActions alta(Long planEstudioId, int anioCursado, int nroComision, String turno) throws Exception {
         return mvc.perform(post(URL).with(admin()).contentType(MediaType.APPLICATION_JSON).content("""
-                {"planEstudioId": %d, "anioCursado": %d, "nroComision": %d, "turno": "%s", "anioLectivo": %d}
-                """.formatted(planEstudioId, anioCursado, nroComision, turno, anioLectivo)));
+                {"planEstudioId": %d, "anioCursado": %d, "nroComision": %d, "turno": "%s"}
+                """.formatted(planEstudioId, anioCursado, nroComision, turno)));
     }
 
-    private long altaId(Long planEstudioId, int anioCursado, int nroComision, String turno, int anioLectivo)
-            throws Exception {
-        String respuesta = alta(planEstudioId, anioCursado, nroComision, turno, anioLectivo)
+    private long altaId(Long planEstudioId, int anioCursado, int nroComision, String turno) throws Exception {
+        String respuesta = alta(planEstudioId, anioCursado, nroComision, turno)
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return JsonPath.<Number>read(respuesta, "$.id").longValue();
     }
-
     private ResultActions modificar(long comisionId, int nroComision, String turno) throws Exception {
         return mvc.perform(put(URL + "/{id}", comisionId).with(admin()).contentType(MediaType.APPLICATION_JSON)
                 .content("""
