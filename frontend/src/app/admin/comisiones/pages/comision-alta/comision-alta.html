@@ -2,7 +2,7 @@
     <h2>Nueva Comision</h2>
     @if(creada())
     {
-        <p class="bien">Se creo la comision {{creada()}}</p>
+        <p class="bien">Se creó la comisión {{creada()}}.</p>
         <button (click)="cerrar()">Listo</button>
     }@else 
     {
@@ -10,8 +10,8 @@
             <label>
                 Año
                 <select [formField]="comisionForm.anioCursado">
-                    <option value="">Eligi una opcion</option>
-                    @for(anio of anios; track anio)
+                    <option value="">Elegí una opción</option>
+                    @for(anio of anios(); track anio)
                     {
                         <option [value]="anio">{{anio}}</option>
                     }
@@ -26,7 +26,7 @@
             <label>
                 Turno
                 <select [formField]="comisionForm.turno">
-                    <option value="">Elegí</option>
+                    <option value="">Elegí un turno</option>
                     @for(turno of turnos; track turno)
                     {
                         <option [value]="turno">{{turno | turno}}</option>
@@ -34,18 +34,15 @@
                 </select>
             </label>
 
-            <label>
-                Año lectivo
-                <input type="number" [formField]="comisionForm.anioLectivo"/>
-            </label>
-
             @if(comisionForm().touched() && comisionForm().invalid())
             {
                 <p class="error">Completa todos los datos</p>
             }
 
-            <button [disabled]="cargando()">Crear</button>
-            <button type="button" (click)="cerrar()">Cancelar</button>
+            <div class="botones">
+                <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+                <button [disabled]="cargando()">Crear</button>
+            </div>
         </form>
     }
 

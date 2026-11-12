@@ -29,6 +29,8 @@ export class ComisionEdicion {
   protected readonly mensaje = signal<string | null>(null)
   protected readonly confirmarBorrado = signal(false)
   protected readonly confirmarBaja = signal(false)
+  // Si se borró, al cerrar se vuelve a la lista: el detalle de esta comisión ya no existe.
+  private readonly borrada = signal(false)
   protected readonly cargando = signal(false)
   protected readonly error = signal<string | null>(null)
 
@@ -88,6 +90,7 @@ export class ComisionEdicion {
     try
     {
       await firstValueFrom(this.api.borrarComision(Number(this.comisionId())));
+      this.borrada.set(true)
       this.mensaje.set('Se borro la comision')
     }catch(error)
     {
@@ -115,7 +118,7 @@ export class ComisionEdicion {
       this.mensaje.set('Se dio de baja la comision')
     }catch(error)
     {
-      this.mensaje.set(mensajeDeError(error))
+      this.error.set(mensajeDeError(error))
     }
 
     this.confirmarBaja.set(false)
@@ -132,7 +135,8 @@ export class ComisionEdicion {
 
   protected volver(): void
   {
-    void this.router.navigate(['..'], { relativeTo: this.ruta });
+    // La ventana está en comisiones/:comisionId/editar: ".." es el detalle y "../.." la lista.
+    void this.router.navigate([this.borrada() ? '../..' : '..'], { relativeTo: this.ruta });
   }
 
 }

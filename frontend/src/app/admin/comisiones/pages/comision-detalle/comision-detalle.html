@@ -1,0 +1,61 @@
+<!-- Arriba están el título del plan y sus pestañas, que los pone PlanDetalle. -->
+<a class="volver" routerLink="..">
+  <app-icono nombre="flecha-izquierda" />
+  Comisiones
+</a>
+
+@if (comision.value(); as datos) {
+  <div class="encabezado">
+    <div>
+      <h2>Comisión {{ datos.nroComision }}</h2>
+      <p class="subtitulo">
+        {{ datos.anioCursado }}° año · {{ datos.turno | turno }} · {{ datos.anioLectivo }}
+      </p>
+      @if (!datos.activa) {
+        <p class="baja">Dada de baja el {{ datos.fechaBaja }}</p>
+      }
+    </div>
+    @if (datos.activa) {
+      <div class="acciones">
+        <a class="accion" routerLink="materias/nueva">Agregar materia</a>
+        <a class="accion" routerLink="editar">Editar</a>
+      </div>
+    }
+  </div>
+
+  <div class="seccion">
+    <h3>Horarios</h3>
+    <label>
+      Cuatrimestre
+      <select [formField]="vistaForm.cuatrimestre">
+        <option value="PRIMER_CUATRIMESTRE">1.er cuatrimestre</option>
+        <option value="SEGUNDO_CUATRIMESTRE">2.º cuatrimestre</option>
+      </select>
+    </label>
+  </div>
+  <app-grilla-horaria
+    [materias]="datos.materias"
+    [cuatrimestre]="vista().cuatrimestre"
+    [turno]="datos.turno"
+  />
+
+  <h3>Materias</h3>
+  @if (datos.materias.length === 0) {
+    <p class="estado">La comisión todavía no tiene materias.</p>
+  } @else {
+    <!-- Una comisión dada de baja no se modifica: sus filas no llevan a editar. -->
+    <app-tabla
+      [columnas]="columnas"
+      [filas]="datos.materias"
+      [enlace]="datos.activa ? enlace : undefined"
+    />
+  }
+} @else if (comision.error()) {
+  <p class="estado error" role="alert">No se pudo cargar la comisión.</p>
+  <button type="button" (click)="comision.reload()">Reintentar</button>
+} @else {
+  <p class="estado">Cargando comisión…</p>
+}
+
+<!-- Al cerrar una ventana se vuelve a pedir la comisión, por si cambió. -->
+<router-outlet (deactivate)="comision.reload()" />

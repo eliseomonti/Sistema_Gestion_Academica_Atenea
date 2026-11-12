@@ -1,4 +1,6 @@
-import { Component, inject, input, numberAttribute, signal } from '@angular/core';
+import { Component, computed, inject, input, numberAttribute, signal } from '@angular/core';
+import { Icono } from '../../../../shared/ui/icono/icono';
+import { CarrerasApi } from '../../../carreras/data/carreras-api';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField } from '@angular/forms/signals';
 import { ComisionResponse } from '../../data/comision';
@@ -12,7 +14,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 
 
 @Component({
-  imports: [FormField,Tabla, Celda,TurnoPipe, RouterLink, RouterOutlet],
+  imports: [FormField, Tabla, Celda, TurnoPipe, RouterLink, RouterOutlet, Icono],
   selector: 'app-comisiones-lista',
   styleUrl: './comisiones-lista.css',
   templateUrl: './comisiones-lista.html',
@@ -20,19 +22,45 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 export class ComisionesLista {
 
   private readonly api = inject(ComisionesAPi);
+  private readonly carrerasApi = inject(CarrerasApi);
   readonly carreraId = input.required({transform: numberAttribute});
   readonly planId = input.required({transform: numberAttribute});
-  protected readonly anios =[1,2,3,4,5,6,7]
   protected readonly turnos: Turno[] = ['MANANA', 'MEDIA_MANANA', 'TARDE', 'NOCHE']
 
+  private readonly materias = rxResource({
+    params: () => ({ carreraId: this.carreraId(), planId: this.planId() }),
+    stream: ({ params }) => this.carrerasApi.listarMaterias(params.carreraId, params.planId),
+  });
+
+  /**
+   * Los años de la carrera. El plan no dice cuántos años dura, así que salen de sus materias:
+   * sólo los años que tienen alguna, ordenados. Igual que en la ventana de alta.
+   */
+  protected readonly anios = computed(() =>
+    [...new Set((this.materias.value() ?? []).map((m) => m.anioCursado))].sort((a, b) => a - b),
+  );
+
+  private readonly anioActual = new Date().getFullYear();
+
   private readonly filtros = signal({
-    anioLectivo: new Date().getFullYear(),
+    anioLectivo: this.anioActual,
     anioCursado: '',
     turno: '',
     estado: 'ACTIVAS',
   });
 
   protected readonly filtrosForm = form(this.filtros)
+
+  /** Algún filtro distinto del de siempre (este año, todos los años y turnos, activas). */
+  protected readonly hayFiltro = computed(() => {
+    const filtros = this.filtros();
+    return (
+      filtros.anioLectivo !== this.anioActual ||
+      filtros.anioCursado !== '' ||
+      filtros.turno !== '' ||
+      filtros.estado !== 'ACTIVAS'
+    );
+  });
 
   protected readonly comisiones = rxResource({
     params: () => ({
@@ -47,10 +75,15 @@ export class ComisionesLista {
   });
 
   protected readonly columnas: Columna<ComisionResponse>[] = [
-    { clave: 'nombre', titulo: 'Comisión', principal: true },
-    { clave: 'anioCursado', titulo: 'Año', valor: (c) => `${c.anioCursado}°`, tituloEnLista: true },
-    { clave: 'turno', titulo: 'Turno' }, 
-    { clave: 'cantidadMaterias', titulo: 'Materias', tituloEnLista: true },
+    { clave: 'nroComision', titulo: 'Comisión', principal: true },
+    { clave: 'anioLectivo', titulo: 'Año lectivo', tituloEnLista: true },
+    {
+      clave: 'anioCursado',
+      titulo: 'Año de la carrera',
+      valor: (c) => `${c.anioCursado}°`,
+      tituloEnLista: true,
+    },
+    { clave: 'turno', titulo: 'Turno' },
   ];
 
   protected readonly enlace = (comision: ComisionResponse) => [comision.id];

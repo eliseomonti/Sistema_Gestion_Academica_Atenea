@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Una materia que se dicta en una comisión activa, con lo que necesita ver quien elige dónde cursarla.
- * nombreComision es el de la planilla ("1/25"); cupoMaximo en null es sin límite. Los horarios vienen
+ * cupoMaximo en null es sin límite. Los horarios vienen
  * por día y hora; los docentes, el titular primero.
  */
 public record MateriaDictada(
