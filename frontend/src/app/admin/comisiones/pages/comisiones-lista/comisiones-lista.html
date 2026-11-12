@@ -1,59 +1,66 @@
+<!-- Contra el borde derecho, como en estudiantes y docentes. -->
 <div class="herramientas">
-    <a class="nuevo" routerLink="nueva">Nueva comisión</a>
+  <a class="nuevo" routerLink="nueva">Nueva comisión</a>
+
+  <!-- popover: el navegador lo abre y lo cierra, y también lo cierra con Esc o al tocar afuera. -->
+  <button
+    type="button"
+    class="boton-filtro"
+    [class.activo]="hayFiltro()"
+    popovertarget="filtros-comisiones"
+    aria-label="Filtros"
+  >
+    <app-icono nombre="filtro" />
+  </button>
+  <!-- Son varios filtros: el panel no se cierra al elegir uno, para poder cambiar otro. -->
+  <div id="filtros-comisiones" class="panel-filtros" popover>
     <label>
-        Año lectivo
-        <input type="number" class="anio" [formField]="filtrosForm.anioLectivo"/>
+      Año lectivo
+      <input type="number" [formField]="filtrosForm.anioLectivo" />
     </label>
 
-    <Label>
-        Año
-        <select [formField]="filtrosForm.anioCursado">
-            <option value="">Todos</option>
-            @for(anio of anios; track anio)
-            {
-                <option [value]="anio">{{anio}}</option>
-            }
-        </select>
-    </Label>
-
-    <label> 
-        Turno
-        <select [formField]="filtrosForm.turno">
-            <option value="">Todos</option>
-        @for(turno of turnos; track turno)
-        {
-            <option [value]="turno">{{turno | turno}}</option>
+    <label>
+      Año de la carrera
+      <select [formField]="filtrosForm.anioCursado">
+        <option value="">Todos</option>
+        @for (anio of anios(); track anio) {
+          <option [value]="anio">{{ anio }}</option>
         }
-        </select>
+      </select>
     </label>
 
     <label>
-        Estado
-        <select [formField]="filtrosForm.estado">
-        <option value="ACTIVAS">Activas</option>
-        <option value="INACTIVAS">Dadas de baja</option>
-        </select>
+      Turno
+      <select [formField]="filtrosForm.turno">
+        <option value="">Todos</option>
+        @for (turno of turnos; track turno) {
+          <option [value]="turno">{{ turno | turno }}</option>
+        }
+      </select>
     </label>
 
+    <label>
+      Estado
+      <select [formField]="filtrosForm.estado">
+        <option value="ACTIVAS">Activas</option>
+        <option value="INACTIVAS">Inactivas</option>
+      </select>
+    </label>
+  </div>
 </div>
 
-@if(comisiones.error())
-{
-    <p class="estadoError" role="alert">No se pudo cargar las comisiones</p>
-}@else if(comisiones.value(); as lista) 
-{
-    @if(lista.length === 0)
-    {
-        <p class="estado">No hay comision con este filtro</p>
-    }@else
-    {
-        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
-        <ng-template appCelda="turno" let-comision>{{comision.turno | turno}}</ng-template>
-        </app-tabla>
-    }
-}@else
-{
-    <p class="estado">Cargando comisiones</p>
+@if (comisiones.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar las comisiones.</p>
+} @else if (comisiones.value(); as lista) {
+  @if (lista.length === 0) {
+    <p class="estado">No hay comisiones con estos filtros.</p>
+  } @else {
+    <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
+      <ng-template appCelda="turno" let-comision>{{ comision.turno | turno }}</ng-template>
+    </app-tabla>
+  }
+} @else {
+  <p class="estado">Cargando comisiones…</p>
 }
 
 <router-outlet (deactivate)="comisiones.reload()" />

@@ -27,6 +27,30 @@ button{
   margin-right: var(--espacio-2);
 }
 
+/* Igual que en "Nuevo docente": Cancelar a la izquierda de la acción principal, contra el borde
+   derecho. Los separa el gap, así que no llevan el margen de los otros botones. */
+.botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-4);
+}
+
+.botones button {
+  margin-right: 0;
+}
+
+/* Cancelar: con borde y sin el fondo azul, para que la otra sea la acción principal. */
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
+}
+
 .bien{
   color: var(--color-ok);
 }

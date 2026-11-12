@@ -3,11 +3,11 @@
 
     @if(mensaje())
     {
-        <p class="bien">Se guardaron los cambios</p>
+        <p class="bien">{{mensaje()}}</p>
         <button type="button" (click)="cerrar()">Listo</button>
     }@else if(comision.value(); as datos)
     {
-        <p>Comisión {{datos.nombre}} · {{datos.anioCursado}}° año</p>
+        <p>Comisión {{datos.nroComision}} · {{datos.anioCursado}}° año</p>
 
         <form [formRoot]="comisionForm">
             <label>
@@ -30,8 +30,10 @@
                 <p class="error">Completa todos los datos</p>
             }
 
-            <button [disabled]="cargando()">Guardar</button>
-            <button type="button" (click)="cerrar()">Cancelar</button>
+            <div class="botones">
+                <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+                <button [disabled]="cargando()">Guardar</button>
+            </div>
         </form>
 
     @if(datos.activa)

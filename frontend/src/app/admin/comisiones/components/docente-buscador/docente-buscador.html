@@ -1,9 +1,17 @@
-<input #texto type="search" placeholder="buscar docente" (input)="buscar.emit(texto.value)">
+<!-- Va adentro de un <form>: Enter no tiene que mandarlo, y los botones son type="button" por lo mismo. -->
+<input
+  #texto
+  type="search"
+  placeholder="buscar docente"
+  aria-label="Buscar docente por apellido, nombre o DNI"
+  (input)="buscar.emit(texto.value)"
+  (keydown.enter)="$event.preventDefault()"
+/>
 <ul>
     @for(docente of opcion(); track docente.personaId)
     {
         <li>
-            <button (click)="elegir.emit(docente)">{{docente.apellido}} {{docente.nombre}} {{docente.dni}}</button>
+            <button type="button" (click)="elegir.emit(docente); texto.value = ''">{{docente.apellido}} {{docente.nombre}} {{docente.dni}}</button>
         </li>
     }
 </ul>
