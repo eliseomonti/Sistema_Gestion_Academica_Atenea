@@ -48,6 +48,7 @@ src/app/
     pipes/
     models/                     Pagina<T> y tipos comunes a varios actores
   login/
+  cuenta/                       la cuenta del usuario logueado, con cualquier rol (/api/cuenta)
   admin/
     admin.routes.ts
     estudiantes/                /api/admin/estudiantes
@@ -104,6 +105,11 @@ Cada `xxx.routes.ts` de actor carga sus features también de forma diferida.
 { path: 'docente', canMatch: [rolGuard('DOCENTE')], loadChildren: () => import('./docente/docente.routes') },
 { path: 'estudiante', canMatch: [rolGuard('ESTUDIANTE')], loadChildren: () => import('./estudiante/estudiante.routes') },
 ```
+
+`cuenta/` es la excepción a la organización por actor: es la misma pantalla para los tres roles
+(datos del usuario y cambio de contraseña), así que va en el primer nivel, como `login/`. Su ruta
+usa `canMatch: [sesionGuard]`, que sólo pide una sesión abierta. Puede usar `core` y `shared`, y
+ningún actor la importa.
 
 ### Reglas de dependencia
 
