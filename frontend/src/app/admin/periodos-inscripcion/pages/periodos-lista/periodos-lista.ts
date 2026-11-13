@@ -58,8 +58,12 @@ export class PeriodosLista {
     {clave: 'fechaCierre', titulo: 'Hasta'},
     
     {clave: 'Habilitada', titulo: 'Estado', valor: (p) => (p.habilitada ? 'Habilitado' : 'Deshabilitado')}
+
+    
   
   ];
+
+  protected readonly enlace = (periodo: PeriodoInscripcionResponse) => [periodo.id];
 
 
 }

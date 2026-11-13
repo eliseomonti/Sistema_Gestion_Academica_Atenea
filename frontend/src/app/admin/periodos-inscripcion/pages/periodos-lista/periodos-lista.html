@@ -25,7 +25,7 @@
         <p class="estado">No hay períodos con este filtro</p>
     }@else
     {
-        <app-tabla [columnas]="columnas" [filas]="lista">
+        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
             <ng-template appCelda="fechaInicio" let-periodo>{{periodo.fechaInicio | date:'dd/MM/yyyy HH:mm'}}</ng-template>
             <ng-template appCelda="fechaCierre" let-periodo>{{periodo.fechaCierre | date:'dd/MM/yyyy HH:mm'}}</ng-template>
         </app-tabla>

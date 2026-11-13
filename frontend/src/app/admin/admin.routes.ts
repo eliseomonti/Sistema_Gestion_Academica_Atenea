@@ -123,6 +123,14 @@ const routes: Routes = [
               ),
             title: 'Nuevo período',
           },
+            {
+            path: ':periodoId',
+            loadComponent: () =>
+              import('./periodos-inscripcion/pages/periodo-edicion/periodo-edicion').then(
+                (m) => m.PeriodoEdicion,
+              ),
+            title: 'Editar periodo',
+          },
         ],
       },
     ],
