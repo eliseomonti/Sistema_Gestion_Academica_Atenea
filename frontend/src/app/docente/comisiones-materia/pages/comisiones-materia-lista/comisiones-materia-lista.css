@@ -1,0 +1,12 @@
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Un horario por línea. */
+.horario {
+  display: block;
+}

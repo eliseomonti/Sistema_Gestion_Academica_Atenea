@@ -1,5 +1,5 @@
 import { Component, inject, input, numberAttribute, signal } from '@angular/core';
-import { PeriodoLectivo } from '../../../carreras/data/carrera';
+import { PeriodoLectivo } from '../../../../shared/models/periodo-lectivo';
 import { PeriodoInscripcionApi } from '../../data/periodos-inscripcion-api';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField } from '@angular/forms/signals';

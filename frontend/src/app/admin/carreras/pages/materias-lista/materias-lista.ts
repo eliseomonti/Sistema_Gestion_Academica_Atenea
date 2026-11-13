@@ -3,7 +3,8 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Celda } from '../../../../shared/ui/tabla/celda';
 import { Columna } from '../../../../shared/ui/tabla/columna';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
-import { PeriodoLectivo, PlanMateriaResponse } from '../../data/carrera';
+import { PeriodoLectivo } from '../../../../shared/models/periodo-lectivo';
+import { PlanMateriaResponse } from '../../data/carrera';
 import { CarrerasApi } from '../../data/carreras-api';
 
 const PERIODOS: Record<PeriodoLectivo, string> = {

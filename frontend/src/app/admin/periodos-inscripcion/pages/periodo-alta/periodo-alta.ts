@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { form, required, min, FormField, FormRoot} from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { TipoPeriodo } from '../../data/periodo-inscripcion';
-import { PeriodoLectivo } from '../../../carreras/data/carrera';
+import { PeriodoLectivo } from '../../../../shared/models/periodo-lectivo';
 import { HttpErrorResponse } from '@angular/common/http';
 
 

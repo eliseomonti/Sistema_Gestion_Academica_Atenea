@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+/* Las pestañas: una fila de links sobre una línea gris. La elegida va en azul y subrayada. */
+.pestanas {
+  display: flex;
+  gap: var(--espacio-4);
+  margin: var(--espacio-4) 0;
+  /* La línea gris es una sombra y no un borde: así el subrayado de la pestaña elegida la tapa. */
+  box-shadow: inset 0 -1px 0 var(--color-divisor);
+  overflow-x: auto; /* en celular, si no entran, se desplazan sin mover la página */
+}
+
+.pestanas a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--espacio-1);
+  border-bottom: 2px solid transparent;
+  color: var(--color-texto-suave);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pestanas a:hover {
+  color: var(--color-texto);
+}
+
+.pestanas a.activa {
+  font-weight: 600;
+  color: var(--color-primario);
+  border-bottom-color: var(--color-primario);
+}

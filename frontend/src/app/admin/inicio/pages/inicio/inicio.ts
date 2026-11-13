@@ -2,6 +2,7 @@ import { Component, computed, inject, ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Sesion } from '../../../../core/seguridad/sesion';
+import { Bienvenida } from '../../../../shared/ui/bienvenida/bienvenida';
 import { Icono, NombreIcono } from '../../../../shared/ui/icono/icono';
 import { CarrerasApi } from '../../../carreras/data/carreras-api';
 import { DocentesApi } from '../../../docentes/data/docentes-api';
@@ -22,7 +23,7 @@ interface Tarjeta {
  */
 @Component({
   selector: 'app-inicio',
-  imports: [RouterLink, Icono],
+  imports: [RouterLink, Bienvenida, Icono],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
@@ -30,15 +31,7 @@ export class Inicio {
   private readonly carrerasApi = inject(CarrerasApi);
   private readonly estudiantesApi = inject(EstudiantesApi);
   private readonly docentesApi = inject(DocentesApi);
-  private readonly sesion = inject(Sesion);
-
-  private readonly hoy = new Date();
-  protected readonly fecha = formatearFecha(this.hoy);
-  protected readonly ciclo = `Ciclo lectivo ${this.hoy.getFullYear()} · ${this.hoy.getMonth() < 7 ? '1' : '2'}.º cuatrimestre`;
-  protected readonly saludo = computed(() => {
-    const nombre = this.sesion.nombre();
-    return nombre ? `${saludoSegunHora(this.hoy)}, ${nombre}` : saludoSegunHora(this.hoy);
-  });
+  protected readonly sesion = inject(Sesion);
 
   /** Las carreras vienen todas juntas (son pocas): se cuentan las activas acá. */
   private readonly carreras = rxResource({ stream: () => this.carrerasApi.listarCarreras() });
@@ -83,19 +76,4 @@ function total<T>(recurso: ResourceRef<T | undefined>, contar: (valor: T) => num
     return contar(recurso.value() as T).toLocaleString('es-AR');
   }
   return recurso.error() ? '—' : '…';
-}
-
-/** 'Jueves 12 de noviembre'. */
-function formatearFecha(fecha: Date): string {
-  const dia = fecha.toLocaleDateString('es-AR', { weekday: 'long' });
-  const mes = fecha.toLocaleDateString('es-AR', { month: 'long' });
-  return `${dia[0].toUpperCase()}${dia.slice(1)} ${fecha.getDate()} de ${mes}`;
-}
-
-function saludoSegunHora(fecha: Date): string {
-  const hora = fecha.getHours();
-  if (hora >= 6 && hora < 12) {
-    return 'Buenos días';
-  }
-  return hora >= 12 && hora < 20 ? 'Buenas tardes' : 'Buenas noches';
 }

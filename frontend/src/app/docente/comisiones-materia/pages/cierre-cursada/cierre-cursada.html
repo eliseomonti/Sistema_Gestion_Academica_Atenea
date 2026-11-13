@@ -1,0 +1,62 @@
+<!-- El link de volver, el título y las pestañas los pone la pantalla de la materia. -->
+<!-- hasValue() primero: al guardar, el acta sigue a la vista mientras llega la nueva. -->
+@if (acta.hasValue()) {
+  @let estudiantes = acta.value().estudiantes;
+  @if (estudiantes.length === 0) {
+    <p class="estado">Todavía no hay estudiantes anotados.</p>
+  } @else {
+    <p class="aviso">
+      Al cerrar la cursada de un estudiante, ya no se le pueden cargar notas de evaluaciones.
+    </p>
+
+    <form [formRoot]="actaForm">
+      <app-tabla [columnas]="columnas" [filas]="estudiantes">
+        <ng-template appCelda="condicion" let-fila>
+          @let campo = actaForm.filas[indices().get(fila.inscripcionComisionId) ?? 0];
+          <select
+            [attr.aria-label]="'Condición de ' + fila.apellido + ', ' + fila.nombre"
+            [formField]="campo.condicion"
+          >
+            <option value="">Sin cerrar</option>
+            @for (condicion of condiciones; track condicion.valor) {
+              <option [value]="condicion.valor">{{ condicion.texto }}</option>
+            }
+          </select>
+          @if (fila.fechaVencimiento) {
+            <span class="vence">Vence el {{ fecha(fila.fechaVencimiento) }}</span>
+          }
+        </ng-template>
+
+        <ng-template appCelda="nota" let-fila>
+          @let campo = actaForm.filas[indices().get(fila.inscripcionComisionId) ?? 0];
+          <input
+            type="number"
+            step="1"
+            inputmode="numeric"
+            [attr.aria-label]="'Nota de cursada de ' + fila.apellido + ', ' + fila.nombre"
+            [formField]="campo.nota"
+          />
+          @if (campo.nota().touched() && campo.nota().invalid()) {
+            <span class="error-campo">{{ campo.nota().errors()[0].message }}</span>
+          }
+        </ng-template>
+      </app-tabla>
+
+      @if (mensaje(); as mensaje) {
+        <p class="bien" role="status">{{ mensaje }}</p>
+      }
+      @if (error(); as error) {
+        <p class="error" role="alert">{{ error }}</p>
+      }
+
+      <div class="botones">
+        <button type="submit" [disabled]="guardando()">Guardar cierre</button>
+      </div>
+    </form>
+  }
+} @else if (acta.error()) {
+  <p class="estado error" role="alert">No se pudo cargar el acta.</p>
+  <button type="button" (click)="acta.reload()">Reintentar</button>
+} @else {
+  <p class="estado">Cargando acta…</p>
+}

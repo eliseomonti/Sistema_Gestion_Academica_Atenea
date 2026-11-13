@@ -28,6 +28,7 @@ export const MENUS: Record<Rol, ItemMenu[]> = {
     { texto: 'Docentes', ruta: '/admin/docentes', icono: 'persona' },
   ],
   DOCENTE: [
+    { texto: 'Inicio', ruta: '/docente', icono: 'casa', exacta: true },
     { texto: 'Mis comisiones', ruta: '/docente/comisiones-materia', icono: 'capas' },
     { texto: 'Exámenes finales', ruta: '/docente/examenes-finales', icono: 'documento' },
   ],

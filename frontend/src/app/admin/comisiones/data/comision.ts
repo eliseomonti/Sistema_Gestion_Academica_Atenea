@@ -1,5 +1,7 @@
 import { Turno } from "../../../shared/models/turno";
-import { PeriodoLectivo } from "../../carreras/data/carrera";
+import { DiaSemana } from "../../../shared/models/dia-semana";
+import { PeriodoLectivo } from "../../../shared/models/periodo-lectivo";
+import { RolDocente } from "../../../shared/models/rol-docente";
 
 
 export interface ComisionResponse{
@@ -46,10 +48,6 @@ export interface ComisionDetalleResponse{
     fechaBaja: string | null;
     materias: ComisionMateriaResponse[];
 }
-
-export type DiaSemana = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO' | 'DOMINGO';
-
-export type RolDocente = 'TITULAR' | 'AYUDANTE';
 
 /** Una materia de la comisión, con sus docentes y horarios: con esto se arma la grilla. */
 export interface ComisionMateriaResponse {

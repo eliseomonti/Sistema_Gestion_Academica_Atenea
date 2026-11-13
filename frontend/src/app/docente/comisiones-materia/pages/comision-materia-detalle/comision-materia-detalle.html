@@ -1,0 +1,15 @@
+<a class="volver" routerLink="/docente/comisiones-materia">
+  <app-icono nombre="flecha-izquierda" />
+  Mis comisiones
+</a>
+
+<!-- Mientras llega la materia, el título dice "Materia". -->
+<h1>{{ materia()?.nombreMateria ?? 'Materia' }}</h1>
+@if (materia(); as materia) {
+  <p class="subtitulo">Comisión {{ materia.nombreComision }} · {{ materia.turno | turno }}</p>
+}
+
+<app-pestanas [pestanas]="pestanas" etiqueta="Secciones de la materia" />
+
+<!-- Acá se muestra la pantalla de la pestaña elegida. -->
+<router-outlet />

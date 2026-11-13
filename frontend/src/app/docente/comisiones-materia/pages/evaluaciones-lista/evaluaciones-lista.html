@@ -1,0 +1,18 @@
+<!-- El link de volver, el título y las pestañas los pone la pantalla de la materia. -->
+<div class="herramientas">
+  <a class="nueva" routerLink="nueva">Nueva evaluación</a>
+</div>
+
+@if (evaluaciones.isLoading()) {
+  <p class="estado">Cargando evaluaciones…</p>
+} @else if (evaluaciones.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar las evaluaciones.</p>
+  <button type="button" (click)="evaluaciones.reload()">Reintentar</button>
+} @else if (evaluaciones.value()?.length === 0) {
+  <p class="estado">Todavía no hay evaluaciones cargadas.</p>
+} @else {
+  <app-tabla [columnas]="columnas" [filas]="evaluaciones.value() ?? []" [enlace]="enlace" />
+}
+
+<!-- La ventana de alta se abre acá, encima de la lista. Al cerrarse, la lista se recarga. -->
+<router-outlet (deactivate)="evaluaciones.reload()" />

@@ -1,0 +1,30 @@
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Contra el borde derecho, como en las listas del admin. */
+.herramientas {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--espacio-3);
+}
+
+.nueva {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: var(--radio);
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-primario);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nueva:hover {
+  background: var(--color-primario-hover);
+}

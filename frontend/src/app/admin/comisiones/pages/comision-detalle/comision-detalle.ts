@@ -6,7 +6,7 @@ import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { Icono } from '../../../../shared/ui/icono/icono';
 import { Columna } from '../../../../shared/ui/tabla/columna';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
-import { PeriodoLectivo } from '../../../carreras/data/carrera';
+import { PeriodoLectivo } from '../../../../shared/models/periodo-lectivo';
 import { Cuatrimestre, GrillaHoraria } from '../../components/grilla-horaria/grilla-horaria';
 import { ComisionMateriaResponse } from '../../data/comision';
 import { ComisionesAPi } from '../../data/comisiones-api';

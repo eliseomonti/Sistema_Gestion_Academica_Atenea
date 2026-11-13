@@ -1,0 +1,11 @@
+<!-- El link de volver, el título y las pestañas los pone la pantalla de la materia. -->
+@if (estudiantes.isLoading()) {
+  <p class="estado">Cargando estudiantes…</p>
+} @else if (estudiantes.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar los estudiantes.</p>
+  <button type="button" (click)="estudiantes.reload()">Reintentar</button>
+} @else if (estudiantes.value()?.length === 0) {
+  <p class="estado">Todavía no hay estudiantes anotados.</p>
+} @else {
+  <app-tabla [columnas]="columnas" [filas]="estudiantes.value() ?? []" />
+}

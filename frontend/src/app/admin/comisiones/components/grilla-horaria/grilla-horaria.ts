@@ -1,7 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 import { Turno } from '../../../../shared/models/turno';
 import { BLOQUES } from '../../data/bloques';
-import { ComisionMateriaResponse, DiaSemana, DocenteAsignadoResponse } from '../../data/comision';
+import { DiaSemana } from '../../../../shared/models/dia-semana';
+import { ComisionMateriaResponse, DocenteAsignadoResponse } from '../../data/comision';
 
 /** El cuatrimestre que muestra la grilla. Las materias anuales aparecen en los dos. */
 export type Cuatrimestre = 'PRIMER_CUATRIMESTRE' | 'SEGUNDO_CUATRIMESTRE';
