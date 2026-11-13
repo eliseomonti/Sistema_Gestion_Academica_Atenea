@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net.">
+  <diagram name="Casos de uso - Administrador" id="c172">
+    <mxGraphModel dx="1625" dy="854" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sis" parent="1" style="rounded=1;arcSize=1;dashed=1;strokeColor=#666666;fontSize=16;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;" value="Sistema Atenea" vertex="1">
+          <mxGeometry height="810" width="760" x="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="c34" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Consultar carreras, planes y materias&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c35" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Registrar estudiante o docente&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="c36" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fdf3e1;strokeColor=#b8862b;strokeWidth=2;fontSize=13;" value="Generar usuario y contraseña temporal" vertex="1">
+          <mxGeometry height="56" width="230" x="800" y="146" as="geometry" />
+        </mxCell>
+        <mxCell id="c37" edge="1" parent="1" source="c35" style="endArrow=open;dashed=1;html=1;endSize=10;" target="c36" value="«include»">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c38" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Buscar persona por DNI y asignar rol&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="c39" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Modificar datos personales&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="298" as="geometry" />
+        </mxCell>
+        <mxCell id="c40" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Dar de baja una persona&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="374" as="geometry" />
+        </mxCell>
+        <mxCell id="c41" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Inscribir persona en un plan y dar de baja la inscripción&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="c42" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Gestionar comisiones&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="526" as="geometry" />
+        </mxCell>
+        <mxCell id="c43" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Asignar materias con cupo, docentes y horarios con aula&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="c44" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fdf3e1;strokeColor=#b8862b;strokeWidth=2;fontSize=13;" value="Validar un único titular por materia&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="230" x="800" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="c45" edge="1" parent="1" source="c43" style="endArrow=open;dashed=1;html=1;endSize=10;" target="c44" value="«include»">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c46" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Gestionar períodos de cursada y turnos de finales&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="678" as="geometry" />
+        </mxCell>
+        <mxCell id="c47" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Crear y reprogramar mesas de final&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="754" as="geometry" />
+        </mxCell>
+        <mxCell id="c48" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontSize=14;strokeWidth=2;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="110" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="c49" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c34" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c50" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c35" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c51" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c38" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c52" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c39" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c53" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c40" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c54" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c41" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c55" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c42" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c56" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c43" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c57" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c46" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c58" edge="1" parent="1" source="c48" style="endArrow=none;html=1;" target="c47" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Simulacro - PrestaYa (Estados)</title>
+<style>
+  @page { size: A4; margin: 18mm 20mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #111; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #999; padding-bottom: 6px; }
+  .head .materia { font-style: italic; font-size: 10pt; }
+  .head .inst { font-weight: bold; font-size: 13pt; }
+  table.datos { width: 100%; border-collapse: collapse; margin: 12px 0 18px; }
+  table.datos td { border: 1px solid #333; padding: 8px; height: 22px; }
+  h1 { text-align: center; font-size: 17pt; text-decoration: underline; margin: 10px 0 14px; }
+  h2 { font-size: 13pt; margin: 18px 0 6px; }
+  h3 { font-size: 12pt; margin: 16px 0 6px; }
+  p { margin: 0 0 9px; text-align: justify; }
+  ul { margin: 4px 0 10px; }
+  li { margin-bottom: 2px; }
+  .puntaje { font-weight: normal; font-size: 10pt; color: #444; }
+  .salto { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="materia">Metodología de Sistemas II<br>Comisión 3 - Simulacro 5</div>
+  <div class="inst">UTN MDP</div>
+</div>
+
+<table class="datos">
+  <tr><td style="width:60%">Nombre:</td><td>Nota:</td></tr>
+</table>
+
+<h1>Examen Parcial (Simulacro)</h1>
+
+<p><b>PrestaYa</b> es una plataforma que permite a estudiantes y docentes pedir prestados equipos (notebooks, proyectores, cámaras y kits de laboratorio) en universidades adheridas.</p>
+
+<p>Cada usuario puede registrarse indicando nombre, legajo, carrera o departamento y correo institucional. Al pedir un equipo, el sistema crea un <b>Préstamo</b>, que contiene el usuario, el equipo, la fecha de retiro, la fecha de devolución pactada y su estado actual.</p>
+
+<p>El sistema verifica que el equipo esté disponible en la fecha pedida. Algunos préstamos requieren autorización del responsable del área, por ejemplo, cuando se trata de equipos de alto valor o préstamos de más de 7 días.</p>
+
+<p>Si el equipo no está disponible, el sistema puede ofrecer otro equipo similar u otra fecha.</p>
+
+<p>Un préstamo aprobado debe retirarse dentro de las 48 horas; si no se retira, se cancela automáticamente. Antes de retirarlo, el usuario puede cancelarlo. Una vez retirado, el préstamo puede renovarse una sola vez, siempre que nadie más haya reservado ese equipo.</p>
+
+<p>Si el equipo no se devuelve en la fecha pactada, el préstamo queda vencido y se aplica una multa por cada día de demora. Al devolver el equipo, un empleado lo revisa: si está en buen estado, el préstamo se finaliza; si tiene daños, se registra el daño y se le cobra la reparación al usuario antes de finalizar.</p>
+
+<p>La multa por demora se calcula de distintas formas según el tipo de usuario: estudiante de grado, estudiante de posgrado o docente. Cada tipo tiene sus propias reglas.</p>
+
+<p>Cada vez que el préstamo cambia de estado, el usuario y el responsable del área deben ser notificados automáticamente.</p>
+
+<p>Para validar que el usuario siga siendo alumno o docente regular, PrestaYa se integra con los sistemas de gestión académica de cada universidad, que tienen sus propios formatos de datos.</p>
+
+<p>PrestaYa registra además todas las operaciones realizadas sobre los préstamos.</p>
+
+<h3>Requerimientos futuros</h3>
+<p>PrestaYa prevé incorporar:</p>
+<ul>
+  <li>nuevos tipos de equipos;</li>
+  <li>nuevos tipos de usuarios (por ejemplo, personal no docente);</li>
+  <li>reservas con anticipación de un cuatrimestre;</li>
+  <li>lockers inteligentes para retiro y devolución.</li>
+</ul>
+
+<h2>Se solicita:</h2>
+
+<h2>1. Diagrama de Estados <span class="puntaje">(3 puntos)</span></h2>
+<p>El <b>Préstamo</b> constituye uno de los objetos centrales de PrestaYa.</p>
+<p>Construya un <b>Diagrama de Estados UML</b> que represente el ciclo de vida de un préstamo desde su solicitud hasta su finalización o cancelación.</p>
+<p>El diagrama deberá contemplar:</p>
+<ul>
+  <li>estados relevantes del préstamo;</li>
+  <li>eventos que produzcan transiciones;</li>
+  <li>condiciones de guarda cuando sean necesarias;</li>
+  <li>acciones asociadas a las transiciones;</li>
+  <li>préstamos que requieren autorización;</li>
+  <li>aprobación y rechazo;</li>
+  <li>cancelación por el usuario y cancelación automática;</li>
+  <li>retiro y renovación;</li>
+  <li>vencimiento y multa;</li>
+  <li>devolución con y sin daños;</li>
+  <li>finalización del préstamo.</li>
+</ul>
+<p>Se deberá representar el comportamiento del <b>Préstamo frente a los diferentes eventos del dominio</b>, y no simplemente enumerar sus posibles estados.</p>
+
+<h2 class="salto">2. Análisis de principios GRASP o SOLID <span class="puntaje">(4 puntos)</span></h2>
+<p>Identifique 4 principios GRASP y/o SOLID cuya aplicación considere relevante en el diseño de PrestaYa.</p>
+<p>Para cada principio explique:</p>
+<p><b>a. Contexto:</b> ¿qué situación concreta de la narrativa justifica su aplicación?</p>
+<p><b>b. Ventajas:</b> ¿qué problema de diseño permite evitar o qué beneficio aporta?</p>
+<p><b>c. Implementación:</b> ¿cómo podría reflejarse conceptualmente en las clases, responsabilidades, métodos o interfaces?</p>
+<p>La elección deberá estar fundamentada en situaciones concretas del sistema.</p>
+
+<h2>3. Patrones de Diseño GoF <span class="puntaje">(3 puntos)</span></h2>
+<p>Identifique 2 situaciones diferentes de PrestaYa donde considere conveniente aplicar un patrón de diseño GoF.</p>
+<p>Para cada patrón:</p>
+<ul>
+  <li>indique su nombre;</li>
+  <li>indique su categoría: <b>Creacional, Estructural o de Comportamiento</b>;</li>
+  <li>explique para qué sirve;</li>
+  <li>describa el problema concreto del sistema que justifica su utilización;</li>
+  <li>explique cómo contribuiría al diseño.</li>
+</ul>
+<p>Se evaluará especialmente la justificación de la elección y su relación con el problema planteado. <b>No se otorgará el puntaje completo por mencionar únicamente el nombre del patrón y su definición.</b></p>
+
+</body>
+</html>

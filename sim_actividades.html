@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Simulacro - AdoptaYa (Actividades)</title>
+<style>
+  @page { size: A4; margin: 18mm 20mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #111; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #999; padding-bottom: 6px; }
+  .head .materia { font-style: italic; font-size: 10pt; }
+  .head .inst { font-weight: bold; font-size: 13pt; }
+  table.datos { width: 100%; border-collapse: collapse; margin: 12px 0 18px; }
+  table.datos td { border: 1px solid #333; padding: 8px; height: 22px; }
+  h1 { text-align: center; font-size: 17pt; text-decoration: underline; margin: 10px 0 14px; }
+  h2 { font-size: 13pt; margin: 18px 0 6px; }
+  h3 { font-size: 12pt; margin: 16px 0 6px; }
+  p { margin: 0 0 9px; text-align: justify; }
+  ul { margin: 4px 0 10px; }
+  li { margin-bottom: 2px; }
+  .puntaje { font-weight: normal; font-size: 10pt; color: #444; }
+  .proceso { text-align: center; font-weight: bold; margin: 6px 0 12px; }
+  .salto { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="materia">Metodología de Sistemas II<br>Comisión 3 - Simulacro 4</div>
+  <div class="inst">UTN MDP</div>
+</div>
+
+<table class="datos">
+  <tr><td style="width:60%">Nombre:</td><td>Nota:</td></tr>
+</table>
+
+<h1>Examen Parcial (Simulacro)</h1>
+
+<p><b>AdoptaYa</b> es una plataforma que permite a personas adoptar mascotas de refugios adheridos.</p>
+
+<p>Cada persona interesada puede registrarse indicando nombre, DNI, dirección, tipo de vivienda y si tiene otras mascotas. Al postularse para adoptar, el sistema crea una <b>Solicitud de Adopción</b>, que contiene el adoptante, la mascota, el voluntario asignado, las evaluaciones realizadas y su estado actual.</p>
+
+<p>El adoptante completa un formulario con sus datos y elige la mascota. El sistema verifica que la mascota siga disponible. Si ya fue reservada por otra persona, el sistema le sugiere al adoptante mascotas similares para que elija otra.</p>
+
+<p>Una vez elegida la mascota, se realizan dos tareas en paralelo: mientras un voluntario del refugio verifica los antecedentes del adoptante, el veterinario realiza un control de salud de la mascota y actualiza sus vacunas. Cuando ambas tareas finalizan, se programa una entrevista con el adoptante.</p>
+
+<p>Después de la entrevista, el coordinador del refugio decide si aprueba la adopción, la rechaza o solicita una visita domiciliaria. Si solicita una visita, un voluntario visita la vivienda y registra un informe, y luego el coordinador vuelve a decidir.</p>
+
+<p>Si la adopción se aprueba, el adoptante firma un contrato de adopción y retira la mascota. La donación al refugio se calcula de distintas formas según el tipo de mascota: perro adulto, cachorro, gato o mascota con necesidades especiales.</p>
+
+<p>Cada vez que la solicitud cambia de estado, el adoptante, el voluntario asignado y el coordinador deben ser notificados automáticamente.</p>
+
+<p>Para verificar antecedentes, AdoptaYa se integra con registros externos de maltrato animal de distintos municipios, que tienen sus propios sistemas y formatos de datos.</p>
+
+<p>Un mes después de la adopción, el sistema envía un recordatorio al adoptante para realizar un seguimiento. AdoptaYa registra además todas las operaciones realizadas sobre las solicitudes.</p>
+
+<h3>Requerimientos futuros</h3>
+<p>AdoptaYa prevé incorporar:</p>
+<ul>
+  <li>nuevos tipos de mascotas;</li>
+  <li>tránsito temporal de mascotas;</li>
+  <li>integración con nuevos municipios;</li>
+  <li>entrevistas por videollamada.</li>
+</ul>
+
+<h2>Se solicita:</h2>
+
+<h2>1. Diagrama de Actividades <span class="puntaje">(3 puntos)</span></h2>
+<p>Modelar mediante un <b>Diagrama de Actividades UML</b> el proceso de:</p>
+<p class="proceso">Postulación, evaluación y aprobación de una adopción.</p>
+<p>El diagrama deberá contemplar:</p>
+<ul>
+  <li>carga del formulario y elección de la mascota;</li>
+  <li>verificación de disponibilidad y sugerencia de mascotas similares;</li>
+  <li>verificación de antecedentes y control veterinario;</li>
+  <li>entrevista con el adoptante;</li>
+  <li>decisión del coordinador: aprobación, rechazo o visita domiciliaria;</li>
+  <li>nueva decisión luego de la visita;</li>
+  <li>firma del contrato y retiro de la mascota;</li>
+  <li>notificación al adoptante;</li>
+  <li>finalización del proceso.</li>
+</ul>
+<p>Deberán representarse correctamente las decisiones, caminos alternativos, condiciones y actividades concurrentes cuando correspondan, indicando los responsables de cada actividad.</p>
+
+<h2 class="salto">2. Análisis de principios GRASP o SOLID <span class="puntaje">(4 puntos)</span></h2>
+<p>Identifique 4 principios GRASP y/o SOLID cuya aplicación considere relevante en el diseño de AdoptaYa.</p>
+<p>Para cada principio explique:</p>
+<p><b>a. Contexto:</b> ¿qué situación concreta de la narrativa justifica su aplicación?</p>
+<p><b>b. Ventajas:</b> ¿qué problema de diseño permite evitar o qué beneficio aporta?</p>
+<p><b>c. Implementación:</b> ¿cómo podría reflejarse conceptualmente en las clases, responsabilidades, métodos o interfaces?</p>
+<p>No alcanza con definir el principio: la elección deberá estar justificada a partir del dominio.</p>
+
+<h2>3. Patrones de Diseño GoF <span class="puntaje">(3 puntos)</span></h2>
+<p>Identifique 2 situaciones diferentes de AdoptaYa donde considere conveniente aplicar un patrón de diseño GoF.</p>
+<p>Para cada patrón:</p>
+<ul>
+  <li>indique su nombre;</li>
+  <li>indique su categoría: <b>Creacional, Estructural o de Comportamiento</b>;</li>
+  <li>explique para qué sirve;</li>
+  <li>describa el problema concreto que resuelve en AdoptaYa;</li>
+  <li>explique cómo contribuiría al diseño.</li>
+</ul>
+<p>Se evaluará especialmente la justificación de la elección y su relación con el problema planteado. <b>No se otorgará el puntaje completo por mencionar únicamente el nombre del patrón y su definición.</b></p>
+
+</body>
+</html>

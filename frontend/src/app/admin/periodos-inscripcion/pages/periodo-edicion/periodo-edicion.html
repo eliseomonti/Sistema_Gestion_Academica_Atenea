@@ -1,0 +1,86 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+    <h2>Editar periodo</h2>
+
+    @if(mensaje())
+    {
+        <p class="bien">{{mensaje()}}</p>
+        <button type="button" (click)="cerrar()">Listo</button>
+    }@else if(periodo.value(); as datos)
+    {
+        <p class="subtitulo">
+            {{datos.tipo === 'CURSADA' ? 'Cursada' : 'Final'}} · Ciclo {{datos.anioLectivo}} · {{datos.habilitada ? 'Habilitado' : 'Deshabilitado'}}
+        </p>
+
+        <form [formRoot]="periodoForm">
+            <label>
+                Desde
+                <input type="datetime-local" [formField]="periodoForm.fechaInicio"/>
+            </label>
+
+            <label>
+                Hasta
+                <input type="datetime-local" [formField]="periodoForm.fechaCierre"/>
+            </label>
+
+            @if(periodoForm().touched() && periodoForm().invalid())
+            {
+                <p class="error">Completa las dos fechas</p>
+            }
+
+            <div class="botones">
+                <button class="guardar" [disabled]="cargando()">Guardar cambios</button>
+                <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+            </div>
+        </form>
+
+        <section class="acciones">
+            <h3>Acciones sobre el periodo</h3>
+
+            @if(borrado())
+            {
+                <app-confirmar-dialog mensaje="Se va a borrar el período, NO se puede deshacer" confirmarTexto="Eliminar" [procesando]="cargando()" (confirmar)="borrar()" (cancelar)="borrado.set(false)" />
+            }@else
+            {
+                <div class="accion">
+                    @if(datos.habilitada)
+                    {
+                        <div>
+                            <p class="accion-titulo">Deshabilitar</p>
+                            <p class="accion-detalle">Los estudiantes no se pueden inscribir, aunque este en fecha</p>
+                        </div>
+                        <button type="button" class="peligro" [disabled]="cargando()" (click)="deshabilitar()">Deshabilitar</button>
+                    }@else
+                    {
+                        <div>
+                            <p class="accion-titulo">Habilitar</p>
+                            <p class="accion-detalle">Los estudiantes se pueden inscribir entre las fechas</p>
+                        </div>
+                        <button type="button" class="secundario" [disabled]="cargando()" (click)="habilitar()">Habilitar</button>
+                    }
+                </div>
+                <div class="accion">
+                    <div>
+                        <p class="accion-titulo">Eliminar</p>
+                        <p class="accion-detalle">Se borra por completo, solo si no tiene inscripciones</p>
+                    </div>
+                    <button type="button" class="peligro" (click)="borrado.set(true)">Eliminar</button>
+                </div>
+            }
+        </section>
+    }@else if(periodo.error())
+    {
+        <p class="error">No se pudo cargar el periodo</p>
+    }@else
+    {
+        <p>Cargando...</p>
+    }
+
+    @if(error())
+    {
+        <p class="error">{{error()}}</p>
+    }
+
+    <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+        <app-icono nombre="cerrar" />
+    </button>
+</dialog>

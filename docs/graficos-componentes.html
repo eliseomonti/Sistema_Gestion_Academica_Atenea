@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gráficos de componentes</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1a1a1a; --muted: #555; --accent: #1a73e8; --line: #ddd; }
+  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--fg); margin: 0; padding: 24px 16px; }
+  main { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.hint { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  section { border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 32px; }
+  h2 { font-size: 16px; margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  button { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  .diagram { overflow-x: auto; background: #fff; }
+  .diagram svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Gráficos de componentes (sección 3.1.3)</h1>
+  <p class="hint">Tocá "Descargar PNG" en cada gráfico y pegá la imagen en el documento.</p>
+
+  <section>
+    <h2>Gráfico Nº4: Backend <button data-target="backend" data-name="grafico-4-backend.png">Descargar PNG</button></h2>
+    <div class="diagram" id="backend"></div>
+  </section>
+
+  <section>
+    <h2>Gráfico Nº5: Frontend <button data-target="frontend" data-name="grafico-5-frontend.png">Descargar PNG</button></h2>
+    <div class="diagram" id="frontend"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+const backend = `flowchart TB
+    FE["Frontend Angular<br/>[Contenedor]"]
+    DB[("Base de datos MySQL<br/>[Contenedor]")]
+
+    subgraph API["Backend API [Spring Boot] - monolito modular por dominio (ADR 0001)"]
+        direction TB
+        SEC["Spring Security<br/>Resource Server OAuth2: valida el JWT<br/>y el rol según el prefijo de la ruta"]
+        subgraph MOD["Módulos (cada uno con controller, service, repository, dto y mapper)"]
+            direction TB
+            INS["inscripciones - nivel 4<br/>períodos, inscripción a comisión y a final,<br/>cupo y situación académica (Java puro)"]
+            EXA["examenes - nivel 3<br/>evaluaciones, notas, cierre de cursada y finales"]
+            COM["comisiones - nivel 2<br/>comisiones, horarios, aulas y docentes"]
+            PER["personas - nivel 1<br/>estudiantes, docentes e inscripción a carrera"]
+            CAR["carreras - nivel 0<br/>carreras, planes y materias"]
+            SEG["seguridad - nivel 0<br/>login, refresh, logout y usuarios"]
+        end
+        COMP["compartido<br/>GlobalExceptionHandler - errores ProblemDetail"]
+        TEST["Spring Modulith<br/>test que verifica las fronteras"]
+    end
+
+    FE -->|"HTTP/JSON + Bearer"| SEC
+    SEC --> MOD
+    INS -->|ExamenesApi| EXA
+    EXA -.->|"puerto Inscriptos<br/>(lo implementa inscripciones)"| INS
+    INS -->|ComisionesApi| COM
+    EXA -->|ComisionesApi| COM
+    COM -->|PersonasApi| PER
+    PER -->|CarrerasApi| CAR
+    PER -->|SeguridadApi| SEG
+    MOD -.-> COMP
+    TEST -.-> MOD
+    MOD -->|"JPA / Hibernate"| DB`;
+
+const frontend = `flowchart TB
+    API["Backend API REST<br/>[Contenedor]"]
+
+    subgraph FE["Frontend [Angular 22] - organizado por actor y feature (ADR 0002)"]
+        direction TB
+        R["app.routes<br/>una ruta por actor, carga diferida"]
+        AD["admin<br/>estudiantes - docentes - personas<br/>carreras - comisiones"]
+        DO["docente"]
+        ES["estudiante"]
+        P["pages<br/>pantallas con ruta,<br/>inyectan los servicios"]
+        C["components<br/>reciben datos por input()"]
+        D["data<br/>xxx-api.ts e interfaces de los DTO"]
+        SH["shared<br/>ui: tabla, paginador, confirmación<br/>pipes - models"]
+        subgraph CORE["core (una sola vez)"]
+            G["seguridad<br/>sesión - rolGuard - interceptor"]
+            L["layout<br/>barra y menú según el rol"]
+        end
+    end
+
+    R -->|"canMatch: rolGuard"| AD
+    R -->|"canMatch: rolGuard"| DO
+    R -->|"canMatch: rolGuard"| ES
+    AD -->|"cada feature tiene"| P
+    DO --> P
+    ES --> P
+    P --> C
+    P --> D
+    C --> SH
+    D -->|"HTTP/JSON"| G
+    G -->|"Bearer + refresh ante 401"| API`;
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  securityLevel: 'loose',
+  flowchart: { htmlLabels: false, curve: 'basis', nodeSpacing: 40, rankSpacing: 50 },
+  themeVariables: {
+    fontFamily: 'Arial', fontSize: '14px',
+    primaryColor: '#8ab4f8', primaryBorderColor: '#4a7fd0', primaryTextColor: '#000000',
+    lineColor: '#333333', clusterBkg: '#eef3fb', clusterBorder: '#4a7fd0',
+    edgeLabelBackground: '#ffffff'
+  }
+});
+
+async function render(id, code) {
+  const { svg } = await mermaid.render(id + '-svg', code);
+  document.getElementById(id).innerHTML = svg;
+}
+
+function download(targetId, fileName) {
+  const svgEl = document.querySelector('#' + targetId + ' svg');
+  const box = svgEl.viewBox.baseVal;
+  const width = box && box.width ? box.width : svgEl.getBoundingClientRect().width;
+  const height = box && box.height ? box.height : svgEl.getBoundingClientRect().height;
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+  clone.removeAttribute('style');
+  const data = new XMLSerializer().serializeToString(clone);
+  const img = new Image();
+  img.onload = () => {
+    const scale = 3;
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0, width, height);
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data);
+}
+
+document.querySelectorAll('button[data-target]').forEach(btn =>
+  btn.addEventListener('click', () => download(btn.dataset.target, btn.dataset.name)));
+
+render('backend', backend).then(() => render('frontend', frontend));
+</script>
+</body>
+</html>

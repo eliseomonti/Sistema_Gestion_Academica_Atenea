@@ -107,6 +107,32 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'periodos',
+        loadComponent: () =>
+          import('./periodos-inscripcion/pages/periodos-lista/periodos-lista').then(
+            (m) => m.PeriodosLista,
+          ),
+        title: 'Períodos de inscripción',
+        children: [
+          {
+            path: 'nuevo',
+            loadComponent: () =>
+              import('./periodos-inscripcion/pages/periodo-alta/periodo-alta').then(
+                (m) => m.PeriodoAlta,
+              ),
+            title: 'Nuevo período',
+          },
+            {
+            path: ':periodoId',
+            loadComponent: () =>
+              import('./periodos-inscripcion/pages/periodo-edicion/periodo-edicion').then(
+                (m) => m.PeriodoEdicion,
+              ),
+            title: 'Editar periodo',
+          },
+        ],
+      },
     ],
   },
   { path: 'carreras', loadChildren: () => import('./carreras/carreras.routes') },

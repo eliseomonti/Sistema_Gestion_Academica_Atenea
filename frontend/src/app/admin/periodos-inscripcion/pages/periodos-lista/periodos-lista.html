@@ -1,0 +1,38 @@
+<div class="herramientas">
+    <a class="nuevo" routerLink="nuevo">Nuevo periodo</a>
+    <label>
+        Año lectivo
+        <input type="number" class="anio" [formField]="filtrosForm.anioLectivo"/>
+    </label>
+
+    <label>
+        Tipo
+        <select [formField]="filtrosForm.tipo">
+            <option value="">Todos</option>
+            <option value="CURSADA">Cursada</option>
+            <option value="FINAL">Final</option>
+        </select>
+    </label>
+</div>
+
+@if(periodos.error())
+{
+    <p class="error">No se pudieron cargar los períodos</p>
+}@else if(periodos.value(); as lista)
+{
+    @if(lista.length === 0)
+    {
+        <p class="estado">No hay períodos con este filtro</p>
+    }@else
+    {
+        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
+            <ng-template appCelda="fechaInicio" let-periodo>{{periodo.fechaInicio | date:'dd/MM/yyyy HH:mm'}}</ng-template>
+            <ng-template appCelda="fechaCierre" let-periodo>{{periodo.fechaCierre | date:'dd/MM/yyyy HH:mm'}}</ng-template>
+        </app-tabla>
+    }
+}@else
+{
+    <p class="estado">Cargando períodos</p>
+}
+
+<router-outlet (deactivate)="periodos.reload()" />

@@ -1,0 +1,62 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+    <h2>Nuevo periodo</h2>
+
+    @if(creado())
+    {
+        <p class="bien">Se creo el periodo</p>
+        <button type="button" (click)="cerrar()">Listo</button>
+    }@else
+    {
+        <form [formRoot]="periodoForm">
+            <label>
+                Tipo
+                <select [formField]="periodoForm.tipo">
+                    <option value="">Elegi</option>
+                    <option value="CURSADA">Cursada</option>
+                    <option value="FINAL">Final</option>
+                </select>
+            </label>
+
+            <label>
+                Año lectivo
+                <input type="number" [formField]="periodoForm.anioLectivo"/>
+            </label>
+
+            @if(periodoForm.tipo().value() === 'CURSADA')
+            {
+                <label>
+                    Cuatrimestre
+                    <select [formField]="periodoForm.periodoLectivo">
+                        <option value="">Elegí</option>
+                        <option value="PRIMER_CUATRIMESTRE">1er cuatrimestre</option>
+                        <option value="SEGUNDO_CUATRIMESTRE">2do cuatrimestre</option>
+                        <option value="ANUAL">Anual</option>
+                    </select>
+                </label>
+            }
+
+            <label>
+                Desde
+                <input type="datetime-local" [formField]="periodoForm.fechaInicio"/>
+            </label>
+
+            <label>
+                Hasta
+                <input type="datetime-local" [formField]="periodoForm.fechaCierre"/>
+            </label>
+
+            @if(periodoForm().touched() && periodoForm().invalid())
+            {
+                <p class="error">Completa todos los datos</p>
+            }
+
+            <button [disabled]="cargando()">Crear</button>
+            <button type="button" (click)="cerrar()">Cancelar</button>
+        </form>
+    }
+
+    @if(error())
+    {
+        <p class="error">{{error()}}</p>
+    }
+</dialog>
