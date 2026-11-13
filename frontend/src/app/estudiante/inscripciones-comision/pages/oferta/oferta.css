@@ -53,3 +53,17 @@ h3{
 .comision .detalle{
   margin: var(--espacio-1) 0 0;
 }
+
+.comision button{
+  margin-top: var(--espacio-2);
+}
+
+.inscripto{
+  margin: var(--espacio-2) 0 0;
+  font-weight: 500;
+  color: var(--color-ok);
+}
+
+.bien{
+  color: var(--color-ok);
+}

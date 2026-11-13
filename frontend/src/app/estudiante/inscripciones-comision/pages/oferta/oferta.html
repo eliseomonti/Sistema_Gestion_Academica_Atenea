@@ -37,6 +37,25 @@
                                 </ul>
                                 <p class="detalle">{{docentes(comision)}}</p>
                                 <p class="detalle">{{cupo(comision)}}</p>
+
+                                 @if(comision.inscripto)
+                                {
+                                    <p class="inscripto">Estás inscripto</p>
+                                }@else
+                                {
+                                    <button type="button"
+                                        [disabled]="inscribiendo() !== null || yaInscriptoEnMateria(materia) || comision.cupoDisponible === 0"
+                                        (click)="inscribir(comision)">
+                                        {{comision.cupoDisponible === 0 ? 'Sin cupo' : 'Inscribirme'}}
+                                    </button>
+                                }
+
+                                @if(aviso()?.ComisionMateriaId === comision.comisionMateriaId)
+                                {
+                                    <p [class.error]="aviso()?.esError" [class.bien]="!aviso()?.esError">{{aviso()?.texto}}</p>
+                                }
+
+
                             </li>
                         }
                     </ul>

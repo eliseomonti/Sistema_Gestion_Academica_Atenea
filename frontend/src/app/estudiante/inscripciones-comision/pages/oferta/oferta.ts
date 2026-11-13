@@ -1,9 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { OfertaComisionResponse, OfertaHorarioResponse, OfertaMateriaResponse, PeriodoLectivo } from '../../data/inscripcion-comision';
 import { InscripcionesComisionApi } from '../../data/inscripciones-comision-api';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { DiaSemana } from '../../../../shared/models/dia-semana';
+import { HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 
 
@@ -34,6 +36,10 @@ export class Oferta {
 
 
   private readonly api = inject(InscripcionesComisionApi);
+  protected readonly inscribiendo = signal<number | null>(null);
+  
+  protected readonly aviso = signal<{ ComisionMateriaId: number; texto: string; esError: boolean} | null>(null);
+
 
   protected readonly oferta = rxResource({
     stream: () => this.api.disponibilidad()
@@ -81,7 +87,46 @@ export class Oferta {
   }
 
 
+  protected yaInscriptoEnMateria(materia: OfertaMateriaResponse): boolean
+  {
+    return materia.comisiones.some((c) => c.inscripto)
+  }
+
+  protected async inscribir(comision: OfertaComisionResponse): Promise<void>
+  {
+    const id = comision.comisionMateriaId;
+    this.aviso.set(null)
+    this.inscribiendo.set(id);
+    try{
+      await firstValueFrom(this.api.inscribirse({comisionMateriaId: id}));
+      this.aviso.set({ComisionMateriaId: id, texto: 'Se inscribio a la comision' + comision.nombreComision, esError: false})
+      this.oferta.reload();
+
+    }catch (error)
+    {
+      this.aviso.set({ComisionMateriaId: id, texto: mensajeDeError(error), esError: true})
+
+      if(error instanceof HttpErrorResponse && error.status === 409)
+      {
+        this.oferta.reload()
+      }
+    }
+    this.inscribiendo.set(null);
+  }
 
 
 
+
+
+
+
+
+}
+
+function mensajeDeError(error: unknown): string
+{
+  if (error instanceof HttpErrorResponse && error.status !== 0 && error.status !== 500) {
+    return error.error?.errores?.[0]?.mensaje ?? error.error?.detail ?? 'Ocurrió un error';
+  }
+  return 'Ocurrió un error';
 }
