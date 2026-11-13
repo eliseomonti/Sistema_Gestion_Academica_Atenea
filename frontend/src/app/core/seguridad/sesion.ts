@@ -1,6 +1,6 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { catchError, finalize, map, Observable, of, shareReplay, throwError } from 'rxjs';
-import { LoginRequest, TokenResponse } from './auth';
+import { CambioPasswordRequest, LoginRequest, TokenResponse } from './auth';
 import { AuthApi } from './auth-api';
 import { Rol } from './rol';
 
@@ -25,7 +25,8 @@ export class Sesion {
 
   readonly accessToken = computed(() => this.datos()?.accessToken ?? null);
   readonly rol = computed(() => this.datos()?.rol ?? null);
-  private readonly roles = computed(() => {
+  /** Todos los roles del usuario, no sólo el de la pantalla de login por la que entró. */
+  readonly roles = computed(() => {
     const token = this.accessToken();
     return token ? leerRoles(token) : [];
   });
@@ -33,6 +34,20 @@ export class Sesion {
   readonly nombre = computed(() => {
     const token = this.accessToken();
     return token ? (leerClaims(token).nombre ?? null) : null;
+  });
+  /** El apellido de la persona logueada (claim `apellido`). */
+  readonly apellido = computed(() => {
+    const token = this.accessToken();
+    return token ? (leerClaims(token).apellido ?? null) : null;
+  });
+  /** 'Laura Gómez'. Vacío con un token de antes de que existieran los claims de nombre. */
+  readonly nombreCompleto = computed(() =>
+    [this.nombre(), this.apellido()].filter(Boolean).join(' '),
+  );
+  /** El nombre de usuario (claim `sub`): el DNI. */
+  readonly usuario = computed(() => {
+    const token = this.accessToken();
+    return token ? (leerClaims(token).sub ?? null) : null;
   });
 
   constructor() {
@@ -99,6 +114,22 @@ export class Sesion {
     return this.refresco;
   }
 
+  /**
+   * Cambia la contraseña del usuario logueado. El backend cierra todas sus sesiones y devuelve
+   * tokens nuevos para esta, que se guardan para que siga abierta. Las otras pestañas los toman
+   * del localStorage, así que también siguen.
+   */
+  cambiarPassword(request: CambioPasswordRequest): Observable<void> {
+    return this.authApi.cambiarPassword(request).pipe(
+      map((tokens) => {
+        const rol = this.rol();
+        if (rol) {
+          this.guardar(tokens, rol);
+        }
+      }),
+    );
+  }
+
   cerrar(): void {
     const actual = this.datos();
     if (actual) {
@@ -137,8 +168,10 @@ function leerGuardada(): DatosSesion | null {
 }
 
 interface Claims {
+  sub?: string;
   roles?: string[];
   nombre?: string;
+  apellido?: string;
 }
 
 /**

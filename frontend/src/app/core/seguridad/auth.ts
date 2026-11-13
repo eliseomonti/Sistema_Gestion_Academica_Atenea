@@ -3,6 +3,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface CambioPasswordRequest {
+  passwordActual: string;
+  passwordNueva: string;
+}
+
 export interface RefreshRequest {
   refreshToken: string;
 }

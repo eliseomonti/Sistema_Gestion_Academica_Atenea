@@ -31,7 +31,11 @@
 
   <app-menu [items]="menu" (elegido)="menuAbierto.set(false)" />
 
-  <button type="button" class="salir" (click)="salir()">Salir</button>
+  <app-usuario
+    [nombre]="nombreCompleto()"
+    (elegido)="menuAbierto.set(false)"
+    (salir)="salir()"
+  />
 </aside>
 
 <main class="contenido">

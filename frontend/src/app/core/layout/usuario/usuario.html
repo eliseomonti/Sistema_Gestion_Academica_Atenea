@@ -1,0 +1,20 @@
+<!-- El nombre y "Mi cuenta" llevan a la cuenta, que lo marca con .activo. -->
+<a
+  class="datos"
+  routerLink="/cuenta"
+  routerLinkActive="activo"
+  ariaCurrentWhenActive="page"
+  (click)="elegido.emit()"
+>
+  <p class="nombre">{{ nombre() }}</p>
+  <p class="detalle">Mi cuenta</p>
+</a>
+<button
+  type="button"
+  class="salir"
+  title="Cerrar sesión"
+  aria-label="Cerrar sesión"
+  (click)="salir.emit()"
+>
+  <app-icono nombre="salir" />
+</button>

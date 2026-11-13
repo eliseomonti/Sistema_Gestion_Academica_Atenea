@@ -49,14 +49,12 @@
 }
 
 /* Botones sobre el azul: sin el fondo del botón primario, que ahí casi no se distingue. */
-.hamburguesa,
-.salir {
+.hamburguesa {
   color: var(--color-texto-sobre-primario);
   background: transparent;
 }
 
-.hamburguesa:hover,
-.salir:hover {
+.hamburguesa:hover {
   background: var(--color-primario-hover);
 }
 
@@ -71,8 +69,7 @@
 /* Sobre el azul de la marca, el foco tiene que ser blanco. */
 .marca:focus-visible,
 .marca-lateral:focus-visible,
-.hamburguesa:focus-visible,
-.salir:focus-visible {
+.hamburguesa:focus-visible {
   outline: 2px solid var(--color-texto-sobre-primario);
   outline-offset: 2px;
 }
@@ -89,7 +86,7 @@
   height: 1.5rem;
 }
 
-/* El menú lateral: azul, con el logo arriba, las opciones y Salir al pie. */
+/* El menú lateral: azul, con el logo arriba, las opciones y el usuario al pie. */
 .lateral {
   display: none; /* en celular, sólo cuando está abierto */
   flex-direction: column;
@@ -107,9 +104,8 @@
   display: none;
 }
 
-.salir {
+app-usuario {
   margin-top: var(--espacio-3);
-  border: 1px solid var(--color-texto-sobre-primario);
 }
 
 .contenido {
@@ -166,7 +162,7 @@
     color: var(--color-texto-sobre-marca-suave);
   }
 
-  .salir {
+  app-usuario {
     margin-top: auto; /* al pie del menú */
   }
 }
