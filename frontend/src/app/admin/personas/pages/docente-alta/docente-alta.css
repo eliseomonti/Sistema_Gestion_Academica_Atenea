@@ -1,7 +1,7 @@
 /* En celular ocupa casi todo el ancho; en pantallas grandes, hasta 28rem. Si no entra de alto,
    se desplaza adentro. */
 .ventana {
-  width: min(100% - 2rem, 28rem);
+  width: min(100% - 2rem, 64rem);
   max-height: calc(100% - 2rem);
   padding: var(--espacio-4);
   border: 1px solid var(--color-divisor);

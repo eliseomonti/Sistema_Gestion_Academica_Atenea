@@ -7,11 +7,12 @@ import { DatosPersonalesRequest, PersonaResponse } from '../../data/persona';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatosPersonalesForm } from '../../components/datos-personales-form/datos-personales-form';
 import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
+import { Icono } from '../../../../shared/ui/icono/icono';
 import { EstudiantesApi } from '../../../estudiantes/data/estudiantes-api';
 import { InscripcionCarreraDetalleResponse } from '../../../estudiantes/data/estudiante';
 
 @Component({
-  imports: [DatosPersonalesForm, ConfirmarDialog],
+  imports: [DatosPersonalesForm, ConfirmarDialog, Icono],
   selector: 'app-persona-edicion',
   styleUrl: './persona-edicion.css',
   templateUrl: './persona-edicion.html',

@@ -6,7 +6,7 @@ label{
 }
 
 .ventana{
-  width: min(100% - 2rem, 28rem);
+  width: min(100% - 2rem, 64rem);
   padding: var(--espacio-4);
   border: 1px solid var(--color-divisor);
   border-radius: var(--radio);
@@ -20,6 +20,7 @@ label{
 
 h2{
   margin-top: 0;
+  padding-right: 2.75rem; /* el lugar de la ✕ */
   font-size: var(--texto-grande);
 }
 
@@ -57,4 +58,25 @@ button{
 
 .error{
   color: var(--color-error);
+}
+
+/* La ✕: sin el fondo azul de los botones, para no competir con la acción principal. */
+.cerrar {
+  position: absolute;
+  top: var(--espacio-2);
+  right: var(--espacio-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px, lo mínimo para tocar con el dedo */
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.cerrar:hover {
+  color: var(--color-texto);
+  background: var(--color-fondo);
 }

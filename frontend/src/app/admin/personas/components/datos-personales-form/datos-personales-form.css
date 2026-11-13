@@ -2,7 +2,17 @@ form {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-3);
-  max-width: 24rem;
+}
+
+/* DNI y legajos, juntos: sin el margen de los párrafos ni el espacio entre campos. */
+.identificacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.identificacion p {
+  margin: 0;
 }
 
 .campo {
@@ -14,4 +24,24 @@ form {
 .error-campo {
   color: var(--color-error);
   font-size: var(--texto-chico);
+}
+
+/* Con Cancelar, Guardar ocupa el ancho que sobra y Cancelar sólo lo que necesita. */
+.botones {
+  display: flex;
+  gap: var(--espacio-2);
+}
+
+.ancho {
+  flex: 1;
+}
+
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
 }

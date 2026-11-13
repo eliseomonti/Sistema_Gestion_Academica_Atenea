@@ -8,9 +8,10 @@ import { Turno } from '../../../../shared/models/turno';
 import { form, required, min, FormRoot, FormField } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
+import { Icono } from '../../../../shared/ui/icono/icono';
 
 @Component({
-  imports: [FormRoot, FormField, TurnoPipe],
+  imports: [FormRoot, FormField, TurnoPipe, Icono],
   selector: 'app-comision-alta',
   styleUrl: './comision-alta.css',
   templateUrl: './comision-alta.html',

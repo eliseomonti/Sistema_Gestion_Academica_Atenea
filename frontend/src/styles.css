@@ -20,6 +20,7 @@
   --color-superficie: #ffffff;
   --color-fondo-marca: var(--color-marca); /* login */
   --color-velo: rgb(31 41 51 / 0.5); /* detrás de una ventana: --color-texto a media opacidad */
+  --color-fondo-marca-claro: #2a4664; /* etiquetas sobre el azul del logo */
 
   /* Bordes */
   --color-borde: #7a8594; /* inputs */
@@ -68,6 +69,16 @@ body {
   line-height: 1.5;
   color: var(--color-texto);
   background: var(--color-fondo);
+}
+
+/* Con una ventana abierta, la página de atrás no se desplaza: la rueda o el dedo sólo mueven la
+   ventana. overscroll-behavior evita que, al llegar al final de la ventana, siga la página. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+dialog {
+  overscroll-behavior: contain;
 }
 
 input,

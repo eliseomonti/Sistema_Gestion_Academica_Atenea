@@ -181,4 +181,10 @@
   @if (error()) {
     <p class="error" role="alert">{{ error() }}</p>
   }
+
+  <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+       al primer campo y no a la ✕. -->
+  <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+    <app-icono nombre="cerrar" />
+  </button>
 </dialog>
