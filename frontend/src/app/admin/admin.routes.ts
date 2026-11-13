@@ -73,6 +73,14 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'periodos',
+        loadComponent: () =>
+          import('./periodos-inscripcion/pages/periodos-lista/periodos-lista').then(
+            (m) => m.PeriodosLista,
+          ),
+        title: 'Períodos de inscripción',
+      },
     ],
   },
   { path: 'carreras', loadChildren: () => import('./carreras/carreras.routes') },
