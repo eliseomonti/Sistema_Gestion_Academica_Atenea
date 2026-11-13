@@ -1,7 +1,6 @@
-export type ModalidadCarrera = 'PRESENCIAL' | 'VIRTUAL';
+import { PeriodoLectivo } from '../../../shared/models/periodo-lectivo';
 
-/** Mitad del año lectivo en que se dicta una materia, no el cuatrimestre de la carrera. */
-export type PeriodoLectivo = 'PRIMER_CUATRIMESTRE' | 'SEGUNDO_CUATRIMESTRE' | 'ANUAL';
+export type ModalidadCarrera = 'PRESENCIAL' | 'VIRTUAL';
 
 /** Igual que `CarreraResponse` del backend. */
 export interface CarreraResponse {

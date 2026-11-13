@@ -31,12 +31,9 @@ import { DocenteListadoResponse } from '../../../docentes/data/docente';
 import { DocentesApi } from '../../../docentes/data/docentes-api';
 import { DocenteBuscador } from '../../components/docente-buscador/docente-buscador';
 import { Bloque, BLOQUES } from '../../data/bloques';
-import {
-  ComisionMateriaResponse,
-  DiaSemana,
-  HorarioRequest,
-  RolDocente,
-} from '../../data/comision';
+import { DiaSemana } from '../../../../shared/models/dia-semana';
+import { RolDocente } from '../../../../shared/models/rol-docente';
+import { ComisionMateriaResponse, HorarioRequest } from '../../data/comision';
 import { ComisionesAPi } from '../../data/comisiones-api';
 
 /** Un docente elegido para la materia. Apellido y nombre son para mostrarlo en la ventana. */

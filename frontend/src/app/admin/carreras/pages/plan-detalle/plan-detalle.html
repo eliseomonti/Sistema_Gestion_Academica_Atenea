@@ -16,13 +16,7 @@
   <p class="subtitulo">{{ nombre }}</p>
 }
 
-<nav class="pestanas" aria-label="Secciones del plan">
-  @for (pestana of pestanas; track pestana.ruta) {
-    <a [routerLink]="pestana.ruta" routerLinkActive="activa" ariaCurrentWhenActive="page">
-      {{ pestana.texto }}
-    </a>
-  }
-</nav>
+<app-pestanas [pestanas]="pestanas" etiqueta="Secciones del plan" />
 
 <!-- Acá se muestra la pantalla de la pestaña elegida. -->
 <router-outlet />

@@ -1,0 +1,7 @@
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}

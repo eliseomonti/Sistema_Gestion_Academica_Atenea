@@ -1,0 +1,84 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+  <h2>Nueva evaluación</h2>
+
+  @if (creada(); as nombre) {
+    <p class="bien">Se creó la evaluación {{ nombre }}.</p>
+    <div class="botones">
+      <button type="button" (click)="cerrar()">Listo</button>
+    </div>
+  } @else {
+    <form [formRoot]="evaluacionForm">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" [formField]="evaluacionForm.nombre" />
+        @if (evaluacionForm.nombre().touched() && evaluacionForm.nombre().invalid()) {
+          <p class="error-campo">{{ evaluacionForm.nombre().errors()[0].message }}</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" [formField]="evaluacionForm.fecha" />
+        @if (evaluacionForm.fecha().touched() && evaluacionForm.fecha().invalid()) {
+          <p class="error-campo">{{ evaluacionForm.fecha().errors()[0].message }}</p>
+        }
+      </div>
+
+      <!-- Sin evaluaciones cargadas no hay nada que recuperar: la casilla no aparece. -->
+      @if (recuperables().length > 0) {
+        <label class="casilla">
+          <input type="checkbox" [formField]="evaluacionForm.recuperatorio" />
+          Es recuperatorio
+        </label>
+      }
+
+      @if (evaluacionForm.recuperatorio().value()) {
+        <div class="campo">
+          <label for="recuperada">Recupera a</label>
+          <select id="recuperada" [formField]="evaluacionForm.evaluacionRecuperadaId">
+            <option value="">Elegí una evaluación</option>
+            @for (evaluacion of recuperables(); track evaluacion.id) {
+              <option [value]="evaluacion.id">{{ evaluacion.nombre }}</option>
+            }
+          </select>
+          @if (
+            evaluacionForm.evaluacionRecuperadaId().touched() &&
+            evaluacionForm.evaluacionRecuperadaId().invalid()
+          ) {
+            <p class="error-campo">
+              {{ evaluacionForm.evaluacionRecuperadaId().errors()[0].message }}
+            </p>
+          }
+        </div>
+      } @else {
+        <div class="campo">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" [formField]="evaluacionForm.tipo">
+            <option value="">Elegí el tipo</option>
+            @for (tipo of tipos; track tipo.valor) {
+              <option [value]="tipo.valor">{{ tipo.texto }}</option>
+            }
+          </select>
+          @if (evaluacionForm.tipo().touched() && evaluacionForm.tipo().invalid()) {
+            <p class="error-campo">{{ evaluacionForm.tipo().errors()[0].message }}</p>
+          }
+        </div>
+      }
+
+      @if (error(); as error) {
+        <p class="error" role="alert">{{ error }}</p>
+      }
+
+      <div class="botones">
+        <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+        <button type="submit" [disabled]="cargando()">Crear</button>
+      </div>
+    </form>
+  }
+
+  <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+       al primer campo y no a la ✕. -->
+  <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+    <app-icono nombre="cerrar" />
+  </button>
+</dialog>

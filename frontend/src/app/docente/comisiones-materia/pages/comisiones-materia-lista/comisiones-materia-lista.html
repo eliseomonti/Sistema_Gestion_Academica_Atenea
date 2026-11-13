@@ -1,0 +1,26 @@
+<h1>Mis comisiones</h1>
+
+@if (materias.isLoading()) {
+  <p class="estado">Cargando materias…</p>
+} @else if (materias.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar tus materias.</p>
+  <button type="button" (click)="materias.reload()">Reintentar</button>
+} @else if (materias.value()?.length === 0) {
+  <p class="estado">No tenés materias asignadas este año.</p>
+} @else {
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="materias.value() ?? []"
+    [agrupar]="grupo"
+    [detalleGrupo]="cantidad"
+    [enlace]="detalle"
+  >
+    <ng-template appCelda="horarios" let-materia>
+      @for (h of materia.horarios; track h.id) {
+        <span class="horario">{{ horario(h) }}</span>
+      } @empty {
+        Sin horarios
+      }
+    </ng-template>
+  </app-tabla>
+}

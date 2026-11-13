@@ -1,0 +1,51 @@
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.aviso {
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio);
+  color: var(--color-alerta);
+  background: var(--color-alerta-fondo);
+}
+
+/* La letra de 1rem evita el zoom de iOS. */
+select,
+input {
+  font-size: var(--texto-base);
+  font-weight: 400;
+}
+
+/* Entra un número de dos cifras. */
+input[type='number'] {
+  width: 5rem;
+}
+
+/* Hasta cuándo dura la regularidad, debajo de la condición. */
+.vence {
+  display: block;
+  font-size: var(--texto-chico);
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+.error-campo {
+  display: block;
+  font-size: var(--texto-chico);
+  font-weight: 400;
+  color: var(--color-error);
+}
+
+.botones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--espacio-3);
+}
+
+.bien {
+  color: var(--color-ok);
+}
+
+.error {
+  color: var(--color-error);
+}

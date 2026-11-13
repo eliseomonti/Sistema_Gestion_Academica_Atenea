@@ -1,4 +1,4 @@
-import { PeriodoLectivo } from "../../carreras/data/carrera";
+import { PeriodoLectivo } from "../../../shared/models/periodo-lectivo";
 
 export type TipoPeriodo = 'CURSADA' | 'FINAL';
 

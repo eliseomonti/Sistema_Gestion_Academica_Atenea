@@ -1,7 +1,8 @@
 import { Component, computed, inject, input, numberAttribute } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { Icono } from '../../../../shared/ui/icono/icono';
+import { Pestana, Pestanas } from '../../../../shared/ui/pestanas/pestanas';
 import { CarrerasApi } from '../../data/carreras-api';
 
 /**
@@ -11,7 +12,7 @@ import { CarrerasApi } from '../../data/carreras-api';
  */
 @Component({
   selector: 'app-plan-detalle',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, Icono],
+  imports: [RouterLink, RouterOutlet, Icono, Pestanas],
   templateUrl: './plan-detalle.html',
   styleUrl: './plan-detalle.css',
 })
@@ -22,7 +23,7 @@ export class PlanDetalle {
   readonly planId = input.required({ transform: numberAttribute });
 
   /** Cada pestaña es una ruta hija: 'materias' → /admin/carreras/:carreraId/planes/:planId/materias. */
-  protected readonly pestanas = [
+  protected readonly pestanas: Pestana[] = [
     { texto: 'Materias', ruta: 'materias' },
     { texto: 'Estudiantes', ruta: 'estudiantes' },
     { texto: 'Comisiones', ruta: 'comisiones'},

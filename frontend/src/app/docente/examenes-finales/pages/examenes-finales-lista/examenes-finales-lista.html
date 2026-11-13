@@ -1,0 +1,12 @@
+<h1>Exámenes finales</h1>
+
+@if (mesas.isLoading()) {
+  <p class="estado">Cargando mesas…</p>
+} @else if (mesas.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar tus mesas.</p>
+  <button type="button" (click)="mesas.reload()">Reintentar</button>
+} @else if (mesas.value()?.length === 0) {
+  <p class="estado">No estás en el tribunal de ninguna mesa este año.</p>
+} @else {
+  <app-tabla [columnas]="columnas" [filas]="mesas.value() ?? []" [enlace]="enlace" />
+}

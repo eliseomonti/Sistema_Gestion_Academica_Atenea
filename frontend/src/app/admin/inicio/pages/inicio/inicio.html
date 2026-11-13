@@ -1,12 +1,4 @@
-<section class="bienvenida">
-  <p class="fecha">{{ fecha }}</p>
-  <p class="saludo">{{ saludo() }}</p>
-  <p class="ciclo">
-    <app-icono nombre="calendario" />
-    {{ ciclo }}
-  </p>
-  <img class="logo-fondo" src="img/atenea-icono-blanco.svg" alt="" />
-</section>
+<app-bienvenida [nombre]="sesion.nombre()" />
 
 <!-- Toda la tarjeta es el link: se puede tocar en cualquier parte. -->
 <ul class="tarjetas">

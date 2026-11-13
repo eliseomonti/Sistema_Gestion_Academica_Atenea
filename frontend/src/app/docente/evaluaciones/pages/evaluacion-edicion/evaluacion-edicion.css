@@ -1,0 +1,125 @@
+.ventana {
+  width: min(100% - 2rem, 32rem);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+.ventana::backdrop {
+  background: var(--color-velo);
+}
+
+h2 {
+  margin-top: 0;
+  padding-right: 2.75rem; /* el lugar de la ✕ */
+  font-size: var(--texto-grande);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.error-campo {
+  margin: 0;
+  font-size: var(--texto-chico);
+  color: var(--color-error);
+}
+
+/* Cancelar a la izquierda de la acción principal, contra el borde derecho. */
+.botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-2);
+}
+
+/* Cancelar: con borde y sin el fondo azul, para que la otra sea la acción principal. */
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
+}
+
+/* Las acciones que no se deshacen, separadas del formulario. */
+.acciones {
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-divisor);
+}
+
+h3 {
+  margin: 0 0 var(--espacio-2);
+  font-size: var(--texto-base);
+}
+
+.accion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+}
+
+.accion-detalle {
+  margin: 0;
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+/* Con borde rojo y sin fondo: avisa sin competir con Guardar. */
+.peligro {
+  flex-shrink: 0;
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  background: var(--color-superficie);
+}
+
+.peligro:hover {
+  background: var(--color-error-fondo);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.bien {
+  color: var(--color-ok);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* La ✕: sin el fondo azul de los botones, para no competir con la acción principal. */
+.cerrar {
+  position: absolute;
+  top: var(--espacio-2);
+  right: var(--espacio-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px, lo mínimo para tocar con el dedo */
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.cerrar:hover {
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}
