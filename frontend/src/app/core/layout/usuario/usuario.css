@@ -1,0 +1,87 @@
+/* Separado de las opciones del menú por una línea, como la marca de arriba. */
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding-top: var(--espacio-3);
+  border-top: 1px solid var(--color-primario-hover);
+}
+
+/* Link a la cuenta. Con el mismo relleno que las opciones del menú (menu.css), el nombre queda
+   alineado con los íconos de arriba. min-width: 0 deja que un nombre largo se corte con "…" en vez
+   de empujar el botón. */
+.datos {
+  position: relative; /* para la barra blanca del estado activo */
+  flex: 1;
+  min-width: 0;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio);
+  color: var(--color-texto-sobre-primario);
+  text-decoration: none;
+}
+
+/* Los tres estados: en reposo sin fondo, al pasar el mouse un azul más claro y en Mi cuenta otro
+   azul más claro con una barra blanca a la izquierda. En los dos últimos, "Mi cuenta" pasa de gris
+   a blanco. */
+.datos:hover {
+  background: var(--color-fondo-marca-hover);
+}
+
+.datos.activo {
+  background: var(--color-fondo-marca-claro);
+}
+
+.datos.activo::before {
+  content: '';
+  position: absolute;
+  top: var(--espacio-2);
+  bottom: var(--espacio-2);
+  left: 0;
+  width: 3px;
+  border-radius: var(--radio);
+  background: var(--color-texto-sobre-primario);
+}
+
+p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nombre {
+  font-weight: 600;
+}
+
+.detalle {
+  font-size: var(--texto-chico);
+  color: var(--color-texto-sobre-marca-suave);
+}
+
+.datos:hover .detalle,
+.datos.activo .detalle {
+  color: var(--color-texto-sobre-primario);
+}
+
+/* Sólo el ícono, sin fondo ni borde. */
+.salir {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.75rem; /* 44px, lo mínimo para tocar con el dedo */
+  padding: 0;
+  color: var(--color-icono-sobre-marca);
+  background: transparent;
+}
+
+.salir:hover {
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-fondo-marca-hover);
+}
+
+/* Sobre el azul, el foco tiene que ser blanco. */
+.datos:focus-visible,
+.salir:focus-visible {
+  outline: 2px solid var(--color-texto-sobre-primario);
+  outline-offset: 2px;
+}

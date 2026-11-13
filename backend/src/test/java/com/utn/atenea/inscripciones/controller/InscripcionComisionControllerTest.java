@@ -90,7 +90,7 @@ class InscripcionComisionControllerTest {
         inscribir(estudiante, programacionEnComision1)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.comisionMateriaId").value(programacionEnComision1))
-                .andExpect(jsonPath("$.nombreComision").value("1/" + String.format("%02d", ANIO % 100)))
+                .andExpect(jsonPath("$.nombreComision").value("1"))
                 .andExpect(jsonPath("$.nombreMateria").value("Programación I de prueba"))
                 .andExpect(jsonPath("$.periodoLectivo").value("PRIMER_CUATRIMESTRE"))
                 .andExpect(jsonPath("$.anioLectivo").value(ANIO))
@@ -159,7 +159,7 @@ class InscripcionComisionControllerTest {
         inscribir(estudiante, programacionEnComision1)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value(
-                        "Ya estás inscripto a esta materia en la comisión 1/" + String.format("%02d", ANIO % 100)));
+                        "Ya estás inscripto a esta materia en la comisión 1"));
     }
 
     @Test
@@ -180,7 +180,7 @@ class InscripcionComisionControllerTest {
         inscribir(estudiante, inglesEnComision1)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value(
-                        "No hay cupo en la comisión 1/" + String.format("%02d", ANIO % 100)));
+                        "No hay cupo en la comisión 1"));
     }
 
     @Test

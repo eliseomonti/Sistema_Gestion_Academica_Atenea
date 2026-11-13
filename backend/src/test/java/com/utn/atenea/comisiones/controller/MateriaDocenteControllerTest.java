@@ -76,7 +76,7 @@ class MateriaDocenteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].comisionMateriaId").value(contains(algebraEsteAnio.intValue())))
                 .andExpect(jsonPath("$[0].nombreMateria").value("Álgebra de prueba materias docente"))
-                .andExpect(jsonPath("$[0].nombreComision").value("1/" + String.format("%02d", ANIO % 100)))
+                .andExpect(jsonPath("$[0].nombreComision").value("1"))
                 .andExpect(jsonPath("$[0].turno").value("MANANA"))
                 .andExpect(jsonPath("$[0].anioLectivo").value(ANIO))
                 .andExpect(jsonPath("$[0].periodoLectivo").value("PRIMER_CUATRIMESTRE"))

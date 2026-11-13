@@ -6,7 +6,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-/** Alta del grupo. Las materias se agregan después, de a una. */
+/**
+ * Alta del grupo. Las materias se agregan después, de a una. El año lectivo no se manda: siempre es
+ * el actual, para que no se creen comisiones de años que ya pasaron.
+ */
 public record AltaComisionRequest(
 
         @NotNull(message = "El plan de estudio es obligatorio")
@@ -22,11 +25,6 @@ public record AltaComisionRequest(
         Integer nroComision,
 
         @NotNull(message = "El turno es obligatorio")
-        Turno turno,
-
-        @NotNull(message = "El año lectivo es obligatorio")
-        @Min(value = 2000, message = "El año lectivo tiene que estar entre 2000 y 2100")
-        @Max(value = 2100, message = "El año lectivo tiene que estar entre 2000 y 2100")
-        Integer anioLectivo
+        Turno turno
 ) {
 }

@@ -5,6 +5,7 @@ import { Rol, rutaInicio, rutaLogin } from '../seguridad/rol';
 import { Sesion } from '../seguridad/sesion';
 import { Menu } from './menu/menu';
 import { MENUS } from './menus';
+import { Usuario } from './usuario/usuario';
 
 /** Nombre del módulo de cada actor, debajo del logo en el menú. */
 const MODULOS: Record<Rol, string> = {
@@ -20,7 +21,7 @@ const MODULOS: Record<Rol, string> = {
  */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, Menu, Icono],
+  imports: [RouterOutlet, RouterLink, Menu, Usuario, Icono],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
   // Escucha los clics en toda la página, no sólo adentro del layout.
@@ -38,6 +39,8 @@ export class Layout {
 
   protected readonly menu = MENUS[this.rol];
   protected readonly modulo = MODULOS[this.rol];
+  /** Al pie del menú, con el link a Mi cuenta. */
+  protected readonly nombreCompleto = this.sesion.nombreCompleto;
   /** A dónde lleva la marca (logo y letras): el inicio del actor, como después del login. */
   protected readonly inicio = rutaInicio(this.rol);
 

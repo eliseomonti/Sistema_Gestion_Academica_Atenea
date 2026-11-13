@@ -48,28 +48,62 @@ const routes: Routes = [
         ],
       },
       {
+        // Sin pantalla propia: agrupa la lista y el detalle, así desde el detalle ".." vuelve a la
+        // lista y desde una ventana del detalle ".." vuelve al detalle.
         path: 'comisiones',
-        loadComponent: () =>
-          import('./comisiones/pages/comisiones-lista/comisiones-lista').then(
-            (m) => m.ComisionesLista,
-          ),
-        title: 'Comisiones del plan',
         children: [
           {
-            path: 'nueva',
+            path: '',
             loadComponent: () =>
-              import('./comisiones/pages/comision-alta/comision-alta').then(
-                (m) => m.ComisionAlta,
+              import('./comisiones/pages/comisiones-lista/comisiones-lista').then(
+                (m) => m.ComisionesLista,
               ),
-            title: 'Nueva comision',
+            title: 'Comisiones del plan',
+            children: [
+              {
+                path: 'nueva',
+                loadComponent: () =>
+                  import('./comisiones/pages/comision-alta/comision-alta').then(
+                    (m) => m.ComisionAlta,
+                  ),
+                title: 'Nueva comision',
+              },
+            ],
           },
           {
             path: ':comisionId',
             loadComponent: () =>
-              import('./comisiones/pages/comision-edicion/comision-edicion').then(
-                (m) => m.ComisionEdicion,
+              import('./comisiones/pages/comision-detalle/comision-detalle').then(
+                (m) => m.ComisionDetalle,
               ),
-            title: 'Editar comision',
+            title: 'Comisión',
+            children: [
+              {
+                path: 'editar',
+                loadComponent: () =>
+                  import('./comisiones/pages/comision-edicion/comision-edicion').then(
+                    (m) => m.ComisionEdicion,
+                  ),
+                title: 'Editar comision',
+              },
+              {
+                path: 'materias/nueva',
+                loadComponent: () =>
+                  import('./comisiones/pages/comision-materia/comision-materia').then(
+                    (m) => m.ComisionMateria,
+                  ),
+                title: 'Agregar materia',
+              },
+              {
+                // Después de 'materias/nueva': si no, "nueva" se tomaría como un id.
+                path: 'materias/:comisionMateriaId',
+                loadComponent: () =>
+                  import('./comisiones/pages/comision-materia/comision-materia').then(
+                    (m) => m.ComisionMateria,
+                  ),
+                title: 'Editar materia',
+              },
+            ],
           },
         ],
       },

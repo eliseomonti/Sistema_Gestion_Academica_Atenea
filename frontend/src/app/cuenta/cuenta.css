@@ -1,0 +1,102 @@
+.tarjeta {
+  max-width: 36rem;
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+h2 {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-grande);
+}
+
+dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: 0;
+}
+
+/* El nombre del dato chico y en gris, y el valor debajo. */
+dt {
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+dd {
+  margin: 0;
+}
+
+form,
+.campo {
+  display: flex;
+  flex-direction: column;
+}
+
+form {
+  gap: var(--espacio-3);
+}
+
+.campo {
+  gap: var(--espacio-1);
+}
+
+/* El ojo va adentro del input, a la derecha, como en el login. */
+.con-boton {
+  position: relative;
+}
+
+.con-boton input {
+  width: 100%;
+  padding-right: 3rem; /* que el texto no quede debajo del botón */
+}
+
+.ver-password {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.75rem; /* 44px, lo mínimo para tocar con el dedo */
+  padding: 0;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.ver-password:hover {
+  color: var(--color-texto);
+  background: transparent;
+}
+
+.ver-password:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: -2px;
+}
+
+.ayuda,
+.error-campo,
+.error,
+.ok {
+  margin: 0;
+  font-size: var(--texto-chico);
+}
+
+.ayuda {
+  color: var(--color-texto-suave);
+}
+
+.error-campo,
+.error {
+  color: var(--color-error);
+}
+
+.ok {
+  color: var(--color-ok);
+}
+
+/* El botón no ocupa todo el ancho del formulario. */
+button[type='submit'] {
+  align-self: flex-start;
+}

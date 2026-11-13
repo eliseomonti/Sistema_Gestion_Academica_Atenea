@@ -1,14 +1,17 @@
 import { HttpErrorResponse} from '@angular/common/http';
-import { afterNextRender, Component, ElementRef, inject, input, numberAttribute, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, input, numberAttribute, signal, viewChild } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { CarrerasApi } from '../../../carreras/data/carreras-api';
 import { ComisionesAPi } from '../../data/comisiones-api';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Turno } from '../../../../shared/models/turno';
 import { form, required, min, FormRoot, FormField } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
+import { Icono } from '../../../../shared/ui/icono/icono';
 
 @Component({
-  imports: [FormRoot, FormField, TurnoPipe],
+  imports: [FormRoot, FormField, TurnoPipe, Icono],
   selector: 'app-comision-alta',
   styleUrl: './comision-alta.css',
   templateUrl: './comision-alta.html',
@@ -16,31 +19,44 @@ import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 export class ComisionAlta {
 
   private readonly api = inject(ComisionesAPi)
+  private readonly carrerasApi = inject(CarrerasApi)
   private readonly router = inject(Router)
   private readonly ruta = inject(ActivatedRoute);
 
   private readonly dialogo = viewChild.required<ElementRef<HTMLDialogElement>>('dialogo')
 
+  readonly carreraId = input.required({transform: numberAttribute})
   readonly planId = input.required({transform: numberAttribute})
-  protected readonly anios = [1,2,3,4,5,6,7]
+
+  private readonly materias = rxResource({
+    params: () => ({ carreraId: this.carreraId(), planId: this.planId() }),
+    stream: ({ params }) => this.carrerasApi.listarMaterias(params.carreraId, params.planId),
+  })
+
+  /**
+   * Los años de la carrera. El plan no dice cuántos años dura, así que salen de sus materias:
+   * sólo los años que tienen alguna, ordenados.
+   */
+  protected readonly anios = computed(() =>
+    [...new Set((this.materias.value() ?? []).map((m) => m.anioCursado))].sort((a, b) => a - b),
+  )
   protected readonly turnos: Turno[] = ['MANANA', 'MEDIA_MANANA', 'TARDE', 'NOCHE']
   protected readonly creada = signal<string | null>(null)
   protected readonly cargando = signal(false)
   protected readonly error = signal<string | null>(null)
 
+  // El año lectivo no se elige ni se manda: el backend usa siempre el actual.
   private readonly datos = signal({
     anioCursado: '',
     nroComision: 1,
     turno: '',
-    anioLectivo: new Date().getFullYear(),
   })
 
   protected readonly comisionForm = form(
     this.datos, (campo) => {
-      required(campo.anioCursado, {message: 'Elegi el año'});
-      required(campo.turno, {message: 'Elegi el turno'});
+      required(campo.anioCursado, {message: 'Elegí el año'});
+      required(campo.turno, {message: 'Elegí el turno'});
       min(campo.nroComision, 1, {message: 'El numero tiene que ser mayor a 0'});
-      min(campo.anioLectivo, 2000, { message: 'Revisá el año lectivo' });
     },
     {
       submission: {
@@ -68,9 +84,9 @@ export class ComisionAlta {
         anioCursado: Number(this.datos().anioCursado),
         nroComision: this.datos().nroComision,
         turno: this.datos().turno as Turno,
-        anioLectivo: this.datos().anioLectivo,
     }))
-    this.creada.set(comision.nombre);
+    // Texto y no número: el @if del HTML pregunta si hay algo creado.
+    this.creada.set(String(comision.nroComision));
   }catch(error)
   {
     this.error.set(mensajeDeError(error))

@@ -1,6 +1,15 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
-import { AltaComisionRequest, ComisionDetalleResponse, ComisionesFiltros, ComisionResponse, ModificacionComisionRequest } from "./comision";
+import {
+    AltaComisionMateriaRequest,
+    AltaComisionRequest,
+    ComisionDetalleResponse,
+    ComisionesFiltros,
+    ComisionMateriaResponse,
+    ComisionResponse,
+    ModificacionComisionMateriaRequest,
+    ModificacionComisionRequest,
+} from "./comision";
 import { Observable } from "rxjs";
 import { API_URL } from "../../../core/http/api-url";
 
@@ -46,5 +55,25 @@ export class ComisionesAPi{
     obtenerComision(comisionId: number): Observable<ComisionDetalleResponse>
     {
         return this.http.get<ComisionDetalleResponse>(`${this.url}/${comisionId}`)
+    }
+
+    // Las materias de la comisión se leen con obtenerComision: estos endpoints sólo las modifican.
+
+    agregarMateria(comisionId: number, request: AltaComisionMateriaRequest): Observable<ComisionMateriaResponse>
+    {
+        return this.http.post<ComisionMateriaResponse>(`${this.url}/${comisionId}/materias`, request);
+    }
+
+    modificarMateria(comisionId: number, comisionMateriaId: number,
+                     request: ModificacionComisionMateriaRequest): Observable<ComisionMateriaResponse>
+    {
+        return this.http.put<ComisionMateriaResponse>(
+            `${this.url}/${comisionId}/materias/${comisionMateriaId}`, request);
+    }
+
+    /** Si la materia ya tiene inscripciones, evaluaciones o encuestas, el backend responde 409. */
+    quitarMateria(comisionId: number, comisionMateriaId: number): Observable<void>
+    {
+        return this.http.delete<void>(`${this.url}/${comisionId}/materias/${comisionMateriaId}`);
     }
 }

@@ -1,0 +1,190 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+  <h2>{{ editando() ? 'Editar materia' : 'Agregar materia' }}</h2>
+
+  @if (mensaje(); as texto) {
+    <p class="bien">{{ texto }}</p>
+    <button type="button" (click)="cerrar()">Listo</button>
+  } @else if (errorAlCargar()) {
+    <p class="error" role="alert">No se pudieron cargar los datos de la comisión.</p>
+    <button type="button" (click)="cerrar()">Cerrar</button>
+  } @else if (cargandoDatos()) {
+    <p class="estado">Cargando…</p>
+  } @else if (editando() && !materiaEditada()) {
+    <p class="error" role="alert">La comisión no tiene esa materia.</p>
+    <button type="button" (click)="cerrar()">Cerrar</button>
+  } @else if (!editando() && opciones().length === 0) {
+    <p class="estado">Ya están todas las materias del año en esta comisión.</p>
+    <button type="button" (click)="cerrar()">Cerrar</button>
+  } @else {
+    <form [formRoot]="materiaForm">
+      @if (materiaEditada(); as materia) {
+        <!-- Al editar, la materia no cambia: para eso se quita y se agrega otra. -->
+        <p class="materia">{{ materia.nombreMateria }}</p>
+      } @else {
+        <label>
+          Materia
+          <select [formField]="materiaForm.materiaId">
+            <option value="">Elegí</option>
+            @for (materia of opciones(); track materia.materiaId) {
+              <option [value]="materia.materiaId">{{ materia.nombre }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <label>
+        Cupo (vacío = sin límite)
+        <input type="number" [formField]="materiaForm.cupoMaximo" />
+      </label>
+
+      <fieldset>
+        <legend>Docentes</legend>
+        @if (materiaForm.docentes().value().length === 0) {
+          <p class="estado">Todavía no hay docentes.</p>
+        } @else {
+          <ul class="elegidos">
+            <!-- Un form de una lista se recorre con @for: cada docente es un campo con su rol. -->
+            @for (docente of materiaForm.docentes; track $index; let i = $index) {
+              <li>
+                <span class="nombre">
+                  {{ docente().value().apellido }}, {{ docente().value().nombre }}
+                </span>
+                <select
+                  [formField]="docente.rol"
+                  [attr.aria-label]="'Rol de ' + docente().value().apellido"
+                >
+                  <option value="TITULAR">Titular</option>
+                  <option value="AYUDANTE">Ayudante</option>
+                </select>
+                <button
+                  type="button"
+                  class="quitar"
+                  [attr.aria-label]="'Quitar a ' + docente().value().apellido"
+                  (click)="quitarDocente(i)"
+                >
+                  <app-icono nombre="cerrar" />
+                </button>
+              </li>
+            }
+          </ul>
+        }
+        <app-docente-buscador
+          [opcion]="opcionesDocentes()"
+          (buscar)="buscarDocente($event)"
+          (elegir)="agregarDocente($event)"
+        />
+      </fieldset>
+
+      <fieldset>
+        <legend>Horarios</legend>
+        @if (aulas.error()) {
+          <p class="error" role="alert">No se pudieron cargar las aulas: sólo se puede elegir virtual.</p>
+        }
+        @for (horario of materiaForm.horarios; track $index; let i = $index) {
+          <div class="horario">
+            <label>
+              Día
+              <select [formField]="horario.diaSemana">
+                <option value="">Elegí</option>
+                @for (dia of dias; track dia.dia) {
+                  <option [value]="dia.dia">{{ dia.nombre }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Bloque
+              <select [formField]="horario.bloque">
+                <option value="">Elegí</option>
+                @for (bloque of bloques(); track bloque.inicio) {
+                  <option [value]="bloque.inicio">{{ bloque.inicio }} a {{ bloque.fin }}</option>
+                }
+                <option [value]="otro">Otro horario…</option>
+              </select>
+            </label>
+            <!-- Las horas a mano, sólo si no sirve ninguno de los bloques del turno. Son de texto
+                 y no type="time": ese muestra AM/PM según el idioma del navegador. -->
+            @if (horario.bloque().value() === otro) {
+              <label>
+                Desde
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="14:00"
+                  autocomplete="off"
+                  [formField]="horario.horaInicio"
+                />
+              </label>
+              <label>
+                Hasta
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="16:00"
+                  autocomplete="off"
+                  [formField]="horario.horaFin"
+                />
+              </label>
+            }
+            <label>
+              Aula
+              <select [formField]="horario.aulaId">
+                <option value="">Virtual</option>
+                @for (aula of aulas.value() ?? []; track aula.id) {
+                  <option [value]="aula.id">{{ aula.nombre }}</option>
+                }
+              </select>
+            </label>
+            <button
+              type="button"
+              class="quitar"
+              [attr.aria-label]="'Quitar el horario ' + (i + 1)"
+              (click)="quitarHorario(i)"
+            >
+              <app-icono nombre="cerrar" />
+            </button>
+          </div>
+        } @empty {
+          <p class="estado">Todavía no hay horarios.</p>
+        }
+        <button type="button" class="agregar-horario" (click)="agregarHorario()">
+          Agregar horario
+        </button>
+      </fieldset>
+
+      @if (materiaForm().touched() && materiaForm().invalid()) {
+        <p class="error">Revisá la materia, el cupo y el día y el horario de cada fila.</p>
+      }
+
+      <div class="botones">
+        <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+        <button [disabled]="cargando()">{{ editando() ? 'Guardar' : 'Agregar' }}</button>
+      </div>
+    </form>
+
+    @if (editando()) {
+      @if (confirmarQuitar()) {
+        <app-confirmar-dialog
+          mensaje="Se va a quitar la materia de la comisión, con sus docentes y horarios."
+          confirmarTexto="Quitar"
+          [procesando]="cargando()"
+          (confirmar)="quitar()"
+          (cancelar)="confirmarQuitar.set(false)"
+        />
+      } @else {
+        <button type="button" class="baja" (click)="confirmarQuitar.set(true)">
+          Quitar materia
+        </button>
+      }
+    }
+  }
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+       al primer campo y no a la ✕. -->
+  <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+    <app-icono nombre="cerrar" />
+  </button>
+</dialog>

@@ -3,11 +3,11 @@
 
     @if(mensaje())
     {
-        <p class="bien">Se guardaron los cambios</p>
+        <p class="bien">{{mensaje()}}</p>
         <button type="button" (click)="cerrar()">Listo</button>
     }@else if(comision.value(); as datos)
     {
-        <p>Comisión {{datos.nombre}} · {{datos.anioCursado}}° año</p>
+        <p class="subtitulo">Comisión {{datos.nroComision}} · {{ordinal(datos.anioCursado)}} año · Ciclo {{datos.anioLectivo}}</p>
 
         <form [formRoot]="comisionForm">
             <label>
@@ -30,23 +30,41 @@
                 <p class="error">Completa todos los datos</p>
             }
 
-            <button [disabled]="cargando()">Guardar</button>
-            <button type="button" (click)="cerrar()">Cancelar</button>
+            <div class="botones">
+                <button class="guardar" [disabled]="cargando()">Guardar cambios</button>
+                <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+            </div>
         </form>
 
-    @if(datos.activa)
-    {
-        @if(confirmarBorrado())
+        @if(datos.activa)
         {
-            <app-confirmar-dialog mensaje="Se va a borrar la comision, NO se puede deshacer" confirmarTexto="Borrar" [procesando]="cargando()" (confirmar)="borrar()" (cancelar)="confirmarBorrado.set(false)" />
-            }@else if(confirmarBaja())
-            {
-                <app-confirmar-dialog mensaje="La comision queda guardada pero ya no se usa" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBaja()" (cancelar)="confirmarBaja.set(false)" />
-            }@else
-            {
-                <button type="button" class="baja" (click)="confirmarBorrado.set(true)">Borrar</button>
-                <button type="button" class="baja" (click)="confirmarBaja.set(true)">Dar de baja</button>
-            }
+            <section class="acciones">
+                <h3>Acciones sobre la comisión</h3>
+
+                @if(confirmarBorrado())
+                {
+                    <app-confirmar-dialog mensaje="Se va a borrar la comision, NO se puede deshacer" confirmarTexto="Eliminar" [procesando]="cargando()" (confirmar)="borrar()" (cancelar)="confirmarBorrado.set(false)" />
+                }@else if(confirmarBaja())
+                {
+                    <app-confirmar-dialog mensaje="La comision queda guardada pero ya no se usa" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBaja()" (cancelar)="confirmarBaja.set(false)" />
+                }@else
+                {
+                    <div class="accion">
+                        <div>
+                            <p class="accion-titulo">Dar de baja</p>
+                            <p class="accion-detalle">Deja de ofrecerse, pero se conserva el historial.</p>
+                        </div>
+                        <button type="button" class="peligro" (click)="confirmarBaja.set(true)">Dar de baja</button>
+                    </div>
+                    <div class="accion">
+                        <div>
+                            <p class="accion-titulo">Eliminar</p>
+                            <p class="accion-detalle">Se borra por completo. Solo si no tiene inscriptos.</p>
+                        </div>
+                        <button type="button" class="peligro" (click)="confirmarBorrado.set(true)">Eliminar</button>
+                    </div>
+                }
+            </section>
         }
     }@else if(comision.error())
     {
@@ -60,4 +78,10 @@
     {
         <p class="error">{{error()}}</p>
     }
+
+    <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+         al primer campo y no a la ✕. -->
+    <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+        <app-icono nombre="cerrar" />
+    </button>
 </dialog>

@@ -8,10 +8,11 @@ import { form, FormField, FormRoot, min, required } from '@angular/forms/signals
 import { firstValueFrom } from 'rxjs';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
+import { Icono } from '../../../../shared/ui/icono/icono';
 
 
 @Component({
-  imports: [FormRoot, FormField, TurnoPipe,ConfirmarDialog],
+  imports: [FormRoot, FormField, TurnoPipe, ConfirmarDialog, Icono],
   selector: 'app-comision-edicion',
   styleUrl: './comision-edicion.css',
   templateUrl: './comision-edicion.html',
@@ -29,6 +30,8 @@ export class ComisionEdicion {
   protected readonly mensaje = signal<string | null>(null)
   protected readonly confirmarBorrado = signal(false)
   protected readonly confirmarBaja = signal(false)
+  // Si se borró, al cerrar se vuelve a la lista: el detalle de esta comisión ya no existe.
+  private readonly borrada = signal(false)
   protected readonly cargando = signal(false)
   protected readonly error = signal<string | null>(null)
 
@@ -88,6 +91,7 @@ export class ComisionEdicion {
     try
     {
       await firstValueFrom(this.api.borrarComision(Number(this.comisionId())));
+      this.borrada.set(true)
       this.mensaje.set('Se borro la comision')
     }catch(error)
     {
@@ -115,7 +119,7 @@ export class ComisionEdicion {
       this.mensaje.set('Se dio de baja la comision')
     }catch(error)
     {
-      this.mensaje.set(mensajeDeError(error))
+      this.error.set(mensajeDeError(error))
     }
 
     this.confirmarBaja.set(false)
@@ -125,6 +129,12 @@ export class ComisionEdicion {
 
 
 
+  /** "1.er", "2.º", "3.er"...: así se abrevian los ordinales en castellano. */
+  protected ordinal(numero: number): string
+  {
+    return numero === 1 || numero === 3 ? `${numero}.er` : `${numero}.º`;
+  }
+
   protected cerrar(): void
   {
     this.dialogo().nativeElement.close();
@@ -132,7 +142,8 @@ export class ComisionEdicion {
 
   protected volver(): void
   {
-    void this.router.navigate(['..'], { relativeTo: this.ruta });
+    // La ventana está en comisiones/:comisionId/editar: ".." es el detalle y "../.." la lista.
+    void this.router.navigate([this.borrada() ? '../..' : '..'], { relativeTo: this.ruta });
   }
 
 }

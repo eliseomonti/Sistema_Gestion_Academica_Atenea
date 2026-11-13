@@ -1,0 +1,111 @@
+<h1>Mi cuenta</h1>
+
+<section class="tarjeta">
+  <h2>Datos</h2>
+  <dl>
+    <div>
+      <dt>Nombre</dt>
+      <dd>{{ nombre() }}</dd>
+    </div>
+    <div>
+      <dt>Usuario</dt>
+      <dd>{{ usuario() }}</dd>
+    </div>
+    <div>
+      <dt>Roles</dt>
+      <dd>{{ roles() }}</dd>
+    </div>
+  </dl>
+</section>
+
+<section class="tarjeta">
+  <h2>Cambiar contraseña</h2>
+
+  <form [formRoot]="passwordForm">
+    <div class="campo">
+      <label for="password-actual">Contraseña actual</label>
+      <div class="con-boton">
+        <input
+          id="password-actual"
+          [type]="mostrarActual() ? 'text' : 'password'"
+          autocomplete="current-password"
+          [formField]="passwordForm.passwordActual"
+        />
+        <button
+          type="button"
+          class="ver-password"
+          [attr.aria-label]="mostrarActual() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          [attr.aria-pressed]="mostrarActual()"
+          (click)="mostrarActual.set(!mostrarActual())"
+        >
+          <app-icono [nombre]="mostrarActual() ? 'ojo' : 'ojo-tachado'" />
+        </button>
+      </div>
+      @if (passwordForm.passwordActual().touched() && passwordForm.passwordActual().invalid()) {
+        <p class="error-campo">{{ passwordForm.passwordActual().errors()[0].message }}</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="password-nueva">Contraseña nueva</label>
+      <div class="con-boton">
+        <input
+          id="password-nueva"
+          [type]="mostrarNueva() ? 'text' : 'password'"
+          autocomplete="new-password"
+          aria-describedby="ayuda-nueva"
+          [formField]="passwordForm.passwordNueva"
+        />
+        <button
+          type="button"
+          class="ver-password"
+          [attr.aria-label]="mostrarNueva() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          [attr.aria-pressed]="mostrarNueva()"
+          (click)="mostrarNueva.set(!mostrarNueva())"
+        >
+          <app-icono [nombre]="mostrarNueva() ? 'ojo' : 'ojo-tachado'" />
+        </button>
+      </div>
+      @if (passwordForm.passwordNueva().touched() && passwordForm.passwordNueva().invalid()) {
+        <p class="error-campo">{{ passwordForm.passwordNueva().errors()[0].message }}</p>
+      } @else {
+        <p id="ayuda-nueva" class="ayuda">Al menos {{ largoMinimo }} caracteres.</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="confirmacion">Repetí la contraseña nueva</label>
+      <div class="con-boton">
+        <input
+          id="confirmacion"
+          [type]="mostrarConfirmacion() ? 'text' : 'password'"
+          autocomplete="new-password"
+          [formField]="passwordForm.confirmacion"
+        />
+        <button
+          type="button"
+          class="ver-password"
+          [attr.aria-label]="mostrarConfirmacion() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          [attr.aria-pressed]="mostrarConfirmacion()"
+          (click)="mostrarConfirmacion.set(!mostrarConfirmacion())"
+        >
+          <app-icono [nombre]="mostrarConfirmacion() ? 'ojo' : 'ojo-tachado'" />
+        </button>
+      </div>
+      @if (passwordForm.confirmacion().touched() && passwordForm.confirmacion().invalid()) {
+        <p class="error-campo">{{ passwordForm.confirmacion().errors()[0].message }}</p>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    @if (cambiada()) {
+      <p class="ok" role="status">
+        Cambiaste tu contraseña. Se cerró la sesión en los otros dispositivos.
+      </p>
+    }
+
+    <button type="submit" [disabled]="passwordForm().submitting()">Cambiar contraseña</button>
+  </form>
+</section>

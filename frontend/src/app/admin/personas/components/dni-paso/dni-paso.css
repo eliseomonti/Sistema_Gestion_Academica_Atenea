@@ -2,7 +2,6 @@ form {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-2);
-  max-width: 24rem;
 }
 
 .error-campo {

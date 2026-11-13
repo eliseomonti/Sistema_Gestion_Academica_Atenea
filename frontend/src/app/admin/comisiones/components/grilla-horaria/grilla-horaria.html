@@ -1,0 +1,41 @@
+<!-- La grilla se muestra siempre, con sus bloques vacíos. El aviso es sobre todo para celular,
+     donde sin clases no se vería nada. -->
+@if (clases().length === 0) {
+  <p class="estado">No hay horarios cargados para este cuatrimestre.</p>
+}
+
+<div class="grilla" [style.--dias]="dias().length">
+  <span class="esquina" style="--columna: 1; --fila: 1">Hora</span>
+  @for (franja of franjas(); track franja; let fila = $index) {
+    <span class="hora" style="--columna: 1" [style.--fila]="fila + 2">{{ franja }}</span>
+  }
+
+  @for (dia of dias(); track dia.dia; let columna = $index) {
+    <span
+      class="dia"
+      [class.sin-clases]="dia.vacio"
+      style="--fila: 1"
+      [style.--columna]="columna + 2"
+    >
+      {{ dia.nombre }}
+    </span>
+
+    @for (clase of dia.celdas; track $index; let fila = $index) {
+      @if (clase) {
+        <div class="clase" [style.--columna]="columna + 2" [style.--fila]="fila + 2">
+          <span class="horas">{{ clase.horas }}</span>
+          <span class="materia">{{ clase.materia }}</span>
+          @if (clase.titular) {
+            <span>{{ clase.titular }}</span>
+          }
+          @if (clase.ayudantes) {
+            <span class="suave">{{ clase.ayudantes }}</span>
+          }
+          <span class="aula">{{ clase.aula }}</span>
+        </div>
+      } @else {
+        <div class="libre" [style.--columna]="columna + 2" [style.--fila]="fila + 2"></div>
+      }
+    }
+  }
+</div>

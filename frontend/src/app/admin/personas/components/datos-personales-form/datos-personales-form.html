@@ -1,5 +1,14 @@
 <form [formRoot]="personaForm">
-  <p>DNI: {{ dni() }}</p>
+  <div class="identificacion">
+    <p>DNI: {{ dni() }}</p>
+    <!-- Sólo en la edición: en el alta todavía no hay legajo. Una persona puede tener los dos. -->
+    @if (legajoEstudiante() !== null) {
+      <p>Legajo de estudiante: {{ legajoEstudiante() }}</p>
+    }
+    @if (legajoDocente() !== null) {
+      <p>Legajo docente: {{ legajoDocente() }}</p>
+    }
+  </div>
 
   <div class="campo">
     <label for="nombre">Nombre</label>
@@ -42,5 +51,10 @@
     }
   </div>
 
-  <button type="submit" [disabled]="guardando()">Guardar</button>
+  <div class="botones">
+    <button type="submit" [class.ancho]="conCancelar()" [disabled]="guardando()">{{ textoGuardar() }}</button>
+    @if (conCancelar()) {
+      <button type="button" class="secundario" (click)="cancelar.emit()">Cancelar</button>
+    }
+  </div>
 </form>

@@ -84,18 +84,21 @@ public class ComisionService {
         return comisionMapper.toDetalleResponse(comision, materias);
     }
 
-    /** Un plan discontinuado también admite comisiones: sus estudiantes siguen cursando. */
+    /**
+     * Un plan discontinuado también admite comisiones: sus estudiantes siguen cursando. El año
+     * lectivo es siempre el actual: no se crean comisiones de años que ya pasaron.
+     */
     @Transactional
     public ComisionResponse alta(AltaComisionRequest request) {
         if (carrerasApi.buscarPlan(request.planEstudioId()).isEmpty()) {
             throw new RecursoNoEncontradoException("No existe el plan de estudio con id " + request.planEstudioId());
         }
+        int anioLectivo = LocalDate.now().getYear();
         validarAnioCursado(request.planEstudioId(), request.anioCursado());
-        validarNumeroLibre(request.planEstudioId(), request.anioCursado(), request.nroComision(),
-                request.anioLectivo(), null);
+        validarNumeroLibre(request.planEstudioId(), request.anioCursado(), request.nroComision(), anioLectivo, null);
 
         Comision comision = comisionRepository.save(new Comision(request.planEstudioId(), request.anioCursado(),
-                request.nroComision(), request.turno(), request.anioLectivo()));
+                request.nroComision(), request.turno(), anioLectivo));
         return comisionMapper.toResponse(comision);
     }
 

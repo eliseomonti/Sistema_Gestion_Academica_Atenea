@@ -1,0 +1,176 @@
+label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+select {
+  background: var(--color-superficie);
+}
+
+/* Más ancha que las otras ventanas, para que una fila de horario entre en una línea. */
+.ventana {
+  width: min(100% - 2rem, 40rem);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+.ventana::backdrop {
+  background: var(--color-velo);
+}
+
+h2 {
+  margin-top: 0;
+  padding-right: 2.75rem; /* el lugar de la ✕ */
+  font-size: var(--texto-grande);
+}
+
+button {
+  margin-right: var(--espacio-2);
+}
+
+fieldset {
+  margin: 0 0 var(--espacio-3);
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+}
+
+legend {
+  padding: 0 var(--espacio-1);
+  font-weight: 500;
+}
+
+/* Cada docente elegido: el nombre, su rol y el botón para quitarlo, en una fila. */
+.elegidos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-3);
+  padding: 0;
+  list-style: none;
+}
+
+.elegidos li {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.nombre {
+  flex: 1;
+}
+
+.quitar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  margin: 0;
+  padding: 0;
+  color: var(--color-texto-suave);
+  background: none;
+}
+
+.quitar:hover {
+  color: var(--color-error);
+  background: none;
+}
+
+/* Una fila por horario. Si no entra, los campos bajan solos; la ✕ queda siempre al final. */
+.horario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}
+
+.horario label {
+  flex: 1 1 6.5rem;
+  margin-bottom: 0;
+}
+
+/* Agregar horario: azul con borde, para que no compita con el botón de guardar. */
+.agregar-horario {
+  color: var(--color-primario);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-primario);
+}
+
+.agregar-horario:hover {
+  background: var(--color-primario-claro);
+}
+
+/* Igual que en "Nuevo docente": Cancelar a la izquierda de la acción principal, contra el borde
+   derecho. Los separa el gap, así que no llevan el margen de los otros botones. */
+.botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-4);
+}
+
+.botones button {
+  margin-right: 0;
+}
+
+/* Cancelar: con borde y sin el fondo azul, para que la otra sea la acción principal. */
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
+}
+
+.estado {
+  margin-top: 0;
+  color: var(--color-texto-suave);
+}
+
+/* Al editar, el nombre de la materia en lugar del desplegable. */
+.materia {
+  margin-top: 0;
+  font-weight: 500;
+}
+
+.baja {
+  margin-top: var(--espacio-3);
+  background: var(--color-error);
+}
+
+.bien {
+  color: var(--color-ok);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* La ✕: sin el fondo azul de los botones, para no competir con la acción principal. */
+.cerrar {
+  position: absolute;
+  top: var(--espacio-2);
+  right: var(--espacio-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px, lo mínimo para tocar con el dedo */
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.cerrar:hover {
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}

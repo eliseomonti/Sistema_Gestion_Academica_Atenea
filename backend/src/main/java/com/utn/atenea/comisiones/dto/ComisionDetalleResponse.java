@@ -8,7 +8,6 @@ import java.util.List;
 /** La comisión con todo lo que se dicta en ella: con esto Angular arma la grilla de la planilla. */
 public record ComisionDetalleResponse(
         Long id,
-        String nombre,
         Long planEstudioId,
         int anioCursado,
         int nroComision,

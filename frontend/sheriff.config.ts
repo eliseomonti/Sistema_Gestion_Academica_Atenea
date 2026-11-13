@@ -14,6 +14,7 @@ export const config: SheriffConfig = {
       core: 'core',
       shared: 'shared',
       login: 'login',
+      cuenta: 'cuenta',
       'admin/<feature>/data': ['actor:admin', 'tipo:data'],
       'admin/<feature>': ['actor:admin', 'tipo:feature'],
       'docente/<feature>/data': ['actor:docente', 'tipo:data'],
@@ -30,6 +31,7 @@ export const config: SheriffConfig = {
     core: 'shared',
     shared: [], // shared no usa nada del proyecto
     login: ['core', 'shared'],
+    cuenta: ['core', 'shared'], // la misma pantalla para los tres actores
     'actor:*': [sameTag, 'core', 'shared'], // regla 1: un actor no importa a otro
     'tipo:feature': ['tipo:data', 'core', 'shared'], // regla 3: de otra feature, sólo su data/
     'tipo:data': ['tipo:data', 'core', 'shared'],
