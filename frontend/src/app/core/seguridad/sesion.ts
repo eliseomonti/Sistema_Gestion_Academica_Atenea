@@ -29,6 +29,11 @@ export class Sesion {
     const token = this.accessToken();
     return token ? leerRoles(token) : [];
   });
+  /** El nombre de la persona logueada (claim `nombre`), para saludarla. */
+  readonly nombre = computed(() => {
+    const token = this.accessToken();
+    return token ? (leerClaims(token).nombre ?? null) : null;
+  });
 
   constructor() {
     // Si otra pestaña inicia, renueva o cierra la sesión, esta toma lo que quedó guardado. Si no,
@@ -131,16 +136,26 @@ function leerGuardada(): DatosSesion | null {
   }
 }
 
+interface Claims {
+  roles?: string[];
+  nombre?: string;
+}
+
 /**
- * Lee los roles del access token (claim `roles`). No verifica la firma: eso lo hace el backend en
- * cada pedido. Acá sólo se usa para decidir qué pantallas mostrar.
+ * Lee los claims del access token. No verifica la firma: eso lo hace el backend en cada pedido. Acá
+ * sólo se usan para decidir qué pantallas mostrar y a quién saludar.
  */
-function leerRoles(accessToken: string): Rol[] {
+function leerClaims(accessToken: string): Claims {
   try {
     const payload = accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    const claims = JSON.parse(atob(payload)) as { roles?: string[] };
-    return (claims.roles ?? []).map((rol) => rol.replace(/^ROLE_/, '') as Rol);
+    const bytes = Uint8Array.from(atob(payload), (letra) => letra.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes)) as Claims;
   } catch {
-    return [];
+    return {};
   }
+}
+
+/** Los roles del access token (claim `roles`), sin el prefijo `ROLE_`. */
+function leerRoles(accessToken: string): Rol[] {
+  return (leerClaims(accessToken).roles ?? []).map((rol) => rol.replace(/^ROLE_/, '') as Rol);
 }

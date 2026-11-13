@@ -10,49 +10,60 @@
     {
         <p class="bien">Se guardaron los cambios</p>
         <button (click)="cerrar()">Listo</button>
-    }@else if(persona.value(); as datos) 
+    }@else if(persona.value(); as datos)
     {
-        <app-datos-personales-form [dni]="datos.dni" [inicial]="datos" [guardando]="cargando()" (guardar)="guardar($event)"/>
-        <button (click)="cerrar()">Cancelar</button>
+        <p class="subtitulo">{{datos.nombre}} {{datos.apellido}}</p>
 
-        @if(datos.activo)
-        {
-            @if(confirmadoBaja())
-            {
-                <app-confirmar-dialog [mensaje]="mensajeBaja(datos)" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBaja()" (cancelar)="confirmadoBaja.set(false)" />
+        <app-datos-personales-form [dni]="datos.dni" [legajoEstudiante]="datos.legajoEstudiante" [legajoDocente]="datos.legajoDocente" [inicial]="datos" [guardando]="cargando()" textoGuardar="Guardar cambios" [conCancelar]="true" (guardar)="guardar($event)" (cancelar)="cerrar()"/>
 
-            }@else
-            {
-                <button class="baja" (click)="confirmadoBaja.set(true)">Dar de baja</button>
-            }
-        }
         @if(inscripciones.value(); as lista)
         {
             @if(lista.length > 0)
             {
-                <h3>Inscripciones a carrera</h3>
-                <ul class="inscripciones">
+                <section class="seccion">
+                    <h3>Inscripciones a carrera</h3>
                     @for(inscripcion of lista; track inscripcion.id)
                     {
-                        <li>
-                            <strong>{{inscripcion.nombreCarrera}}</strong> ({{inscripcion.nombrePlan}})
-                            <br />
-                            {{inscripcion.estado}} desde {{inscripcion.fechaEstado ?? inscripcion.fechaInscripcion}}
-
-                            @if(inscripcion.estado === 'ACTIVA')
-                            {
-                                @if(inscripcionABajar()?.id === inscripcion.id)
+                        @if(inscripcionABajar()?.id === inscripcion.id)
+                        {
+                            <app-confirmar-dialog [mensaje]="mensajeBajaInscripcion(inscripcion)" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBajaInscripcion(inscripcion)" (cancelar)="inscripcionABajar.set(null)" />
+                        }@else
+                        {
+                            <div class="accion">
+                                <div>
+                                    <p class="accion-titulo">{{inscripcion.nombreCarrera}} ({{inscripcion.nombrePlan}})</p>
+                                    <p class="accion-detalle">{{inscripcion.estado}} desde {{inscripcion.fechaEstado ?? inscripcion.fechaInscripcion}}</p>
+                                </div>
+                                @if(inscripcion.estado === 'ACTIVA')
                                 {
-                                    <app-confirmar-dialog [mensaje]="mensajeBajaInscripcion(inscripcion)" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBajaInscripcion(inscripcion)" (cancelar)="inscripcionABajar.set(null)" />
-                                }@else
-                                {
-                                    <button class="baja" (click)="inscripcionABajar.set(inscripcion)">Dar de baja</button>
+                                    <button type="button" class="peligro" (click)="inscripcionABajar.set(inscripcion)">Dar de baja</button>
                                 }
-                            }
-                        </li>
+                            </div>
+                        }
                     }
-                </ul>
+                </section>
             }
+        }
+
+        @if(datos.activo)
+        {
+            <section class="seccion">
+                <h3 class="titulo-peligro">Acciones sobre la persona</h3>
+
+                @if(confirmadoBaja())
+                {
+                    <app-confirmar-dialog [mensaje]="mensajeBaja(datos)" confirmarTexto="Dar de baja" [procesando]="cargando()" (confirmar)="darDeBaja()" (cancelar)="confirmadoBaja.set(false)" />
+                }@else
+                {
+                    <div class="accion">
+                        <div>
+                            <p class="accion-titulo">Dar de baja</p>
+                            <p class="accion-detalle">Pierde el acceso al sistema, pero se conserva el historial.</p>
+                        </div>
+                        <button type="button" class="peligro" (click)="confirmadoBaja.set(true)">Dar de baja</button>
+                    </div>
+                }
+            </section>
         }
     }@else if(persona.error()) 
     {
@@ -67,4 +78,9 @@
         <p class="error">{{error()}}</p>
     }
 
+    <!-- Al final del HTML, aunque se vea arriba a la derecha: así, al abrirse la ventana, el foco va
+         al primer campo y no a la ✕. -->
+    <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+        <app-icono nombre="cerrar" />
+    </button>
 </dialog>

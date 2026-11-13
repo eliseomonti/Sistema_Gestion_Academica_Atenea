@@ -8,10 +8,11 @@ import { form, FormField, FormRoot, min, required } from '@angular/forms/signals
 import { firstValueFrom } from 'rxjs';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
+import { Icono } from '../../../../shared/ui/icono/icono';
 
 
 @Component({
-  imports: [FormRoot, FormField, TurnoPipe,ConfirmarDialog],
+  imports: [FormRoot, FormField, TurnoPipe, ConfirmarDialog, Icono],
   selector: 'app-comision-edicion',
   styleUrl: './comision-edicion.css',
   templateUrl: './comision-edicion.html',
@@ -127,6 +128,12 @@ export class ComisionEdicion {
   }
 
 
+
+  /** "1.er", "2.º", "3.er"...: así se abrevian los ordinales en castellano. */
+  protected ordinal(numero: number): string
+  {
+    return numero === 1 || numero === 3 ? `${numero}.er` : `${numero}.º`;
+  }
 
   protected cerrar(): void
   {

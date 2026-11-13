@@ -24,9 +24,15 @@ const EDAD_MAXIMA = 100;
 export class DatosPersonalesForm {
 
   readonly dni = input.required<string>();
+  readonly legajoEstudiante = input<number | null>(null);
+  readonly legajoDocente = input<number | null>(null);
   readonly guardando = input(false);
   readonly guardar = output<DatosPersonalesRequest>();
   readonly inicial = input<PersonaResponse | null>(null);
+  /** En la edición: "Guardar cambios", con Cancelar al lado. En las altas, sólo "Guardar". */
+  readonly textoGuardar = input('Guardar');
+  readonly conCancelar = input(false);
+  readonly cancelar = output();
 
   /**
    * La fecha de nacimiento es un Date (null mientras está vacía): así [formField] la toma del
