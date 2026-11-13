@@ -25,7 +25,18 @@
                         @for(comision of materia.comisiones; track comision.comisionMateriaId)
                         {
                             <li class="comision">
-                                <strong>Comision {{comision.nombreComision}}</strong> {{comision.turno | turno}}
+                                <strong>Comisión {{comision.nombreComision}}</strong> · {{comision.turno | turno}}
+                                <ul class="horarios">
+                                    @for(h of comision.horarios; track $index)
+                                    {
+                                        <li>{{horario(h)}}</li>
+                                    }@empty
+                                    {
+                                        <li>Horarios a confirmar</li>
+                                    }
+                                </ul>
+                                <p class="detalle">{{docentes(comision)}}</p>
+                                <p class="detalle">{{cupo(comision)}}</p>
                             </li>
                         }
                     </ul>

@@ -43,3 +43,13 @@ h3{
 .error{
   color: var(--color-error);
 }
+
+.horarios{
+  margin: var(--espacio-1) 0;
+  padding-left: var(--espacio-3);
+  font-size: var(--texto-chico);
+}
+
+.comision .detalle{
+  margin: var(--espacio-1) 0 0;
+}
