@@ -1,0 +1,39 @@
+<h1>Inscripcion a cursado</h1>
+
+@if(oferta.error())
+{
+    <p class="error">NO se pudo cargar la oferta</p>
+    <button type="button" (click)="oferta.reload()">Reintentar</button>
+}@else if(oferta.value(); as materias)
+{
+    @if(materias.length === 0)
+    {
+        <p class="estado">No hay materias para inscribirte, no hay un periodo de inscripcion abierto</p>
+    }@else
+    {
+        @for(anio of anio(); track anio)
+        {
+            <h2>{{anio}}° año</h2>
+
+            @for(materia of materiasDelAnio(anio); track materia.materiaId)
+            {
+                <article class="materia">
+                    <h3>{{materia.nombreMateria}}</h3>
+                    <p class="detalle">{{cuatrimestre(materia.periodoLectivo)}}</p>
+
+                    <ul class="comisiones">
+                        @for(comision of materia.comisiones; track comision.comisionMateriaId)
+                        {
+                            <li class="comision">
+                                <strong>Comision {{comision.nombreComision}}</strong> {{comision.turno | turno}}
+                            </li>
+                        }
+                    </ul>
+                </article>
+            }
+        }
+    }
+}@else
+{
+    <p class="estado">Cargando...</p>
+}
