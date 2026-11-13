@@ -8,6 +8,7 @@ import { Columna } from '../../../../shared/ui/tabla/columna';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
 import { Celda } from '../../../../shared/ui/tabla/celda';
 import { DatePipe } from '@angular/common';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 
 const CUATRIMESTRE: Record<PeriodoLectivo, string> =
@@ -19,7 +20,7 @@ const CUATRIMESTRE: Record<PeriodoLectivo, string> =
 
 
 @Component({
-  imports: [FormField, Tabla, Celda, DatePipe],
+  imports: [FormField, Tabla, Celda, DatePipe, RouterLink, RouterOutlet],
   selector: 'app-periodos-lista',
   styleUrl: './periodos-lista.css',
   templateUrl: './periodos-lista.html',

@@ -80,6 +80,16 @@ const routes: Routes = [
             (m) => m.PeriodosLista,
           ),
         title: 'Períodos de inscripción',
+        children: [
+          {
+            path: 'nuevo',
+            loadComponent: () =>
+              import('./periodos-inscripcion/pages/periodo-alta/periodo-alta').then(
+                (m) => m.PeriodoAlta,
+              ),
+            title: 'Nuevo período',
+          },
+        ],
       },
     ],
   },

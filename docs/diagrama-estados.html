@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagrama de estados</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #fff; color: #1a1a1a; margin: 0; padding: 24px 16px; }
+  main { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.hint { color: #555; margin: 0 0 24px; font-size: 14px; }
+  section { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+  h2 { font-size: 16px; margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  button { background: #1a73e8; color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  .diagram { overflow-x: auto; background: #fff; }
+  .diagram svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Diagrama de estados corregido</h1>
+  <p class="hint">Tocá "Descargar PNG" y reemplazá la imagen en el documento.</p>
+  <section>
+    <h2>Inscripción de un estudiante a una materia <button data-target="estados" data-name="diagrama-estados.png">Descargar PNG</button></h2>
+    <div class="diagram" id="estados"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+const code = `stateDiagram-v2
+    state "Cursando<br/>(acta abierta)" as CUR
+    state "Regularidad vigente<br/>(2 años desde el cierre)" as RV
+    state "Inscripto a final" as IF
+    state "Materia aprobada" as AP
+    state "Regularidad vencida" as VEN
+    state "No regular" as NR
+    state "Baja de cursada" as BAJA
+    state cierre <<choice>>
+    state resultado <<choice>>
+
+    [*] --> CUR : Inscribirse a comisión (RF19)<br/>[correlativas, cupo<br/>y período abierto]
+    CUR --> CUR : Cargar o corregir<br/>notas (RF14)
+    CUR --> BAJA : Darse de baja (RF19)<br/>[período abierto]
+    CUR --> cierre : Cerrar acta (RF15)
+    cierre --> RV : [condición = regular] /<br/>fijar vencimiento<br/>a 2 años (RN04)
+    cierre --> AP : [condición =<br/>promocionado]
+    cierre --> NR : [condición =<br/>no regular]
+    RV --> IF : Inscribirse a mesa (RF21)<br/>[regularidad vigente]
+    IF --> RV : Darse de baja (RF21)<br/>[hasta el día anterior]
+    IF --> resultado : Cargar nota<br/>del final (RF17)
+    resultado --> AP : [nota ≥ 6] (RN06)
+    resultado --> RV : [nota menor a 6<br/>o ausente]
+    RV --> VEN : after(2 años desde<br/>el cierre) (RN04)
+    AP --> [*]
+    VEN --> [*]
+    NR --> [*]
+    BAJA --> [*]
+
+    note left of CUR
+        Con el acta cerrada ya no se
+        cargan notas de cursada (RN05)
+    end note
+    note right of NR
+        Para volver a cursar, el estudiante
+        se inscribe de nuevo a la comisión
+    end note
+
+    classDef activo fill:#dbe8fb,stroke:#3b5b8c,color:#000
+    classDef ok fill:#d9f0d9,stroke:#4f8a4f,color:#000
+    classDef mal fill:#f8d7d7,stroke:#b05050,color:#000
+    class CUR,RV,IF activo
+    class AP ok
+    class VEN,NR,BAJA mal`;
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  securityLevel: 'loose',
+  flowchart: { htmlLabels: false },
+  state: { nodeSpacing: 60, rankSpacing: 60 },
+  themeVariables: {
+    fontFamily: 'Arial', fontSize: '15px',
+    primaryColor: '#dbe8fb', primaryBorderColor: '#3b5b8c', primaryTextColor: '#000000',
+    lineColor: '#333333', noteBkgColor: '#fff59d', noteBorderColor: '#d4c34a', noteTextColor: '#000000',
+    edgeLabelBackground: '#ffffff'
+  }
+});
+
+mermaid.render('estados-svg', code).then(({ svg }) => {
+  document.getElementById('estados').innerHTML = svg;
+});
+
+function download(targetId, fileName) {
+  const svgEl = document.querySelector('#' + targetId + ' svg');
+  const box = svgEl.viewBox.baseVal;
+  const width = box && box.width ? box.width : svgEl.getBoundingClientRect().width;
+  const height = box && box.height ? box.height : svgEl.getBoundingClientRect().height;
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+  clone.removeAttribute('style');
+  const data = new XMLSerializer().serializeToString(clone);
+  const img = new Image();
+  img.onload = () => {
+    const scale = 3;
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0, width, height);
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(data);
+}
+document.querySelectorAll('button[data-target]').forEach(b =>
+  b.addEventListener('click', () => download(b.dataset.target, b.dataset.name)));
+</script>
+</body>
+</html>

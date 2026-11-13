@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Risk Register</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 8pt; margin: 16px; background: #fff; color: #000; }
+  table { border-collapse: collapse; width: 1500px; table-layout: fixed; }
+  th:nth-child(1) { width: 55px; }
+  th:nth-child(2) { width: 230px; }
+  th:nth-child(3) { width: 95px; }
+  th:nth-child(4), th:nth-child(5) { width: 22px; }
+  th:nth-child(6) { width: 40px; }
+  th:nth-child(7) { width: 70px; }
+  th:nth-child(8) { width: 220px; }
+  th:nth-child(9) { width: 230px; }
+  th:nth-child(10) { width: 110px; }
+  th:nth-child(11) { width: 160px; }
+  th, td { border: 1px solid #000; padding: 4px; vertical-align: middle; }
+  th { background: #6d9eeb; font-weight: bold; text-align: center; }
+  td.c { text-align: center; }
+  td.t { text-align: left; }
+</style>
+</head>
+<body>
+<p class="no-print"><button id="descargar" style="background:#1a73e8;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:14px;cursor:pointer">Descargar PNG</button></p>
+<table id="tabla">
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Riesgo estructurado (Causa – Evento – Efecto)</th>
+  <th>Categoría</th>
+  <th>P</th>
+  <th>I</th>
+  <th>Score</th>
+  <th>Estrategia</th>
+  <th>Mitigación Preventiva</th>
+  <th>Contingencia y Disparador</th>
+  <th>Risk owner</th>
+  <th>Reserva y estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td class="c">RSK-01</td>
+  <td class="c">Debido a que el equipo no estaba conforme con la base de datos ni con el backend hechos en el cuatrimestre anterior (Causa), puede ocurrir que haya que rehacerlos durante este cuatrimestre (Evento), lo que provocaría perder semanas de desarrollo y retrasar el frontend, objetivo principal del cuatrimestre (Efecto)</td>
+  <td class="c">Tecnológico</td>
+  <td class="c">4</td>
+  <td class="c">4</td>
+  <td class="c">16</td>
+  <td class="c">Mitigar</td>
+  <td class="t">Revisar al inicio del cuatrimestre el modelo de datos y el backend contra los requisitos funcionales MUST HAVE de la tabla MoSCoW, y decidir temprano si se rehacen, antes de construir pantallas encima.</td>
+  <td class="c">Disparador: El equipo no esta conforme con el modelo anterior<br>Contingencia (ejecutada): rehacer la base y el backend en un plazo acotado, con la arquitectura documentada (ADR 0001) y verificada por tests (Spring Modulith), para no repetir el problema.</td>
+  <td class="c">Silva Joaquín (desarrollador)</td>
+  <td class="c">Reserva: No había; el tiempo salió del frontend (ver RSK-02).<br>Estado: Cerrado. Finalizado en el segundo sprint</td>
+</tr>
+<tr>
+  <td class="c">RSK-02</td>
+  <td class="c">Debido a que los tres integrantes cursan otras materias en paralelo y sus parciales caen en las mismas semanas (Causa), puede ocurrir que baje la dedicación al proyecto y se posponga el frontend, objetivo principal del cuatrimestre (Evento), lo que provocaría llegar a la entrega sin las pantallas de docente y estudiante (Efecto).</td>
+  <td class="c">Organizacional</td>
+  <td class="c">4</td>
+  <td class="c">4</td>
+  <td class="c">16</td>
+  <td class="c">Mitigar</td>
+  <td class="t">Armar al inicio un calendario con los parciales de los tres integrantes y planificar sprints más livianos en esas semanas. Empezar el frontend en paralelo al backend, en lugar de esperar a terminarlo.</td>
+  <td class="c">Disparador: Una semana con parciales de dos o más integrantes, o un sprint que cierra con menos del 50 % de lo comprometido.<br>Contingencia (en curso): Concentrar el frontend en lo imprescindible (login, admin e inscripción del estudiante), pasar el resto a la versión siguiente y reutilizar las pantallas del admin (RSK-05).</td>
+  <td class="c">Solá Federico (Product Owner)</td>
+  <td class="c">Reserva: Última semana antes de la entrega sin historias nuevas.<br>Estado: Activo / Materializado</td>
+</tr>
+<tr>
+  <td class="c">RSK-03</td>
+  <td class="c">Debido a que nadie del equipo hizo un despliegue y la aplicación sólo corre en la computadora de cada integrante (Causa), puede ocurrir que al publicarla fallen las variables de entorno, CORS, la URL de la API o la conexión a MySQL cerca de la entrega (Evento), lo que provocaría perder días del último sprint en infraestructura o defender el proyecto sólo en local (Efecto).</td>
+  <td class="c">Tecnológico</td>
+  <td class="c">4</td>
+  <td class="c">3</td>
+  <td class="c">12</td>
+  <td class="c">Transferir</td>
+  <td class="t">Publicar en una plataforma gestionada (PaaS) con MySQL administrado, que se hace cargo del servidor, la red y el certificado HTTPS (ver RSK-06). Hacer ya un primer despliegue con lo que existe (login y admin) y repetirlo en cada merge a main.</td>
+  <td class="c">Disparador: A tres semanas de la entrega no hay una URL pública funcionando.<br>Contingencia: Demo local con un script que levanta MySQL, backend y frontend y carga los datos de prueba de la carpeta bdd/.</td>
+  <td class="c">Monti Eliseo (Desarrollador)</td>
+  <td class="c">Reserva: 3 días para el primer despliegue.<br>Estado: Materializado. Contingencia en curso: demo local con los scripts de la carpeta bdd/</td>
+</tr>
+<tr>
+  <td class="c">RSK-04</td>
+  <td class="c">Oportunidad. Debido a que al rehacer el backend se definió una arquitectura documentada y verificada por tests (ADR 0001), con reglas de integridad en la base y endpoints separados por actor (/api/admin, /api/docente, /api/estudiante) (Causa), puede ocurrir que el frontend se construya sobre una API estable y ordenada (Evento), lo que permitiría avanzar las pantallas con menos retrabajo y recuperar parte del tiempo que costó rehacerlo (RSK-01) (Efecto).</td>
+  <td class="c">Tecnológico</td>
+  <td class="c">3</td>
+  <td class="c">4</td>
+  <td class="c">12</td>
+  <td class="c">Explotar</td>
+  <td class="t">Organizar el frontend con la misma partición por actor (ADR 0002): cada pantalla consume un solo grupo de endpoints y sus tipos copian los DTO del backend.</td>
+  <td class="c">Señal: Una pantalla nueva se conecta a la API sin cambios en el backend.<br>Acción: pasar el tiempo ganado a las pantallas de docente y estudiante.</td>
+  <td class="c">Solá Federico (desarrollador backend)</td>
+  <td class="c">Reserva: no aplica.<br>Estado: Activo / Materializado</td>
+</tr>
+<tr>
+  <td class="c">RSK-05</td>
+  <td class="c">Oportunidad. Debido a que las primeras pantallas del administrador dejaron componentes compartidos (tabla, paginador, etiqueta) y un patrón de lista con filtros y alta en ventana (Causa), puede ocurrir que las demás pantallas, incluidas las de docente y estudiante, se armen sobre esa base (Evento), lo que permitiría bajar el tiempo de frontend y compensar parte del atraso de RSK-02 (Efecto).</td>
+  <td class="c">Tecnológico</td>
+  <td class="c">4</td>
+  <td class="c">3</td>
+  <td class="c">12</td>
+  <td class="c">Mejorar</td>
+  <td class="t">Documentar una feature de referencia y subir a shared/ui lo que usen dos actores o más (regla del ADR 0002), para que el patrón sirva también a docente y estudiante.</td>
+  <td class="c">Señal: Una pantalla nueva sale en menos de la mitad del tiempo que llevó su equivalente anterior.<br>Acción: Pasar las horas ahorradas a las pantallas atrasadas por RSK-02.</td>
+  <td class="c">Silva Joaquín (desarrollador)</td>
+  <td class="c">Reserva: no aplica.<br>Estado: Activo / Materializado</td>
+</tr>
+<tr>
+  <td class="c">RSK-06</td>
+  <td class="c">Oportunidad. Debido a que existen plataformas gestionadas (PaaS) con planes gratuitos o beneficios para estudiantes que publican aplicaciones Spring Boot, Angular y MySQL sin administrar un servidor (Causa), puede ocurrir que el equipo publique el sistema sin costo y sin saber configurar infraestructura (Evento), lo que permitiría reducir RSK-03 a un trabajo de configuración y tener una URL pública para la defensa y para que otros estudiantes lo prueben (Efecto).</td>
+  <td class="c">Tecnológico</td>
+  <td class="c">3</td>
+  <td class="c">3</td>
+  <td class="c">9</td>
+  <td class="c">Explotar</td>
+  <td class="t">Elegir una plataforma esta semana comparando los límites del plan gratuito (horas, memoria, base de datos) y asignar el primer despliegue a un integrante.</td>
+  <td class="c">Señal: El primer despliegue funciona dentro del plan gratuito.<br>Acción: Desplegar en cada merge a main y compartir la URL con compañeros para que lo prueben.</td>
+  <td class="c">Monti Eliseo (desarrollador)</td>
+  <td class="c">Reserva: No aplica.<br>Estado: No aprovechada. No se llegó a desplegar antes de la entrega</td>
+</tr>
+<tr>
+  <td class="c">RSK-07</td>
+  <td class="c">Debido a que el MVP incluía los ABM de carreras, planes de estudio, materias y correlatividades, además de las pantallas de administrador, docente y estudiante <b>(Causa)</b>, puede ocurrir que construirlos consuma el tiempo de las funcionalidades principales <b>(Evento)</b>, lo que provocaría no llegar con los plazos de la entrega <b>(Efecto)</b>.</td>
+  <td class="c">Alcance</td>
+  <td class="c">4</td>
+  <td class="c">4</td>
+  <td class="c">16</td>
+  <td class="c">Evitar</td>
+  <td class="t">Sacar del MVP los ABM de carreras, planes, materias y correlatividades: en el sistema quedan sólo de lectura y los datos se cargan directamente en la base con scripts SQL (bdd/01-carreras.sql). Son datos que casi no cambian; los ABM quedan en el backlog para una versión siguiente.</td>
+  <td class="c"><b>Disparador:</b> Hay que cargar o corregir una carrera, un plan o una materia.<br><b>Contingencia:</b> Script SQL guardado en la carpeta bdd/ y probado en una base descartable antes de aplicarlo.</td>
+  <td class="c">Solá Federico (Product Owner)</td>
+  <td class="c"><b>Reserva:</b> No requiere.<br>Estado: Cerrado. Se evitó al sacar los ABM del MVP</td>
+</tr>
+</tbody>
+</table>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+document.getElementById('descargar').addEventListener('click', async () => {
+  const canvas = await html2canvas(document.getElementById('tabla'), { scale: 3, backgroundColor: '#ffffff' });
+  const link = document.createElement('a');
+  link.download = 'risk-register.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+</script>
+</body>
+</html>

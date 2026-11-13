@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Simulacro - FarmaYa (Secuencia)</title>
+<style>
+  @page { size: A4; margin: 18mm 20mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #111; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #999; padding-bottom: 6px; }
+  .head .materia { font-style: italic; font-size: 10pt; }
+  .head .inst { font-weight: bold; font-size: 13pt; }
+  table.datos { width: 100%; border-collapse: collapse; margin: 12px 0 18px; }
+  table.datos td { border: 1px solid #333; padding: 8px; height: 22px; }
+  h1 { text-align: center; font-size: 17pt; text-decoration: underline; margin: 10px 0 14px; }
+  h2 { font-size: 13pt; margin: 18px 0 6px; }
+  h3 { font-size: 12pt; margin: 16px 0 6px; }
+  p { margin: 0 0 9px; text-align: justify; }
+  ul { margin: 4px 0 10px; }
+  li { margin-bottom: 2px; }
+  .puntaje { font-weight: normal; font-size: 10pt; color: #444; }
+  .proceso { text-align: center; font-weight: bold; margin: 6px 0 12px; }
+  .salto { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="materia">Metodología de Sistemas II<br>Comisión 3 - Simulacro 3</div>
+  <div class="inst">UTN MDP</div>
+</div>
+
+<table class="datos">
+  <tr><td style="width:60%">Nombre:</td><td>Nota:</td></tr>
+</table>
+
+<h1>Examen Parcial (Simulacro)</h1>
+
+<p><b>FarmaYa</b> es una plataforma que permite a pacientes comprar medicamentos en farmacias adheridas y recibirlos en su domicilio.</p>
+
+<p>Cada paciente puede registrarse indicando nombre, DNI, dirección, obra social y número de afiliado. Al confirmar una compra, el sistema crea un <b>Pedido</b>, que contiene el paciente, la farmacia, los medicamentos, la receta (si corresponde), el repartidor asignado y su estado actual.</p>
+
+<p>Algunos medicamentos requieren receta. En ese caso, el paciente carga la receta digital y el sistema la valida con la obra social del paciente. Si la receta no es válida, el pedido no puede continuar y se le informa al paciente el motivo.</p>
+
+<p>Con la receta validada, el sistema consulta a la farmacia si tiene stock de los medicamentos. Si no hay stock, el sistema puede ofrecer un medicamento equivalente o una farmacia cercana que sí lo tenga.</p>
+
+<p>El total del pedido se calcula de distintas formas según la cobertura del paciente: sin cobertura, obra social con descuento del 40%, prepaga con descuento del 70% o plan de medicamentos crónicos con cobertura total. Cada forma tiene sus propias reglas de cálculo.</p>
+
+<p>Un pedido puede estar pendiente de validación, confirmado, en preparación, en camino, entregado o cancelado. Solo puede cancelarse si todavía no salió de la farmacia.</p>
+
+<p>Cuando el pedido sale de la farmacia, el paciente, la farmacia y el repartidor deben ser notificados automáticamente.</p>
+
+<p>Para validar las recetas, FarmaYa se integra con los sistemas de distintas obras sociales, como OSDE o IOMA, que tienen sus propios formatos de datos y formas de comunicarse.</p>
+
+<p>FarmaYa registra además todas las operaciones realizadas sobre los pedidos.</p>
+
+<h3>Requerimientos futuros</h3>
+<p>FarmaYa prevé incorporar:</p>
+<ul>
+  <li>nuevas obras sociales y prepagas;</li>
+  <li>pedidos recurrentes para tratamientos crónicos;</li>
+  <li>retiro en sucursal;</li>
+  <li>seguimiento del repartidor en tiempo real.</li>
+</ul>
+
+<h2>Se solicita:</h2>
+
+<h2>1. Diagrama de Secuencia <span class="puntaje">(3 puntos)</span></h2>
+<p>Modelar mediante un <b>Diagrama de Secuencia UML</b> el escenario de:</p>
+<p class="proceso">Realización de un pedido de un medicamento con receta.</p>
+<p>El diagrama deberá contemplar:</p>
+<ul>
+  <li>actor y objetos participantes (interfaz, controlador y entidades);</li>
+  <li>carga de la receta por parte del paciente;</li>
+  <li>validación de la receta con la obra social;</li>
+  <li>consulta de stock en la farmacia;</li>
+  <li>cálculo del total según la cobertura;</li>
+  <li>creación y registro del pedido;</li>
+  <li>notificación al paciente;</li>
+  <li>caminos alternativos (receta inválida y falta de stock) mediante fragmentos <b>alt</b> u <b>opt</b>.</li>
+</ul>
+<p>Se deberán representar correctamente los mensajes, sus respuestas, los mensajes reflexivos cuando correspondan y las barras de activación.</p>
+
+<h2 class="salto">2. Análisis de principios GRASP o SOLID <span class="puntaje">(4 puntos)</span></h2>
+<p>Identifique 4 principios GRASP y/o SOLID cuya aplicación considere relevante en el diseño de FarmaYa.</p>
+<p>Para cada principio explique:</p>
+<p><b>a. Contexto:</b> ¿qué situación concreta de la narrativa justifica su aplicación?</p>
+<p><b>b. Ventajas:</b> ¿qué problema de diseño permite evitar o qué beneficio aporta?</p>
+<p><b>c. Implementación:</b> ¿cómo podría reflejarse conceptualmente en las clases, responsabilidades, métodos o interfaces?</p>
+<p>La elección deberá estar fundamentada en situaciones concretas del sistema.</p>
+
+<h2>3. Patrones de Diseño GoF <span class="puntaje">(3 puntos)</span></h2>
+<p>Identifique 2 situaciones diferentes de FarmaYa donde considere conveniente aplicar un patrón de diseño GoF.</p>
+<p>Para cada patrón:</p>
+<ul>
+  <li>indique su nombre;</li>
+  <li>indique su categoría: <b>Creacional, Estructural o de Comportamiento</b>;</li>
+  <li>explique para qué sirve;</li>
+  <li>describa el problema concreto del sistema que justifica su utilización;</li>
+  <li>explique cómo contribuiría al diseño.</li>
+</ul>
+<p>Se evaluará especialmente la justificación de la elección y su relación con el problema planteado. <b>No se otorgará el puntaje completo por mencionar únicamente el nombre del patrón y su definición.</b></p>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<mxfile host="app.diagrams.net.">
+  <diagram name="Casos de uso - General" id="c171">
+    <mxGraphModel dx="680" dy="357" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sis" parent="1" style="rounded=1;arcSize=1;dashed=1;strokeColor=#666666;fontSize=16;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;" value="Sistema Atenea" vertex="1">
+          <mxGeometry height="1006" width="760" x="300" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Autenticarse: iniciar, renovar y cerrar sesión&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fdf3e1;strokeColor=#b8862b;strokeWidth=2;fontSize=13;" value="Seleccionar rol activo (más de un rol)" vertex="1">
+          <mxGeometry height="56" width="230" x="800" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" edge="1" parent="1" source="c2" style="endArrow=open;dashed=1;html=1;endSize=10;" target="c1" value="extends">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Consultar estructura académica&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Gestionar personas, roles e inscripciones a planes&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="262" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Gestionar comisiones, materias, docentes y horarios&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="338" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Gestionar períodos, turnos y mesas de final&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="414" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Consultar materias, alumnos y mesas como tribunal&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Gestionar evaluaciones y cargar notas&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="606" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Cerrar acta de cursada&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="682" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Inscribirse a cursadas&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="798" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Inscribirse a mesas de final&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="874" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f1fb;strokeColor=#2f5b93;strokeWidth=2;fontSize=13;" value="Consultar avance e historial académico&amp;nbsp;" vertex="1">
+          <mxGeometry height="56" width="360" x="330" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontSize=14;strokeWidth=2;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="170" y="288" as="geometry" />
+        </mxCell>
+        <mxCell id="c17" edge="1" parent="1" source="c16" style="endArrow=none;html=1;" target="c4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c18" edge="1" parent="1" source="c16" style="endArrow=none;html=1;" target="c5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c19" edge="1" parent="1" source="c16" style="endArrow=none;html=1;" target="c6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c20" edge="1" parent="1" source="c16" style="endArrow=none;html=1;" target="c7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c21" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontSize=14;strokeWidth=2;" value="Docente" vertex="1">
+          <mxGeometry height="60" width="30" x="170" y="594" as="geometry" />
+        </mxCell>
+        <mxCell id="c22" edge="1" parent="1" source="c21" style="endArrow=none;html=1;" target="c8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c23" edge="1" parent="1" source="c21" style="endArrow=none;html=1;" target="c9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c24" edge="1" parent="1" source="c21" style="endArrow=none;html=1;" target="c10" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c25" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontSize=14;strokeWidth=2;" value="Estudiante" vertex="1">
+          <mxGeometry height="60" width="30" x="170" y="862" as="geometry" />
+        </mxCell>
+        <mxCell id="c26" edge="1" parent="1" source="c25" style="endArrow=none;html=1;" target="c11" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c27" edge="1" parent="1" source="c25" style="endArrow=none;html=1;" target="c12" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c28" edge="1" parent="1" source="c25" style="endArrow=none;html=1;" target="c13" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c29" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontSize=14;strokeWidth=2;" value="Usuario" vertex="1">
+          <mxGeometry height="60" width="30" x="40" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="c30" edge="1" parent="1" source="c29" style="endArrow=none;html=1;" target="c1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c31" edge="1" parent="1" source="c16" style="endArrow=block;endFill=0;html=1;endSize=14;" target="c29" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c32" edge="1" parent="1" source="c21" style="endArrow=block;endFill=0;html=1;endSize=14;" target="c29" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c33" edge="1" parent="1" source="c25" style="endArrow=block;endFill=0;html=1;endSize=14;" target="c29" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
