@@ -1,0 +1,18 @@
+<app-bienvenida [nombre]="sesion.nombre()" />
+
+<!-- Toda la tarjeta es el link: se puede tocar en cualquier parte. -->
+<ul class="tarjetas">
+  @for (tarjeta of tarjetas(); track tarjeta.ruta) {
+    <li>
+      <a class="tarjeta" [routerLink]="tarjeta.ruta">
+        <span class="titulo">
+          <app-icono [nombre]="tarjeta.icono" />
+          {{ tarjeta.texto }}
+        </span>
+        <span class="total">{{ tarjeta.total }}</span>
+        <span class="detalle">{{ tarjeta.detalle }}</span>
+        <app-icono class="flecha" nombre="flecha-derecha" />
+      </a>
+    </li>
+  }
+</ul>
