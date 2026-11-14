@@ -1,11 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { OfertaComisionResponse, OfertaHorarioResponse, OfertaMateriaResponse, PeriodoLectivo } from '../../data/inscripcion-comision';
+import { InscripcionComisionResponse, OfertaComisionResponse, OfertaHorarioResponse, OfertaMateriaResponse, PeriodoLectivo } from '../../data/inscripcion-comision';
 import { InscripcionesComisionApi } from '../../data/inscripciones-comision-api';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { DiaSemana } from '../../../../shared/models/dia-semana';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { DatePipe } from '@angular/common';
+import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
 
 
 
@@ -27,7 +29,7 @@ const DIAS: Record<DiaSemana, string> = {
 
 
 @Component({
-  imports: [TurnoPipe],
+  imports: [TurnoPipe,DatePipe, ConfirmarDialog],
   selector: 'app-oferta',
   styleUrl: './oferta.css',
   templateUrl: './oferta.html',
@@ -101,7 +103,7 @@ export class Oferta {
       await firstValueFrom(this.api.inscribirse({comisionMateriaId: id}));
       this.aviso.set({ComisionMateriaId: id, texto: 'Se inscribio a la comision' + comision.nombreComision, esError: false})
       this.oferta.reload();
-
+      this.misInscripciones.reload();
     }catch (error)
     {
       this.aviso.set({ComisionMateriaId: id, texto: mensajeDeError(error), esError: true})
@@ -114,7 +116,36 @@ export class Oferta {
     this.inscribiendo.set(null);
   }
 
+  protected readonly misInscripciones = rxResource({
+    stream: () => this.api.listarInscripciones(),
+  })
 
+  protected readonly aBajar = signal<InscripcionComisionResponse | null>(null)
+  protected readonly bajando = signal(false)
+  protected readonly avisoBaja = signal<{texto: string, esError: boolean} | null>(null)
+
+   protected mensajeBaja(inscripcion: InscripcionComisionResponse): string
+  {
+    return `Te vas a dar de baja de ${inscripcion.nombreMateria}, comisión ${inscripcion.nombreComision}.`;
+  }
+
+  protected async darDeBaja(inscripcion: InscripcionComisionResponse): Promise<void>
+  {
+    this.avisoBaja.set(null);
+    this.bajando.set(true);
+    try
+    {
+      await firstValueFrom(this.api.darDeBaja(inscripcion.id));
+      this.avisoBaja.set({ texto: 'Te diste de baja de ' + inscripcion.nombreMateria, esError: false });
+    }catch(error)
+    {
+      this.avisoBaja.set({texto: mensajeDeError(error),esError: true})
+    }
+    this.aBajar.set(null);
+    this.bajando.set(false);
+    this.misInscripciones.reload();
+    this.oferta.reload();
+  }
 
 
 

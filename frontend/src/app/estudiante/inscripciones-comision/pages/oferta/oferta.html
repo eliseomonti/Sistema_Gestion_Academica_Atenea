@@ -1,4 +1,50 @@
 <h1>Inscripcion a cursado</h1>
+<section class="mis-inscripciones">
+    <h2>Mis inscripciones</h2>
+
+    @if(misInscripciones.error())
+    {
+        <p class="error">No se pudieron cargar tus inscripciones</p>
+    }@else if(misInscripciones.value(); as lista)
+    {
+        <ul class="comisiones">
+            @for(inscripcion of lista; track inscripcion.id)
+            {
+                <li class="comision" [class.de-baja]="inscripcion.estado === 'BAJA'">
+                    <strong>{{inscripcion.nombreMateria}}</strong> · Comision {{inscripcion.nombreComision}}
+                    <p class="detalle">
+                        {{cuatrimestre(inscripcion.periodoLectivo)}}  desde el {{inscripcion.fechaInscripcion | date: 'dd/MM/yyyy'}}
+                        {{inscripcion.estado === 'INSCRIPTO' ? 'Inscripto' : 'Dado de baja'}}
+                    </p>
+
+                    @if(inscripcion.estado === 'INSCRIPTO')
+                    {
+                        @if(aBajar()?.id === inscripcion.id)
+                        {
+                            <app-confirmar-dialog [mensaje]="mensajeBaja(inscripcion)" confirmarTexto="Darme de baja" [procesando]="bajando()" (confirmar)="darDeBaja(inscripcion)" (cancelar)="aBajar.set(null)" />
+                        }@else
+                        {
+                            <button type="button" class="baja" [disabled]="bajando()" (click)="aBajar.set(inscripcion)">Darme de baja</button>
+                        }
+                    }
+                </li>
+            }@empty
+            {
+                <li class="detalle">Todavia no te inscribiste a ninguna materia este año</li>
+            }
+        </ul>
+
+        @if(avisoBaja(); as aviso)
+        {
+            <p [class.error]="aviso.esError" [class.bien]="!aviso.esError">{{aviso.texto}}</p>
+        }
+    }@else
+    {
+        <p class="estado">Cargando tus inscripciones...</p>
+    }
+</section>
+
+<h2>Materias para inscribirte</h2>
 
 @if(oferta.error())
 {
