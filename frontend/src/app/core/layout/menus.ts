@@ -33,6 +33,7 @@ export const MENUS: Record<Rol, ItemMenu[]> = {
     { texto: 'Exámenes finales', ruta: '/docente/examenes-finales', icono: 'documento' },
   ],
   ESTUDIANTE: [
+    { texto: 'Inicio', ruta: '/estudiante', icono: 'casa', exacta: true },
     { texto: 'Plan de estudio', ruta: '/estudiante/plan-estudio', icono: 'libro' },
     { texto: 'Inscripción a cursado', ruta: '/estudiante/inscripciones-comision', icono: 'editar' },
     {
