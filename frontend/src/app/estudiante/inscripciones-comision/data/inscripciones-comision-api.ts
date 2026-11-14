@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
 import { API_URL } from "../../../core/http/api-url";
 import { Observable } from "rxjs";
@@ -20,9 +20,15 @@ export class InscripcionesComisionApi{
         return this.http.post<InscripcionComisionResponse>(this.url, request);
     }
 
-    listarInscripciones(): Observable<InscripcionComisionResponse[]>
+    listarInscripciones(anioLectivo?: number): Observable<InscripcionComisionResponse[]>
     {
-        return this.http.get<InscripcionComisionResponse[]>(this.url);
+        const params = anioLectivo? new HttpParams().set('anioLectivo', anioLectivo): undefined
+        return this.http.get<InscripcionComisionResponse[]>(this.url, {params});
+    }
+
+    darDeBaja(inscripcionid: number): Observable<InscripcionComisionResponse>
+    {
+        return this.http.post<InscripcionComisionResponse>(`${this.url}/${inscripcionid}/baja`, null)
     }
 
 
