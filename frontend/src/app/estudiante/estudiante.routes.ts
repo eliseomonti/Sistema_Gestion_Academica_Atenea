@@ -4,9 +4,14 @@ import { Routes } from '@angular/router';
 const routes: Routes = [
     {path: '', pathMatch: 'full', loadComponent: () => import('./inicio/pages/inicio/inicio').then((m) => m.Inicio), title: 'Inicio'},
     {
+        path: 'plan-estudio', loadComponent: () => import('./plan-estudio/pages/plan-estudio/plan-estudio').then((m) => m.PlanEstudio), 
+        title: 'Plan de estudio'
+    },
+    {
         path: 'inscripciones-comision', loadComponent: () => import('./inscripciones-comision/pages/oferta/oferta').then((m) => m.Oferta), 
         title: 'Inscripcion a cursado'
     },
+    
 ];
 
 export default routes;

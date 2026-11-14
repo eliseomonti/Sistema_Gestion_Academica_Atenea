@@ -1,0 +1,72 @@
+.plan{
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+h2{
+  margin: 0;
+  font-size: var(--texto-grande);
+}
+
+h3{
+  margin: var(--espacio-4) 0 var(--espacio-2);
+  font-size: var(--texto-base);
+}
+
+.detalle{
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+.avance{
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--espacio-3);
+  font-size: var(--texto-chico);
+}
+
+.barra{
+  height: 0.5rem;
+  margin-top: var(--espacio-1);
+  border-radius: var(--radio);
+  background: var(--color-divisor);
+  overflow: hidden;
+}
+
+.relleno{
+  height: 100%;
+  background: var(--color-primario);
+}
+
+.materias{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.materias li{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+  border-top: 1px solid var(--color-divisor);
+}
+
+.materias li > span:first-child{
+  display: flex;
+  flex-direction: column;
+}
+
+.estado{
+  color: var(--color-texto-suave);
+}
+
+.error{
+  color: var(--color-error);
+}

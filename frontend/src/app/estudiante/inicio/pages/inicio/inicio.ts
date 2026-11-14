@@ -70,7 +70,7 @@ export class Inicio {
     },
     {
       texto: 'Avance de la carrera',
-      ruta: null,
+      ruta: '/estudiante/plan-estudio',
       icono: 'birrete',
       total: total(this.planes, (planes) => `${planes[0]?.porcentajeAvance ?? 0}%`),
       detalle: 'de las materias aprobadas',
