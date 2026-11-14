@@ -4,6 +4,8 @@ import { Turno } from "../../../shared/models/turno";
 
 export type PeriodoLectivo = 'PRIMER_CUATRIMESTRE' | 'SEGUNDO_CUATRIMESTRE' | 'ANUAL';
 
+export type EstadoInscripcion = 'INSCRIPTO' | 'BAJA';
+
 export interface OfertaMateriaResponse{
     planEstudioId: number;
     materiaId: number;
@@ -51,5 +53,5 @@ export interface InscripcionComisionResponse{
     periodoLectivo: PeriodoLectivo;
     anioLectivo: number;
     fechaInscripcion: string;
-    estado: string;
+    estado: EstadoInscripcion;
 }

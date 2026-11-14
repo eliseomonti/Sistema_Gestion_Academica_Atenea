@@ -20,6 +20,10 @@ export class InscripcionesComisionApi{
         return this.http.post<InscripcionComisionResponse>(this.url, request);
     }
 
+    listarInscripciones(): Observable<InscripcionComisionResponse[]>
+    {
+        return this.http.get<InscripcionComisionResponse[]>(this.url);
+    }
 
 
 
