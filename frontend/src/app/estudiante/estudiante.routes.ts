@@ -13,6 +13,7 @@ const routes: Routes = [
     },
     {path: 'inscripciones-final', loadComponent: () => import('./inscripciones-final/pages/mesas/mesas').then((m) => m.Mesas), 
     title: 'inscripcion a finales' },
+    {path: 'notas', loadComponent: () => import('./notas/pages/notas/notas').then((m) => m.Notas), title: 'Mis notas'}
     
 ];
 
