@@ -1,0 +1,54 @@
+<h1>Plan de estudio</h1>
+@if(planes.error())
+{
+    <p class="error">No se pudo cargar tu plan de estudio</p>
+    <button type="button" (click)="planes.reload()">Reintentar</button>
+}@else if(planes.value(); as lista)
+    {
+        @for(plan of lista; track plan.planEstudioId)
+    {
+        <section class="plan">
+            <h2>{{plan.nombreCarrera}}</h2>
+            <p class="detalle">{{plan.nombrePlan}}</p>
+
+            <div class="avance">
+                <span>{{plan.materiasAprobadas}} de {{plan.totalMaterias}} materias aprobadas</span>
+                <strong>{{plan.porcentajeAvance}}%</strong>
+            </div>
+            <div class="barra">
+                <div class="relleno" [style.width.%]="plan.porcentajeAvance"></div>
+            </div>
+            @for(anio of aniosDe(plan); track anio)
+            {
+                <h3>{{anio}}° año</h3>
+                <ul class="materias">
+                    @for(materia of materiasDe(plan, anio); track materia.materiaId)
+                    {
+                        <li>
+                            <span>
+                                <strong>{{materia.nombre}}</strong>
+                                <span class="detalle">{{cuatrimestre(materia.periodoLectivo)}}</span>
+                            </span>
+
+                            @if(estado(materia).tipo; as tipo)
+                            {
+                                <app-etiqueta [tipo]="tipo">
+                                    {{estado(materia).texto}}@if(materia.nota !== null){ · {{materia.nota}}}
+                                </app-etiqueta>
+                            }@else
+                            {
+                                <span class="detalle">{{estado(materia).texto}}</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }@empty
+    {
+        <p class="estado">No estás inscripto a ninguna carrera.</p>
+    }
+}@else 
+{
+     <p class="estado">Cargando plan de estudio...</p>
+}
