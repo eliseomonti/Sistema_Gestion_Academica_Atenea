@@ -63,7 +63,7 @@ export class Inicio {
     },
     {
       texto: 'Finales aprobados',
-      ruta: null,
+      ruta: '/estudiante/notas',
       icono: 'medalla',
       total: total(this.finales, (lista) => String(lista.filter((f) => f.aprobado === true).length)),
       detalle: 'en toda la carrera',
