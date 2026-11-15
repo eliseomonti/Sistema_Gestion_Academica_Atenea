@@ -48,7 +48,7 @@ export class Notas {
         case 'REGULAR':
           return {texto: 'Regular', tipo: 'ok'};
           case 'NO_REGULAR':
-            return {texto: 'Promocionado', tipo: 'error'};
+            return {texto: 'Libre', tipo: 'error'};
             default: 
             return null;
     }
