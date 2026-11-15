@@ -1,0 +1,84 @@
+<h1>Inscripcion a finales</h1>
+
+<section class="bloque">
+    <h2>Mis inscripciones</h2>
+
+    @if(misInscripciones.error())
+    {
+        <p class="error">No se pudieron cargar tus inscripciones</p>
+    }@else if(misInscripciones.value(); as lista)
+    {
+        <ul class="lista">
+            @for(inscripcion of lista; track inscripcion.id)
+            {
+                <li [class.de-baja]="inscripcion.estado === 'BAJA'">
+                    <strong>{{inscripcion.nombreMateria}}</strong>
+                    <p class="detalle">
+                        {{inscripcion.fecha | date: 'dd/MM/yyyy'}} · {{horario(inscripcion)}} {{inscripcion.estado === 'INSCRIPTO' ? 'Inscripto' : 'Dado de baja'}}
+                    </p>
+
+                    @if(inscripcion.estado === 'INSCRIPTO')
+                    {
+                        @if(aBajar()?.id === inscripcion.id)
+                        {
+                            <app-confirmar-dialog [mensaje]="mensajeBaja(inscripcion)" confirmarTexto="Darme de baja" [procesando]="bajando()" (confirmar)="darDeBaja(inscripcion)" (cancelar)="aBajar.set(null)" />
+                        }@else
+                        {
+                            <button type="button" class="baja" [disabled]="bajando()" (click)="aBajar.set(inscripcion)">Darme de baja</button>
+                        }
+                    }
+                </li>
+            }@empty
+            {
+                <li class="detalle">No estas anotado a ninguna mesa</li>
+            }
+        </ul>
+
+        @if(avisoBaja(); as aviso)
+        {
+            <p [class.error]="aviso.esError" [class.bien]="!aviso.esError">{{aviso.texto}}</p>
+        }
+    }@else
+    {
+        <p class="estado">Cargando tus inscripciones...</p>
+    }
+</section>
+
+<section class="bloque">
+    <h2>Mesas disponibles</h2>
+
+    @if(oferta.error())
+    {
+        <p class="error">No se pudieron cargar las mesas</p>
+        <button type="button" (click)="oferta.reload()">Reintentar</button>
+    }@else if(oferta.hasValue())
+    {
+        <ul class="lista">
+            @for(mesa of mesas(); track mesa.examenFinalId)
+            {
+                <li>
+                    <strong>{{mesa.nombreMateria}}</strong>
+                    <p class="detalle">{{mesa.fecha | date: 'dd/MM/yyyy'}} {{horario(mesa)}}</p>
+                    <p class="detalle">{{docentes(mesa)}}</p>
+                     @if(mesa.inscripto)
+                    {
+                        <p class="inscripto">Estas inscripto</p>
+                    }@else
+                    {
+                        <button type="button" [disabled]="inscribiendo() !== null" (click)="inscribir(mesa)">Inscribirme</button>
+                    }
+                    @if(aviso()?.examenFinalId === mesa.examenFinalId)
+                    {
+                        <p [class.error]="aviso()?.esError" [class.bien]="!aviso()?.esError">{{aviso()?.texto}}</p>
+                    }
+                </li>
+            }@empty
+            {
+                <li class="detalle">No hay mesas abiertas para inscribirte, puede que no haya un turno de finales abierto</li>
+            }
+        </ul>
+    }@else
+    {
+        <p class="estado">Cargando mesas...</p>
+    }
+</section>

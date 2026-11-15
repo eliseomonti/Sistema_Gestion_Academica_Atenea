@@ -11,6 +11,8 @@ const routes: Routes = [
         path: 'inscripciones-comision', loadComponent: () => import('./inscripciones-comision/pages/oferta/oferta').then((m) => m.Oferta), 
         title: 'Inscripcion a cursado'
     },
+    {path: 'inscripciones-final', loadComponent: () => import('./inscripciones-final/pages/mesas/mesas').then((m) => m.Mesas), 
+    title: 'inscripcion a finales' },
     
 ];
 
