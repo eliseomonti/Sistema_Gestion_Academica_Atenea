@@ -51,6 +51,11 @@ export class Cuenta {
   protected readonly mostrarNueva = signal(false);
   protected readonly mostrarConfirmacion = signal(false);
 
+  /** El link por mail, para quien no se acuerda de la contraseña actual. */
+  protected readonly pidiendoLink = signal(false);
+  protected readonly linkEnviado = signal(false);
+  protected readonly errorLink = signal<string | null>(null);
+
   private readonly passwords = signal({ ...VACIO });
   protected readonly passwordForm = form(
     this.passwords,
@@ -74,6 +79,20 @@ export class Cuenta {
     { submission: { action: () => this.cambiar() } },
   );
 
+  protected async pedirLink(): Promise<void> {
+    this.errorLink.set(null);
+    this.linkEnviado.set(false);
+    this.pidiendoLink.set(true);
+    try {
+      await firstValueFrom(this.sesion.pedirLinkPassword());
+      this.linkEnviado.set(true);
+    } catch (error) {
+      this.errorLink.set(mensajeDeError(error));
+    } finally {
+      this.pidiendoLink.set(false);
+    }
+  }
+
   private async cambiar(): Promise<undefined> {
     this.error.set(null);
     this.cambiada.set(false);
@@ -90,7 +109,10 @@ export class Cuenta {
   }
 }
 
-/** 409: la actual no es correcta o la nueva es igual. 400: la nueva no cumple el largo. */
+/**
+ * 409: la actual no es correcta, la nueva es igual, o ya se pidieron demasiados links por mail.
+ * 400: la nueva no cumple el largo.
+ */
 function mensajeDeError(error: unknown): string {
   if (error instanceof HttpErrorResponse && (error.status === 409 || error.status === 400)) {
     return error.error?.errores?.[0]?.mensaje ?? error.error?.detail ?? 'Revisá los datos.';

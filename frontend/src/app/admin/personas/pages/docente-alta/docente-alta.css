@@ -59,11 +59,6 @@ h2 {
   background: var(--color-alerta-fondo);
 }
 
-.aviso {
-  color: var(--color-alerta);
-  font-size: var(--texto-chico);
-}
-
 .exito {
   padding: var(--espacio-3);
   border-radius: var(--radio);

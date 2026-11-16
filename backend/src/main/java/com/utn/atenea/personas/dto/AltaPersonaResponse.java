@@ -1,15 +1,13 @@
 package com.utn.atenea.personas.dto;
 
 /**
- * Respuesta del alta de un estudiante o docente. Es la única vez que viaja la contraseña temporal:
- * también se le manda por mail a la persona, y si el mail no sale (mailEnviado en false), el admin
- * la ve en pantalla para entregársela.
+ * Respuesta del alta de un estudiante o docente. El usuario y la contraseña temporal no viajan acá:
+ * le llegan sólo a la persona, por mail. Si el mail no sale (mailEnviado en false), la persona puede
+ * pedir una contraseña nueva con su email desde "¿Olvidaste tu contraseña?".
  */
 public record AltaPersonaResponse(
         Long personaId,
         Long legajo,
-        String username,
-        String passwordTemporal,
         boolean mailEnviado
 ) {
 }

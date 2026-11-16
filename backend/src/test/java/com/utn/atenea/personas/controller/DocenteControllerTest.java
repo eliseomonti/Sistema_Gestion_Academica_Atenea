@@ -7,6 +7,7 @@ import com.utn.atenea.personas.repository.PersonaRepository;
 import com.utn.atenea.personas.service.PersonaService;
 import com.utn.atenea.seguridad.CredencialesIniciales;
 import com.utn.atenea.seguridad.NombreRol;
+import com.utn.atenea.compartido.mail.EnvioMails;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +15,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -44,6 +46,7 @@ class DocenteControllerTest {
     private static final String DNI = "99000001";
 
     @Autowired MockMvc mvc;
+    @MockitoBean EnvioMails envioMails;
     @Autowired PersonaRepository personaRepository;
     @Autowired PersonaService personaService;
     @Autowired JwtDecoder jwtDecoder;
@@ -54,12 +57,12 @@ class DocenteControllerTest {
 
         String respuesta = alta(DNI, "docente.test@atenea.test", admin())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value(DNI))
+                .andExpect(jsonPath("$.passwordTemporal").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
 
         long personaId = JsonPath.<Number>read(respuesta, "$.personaId").longValue();
         long legajo = JsonPath.<Number>read(respuesta, "$.legajo").longValue();
-        String passwordTemporal = JsonPath.read(respuesta, "$.passwordTemporal");
+        String passwordTemporal = CredencialesDelMail.password(envioMails);
 
         assertThat(legajo).isEqualTo(legajoEsperado);
         Persona docente = personaRepository.findById(personaId).orElseThrow();

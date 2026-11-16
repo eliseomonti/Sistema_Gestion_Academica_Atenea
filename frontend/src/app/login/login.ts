@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { form, FormField, FormRoot, required } from '@angular/forms/signals';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Rol, rutaInicio } from '../core/seguridad/rol';
 import { Sesion } from '../core/seguridad/sesion';
@@ -16,7 +16,7 @@ const TITULOS: Record<Rol, string> = {
 /** Una sola pantalla para los tres actores. El rol llega desde `data` de la ruta. */
 @Component({
   selector: 'app-login',
-  imports: [FormRoot, FormField, Icono],
+  imports: [FormRoot, FormField, Icono, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

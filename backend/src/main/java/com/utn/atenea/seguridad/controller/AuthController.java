@@ -1,9 +1,12 @@
 package com.utn.atenea.seguridad.controller;
 
 import com.utn.atenea.seguridad.dto.LoginRequest;
+import com.utn.atenea.seguridad.dto.RecuperacionPasswordRequest;
 import com.utn.atenea.seguridad.dto.RefreshRequest;
+import com.utn.atenea.seguridad.dto.RestablecimientoPasswordRequest;
 import com.utn.atenea.seguridad.dto.TokenResponse;
 import com.utn.atenea.seguridad.service.AuthService;
+import com.utn.atenea.seguridad.service.RecuperacionPasswordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final RecuperacionPasswordService recuperacionPasswordService;
 
     @PostMapping("/login")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
@@ -34,5 +38,18 @@ public class AuthController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@Valid @RequestBody RefreshRequest request) {
         authService.logout(request);
+    }
+
+    /** Siempre 204, exista o no el email: la respuesta no revela qué emails hay. */
+    @PostMapping("/recuperar-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void recuperarPassword(@Valid @RequestBody RecuperacionPasswordRequest request) {
+        recuperacionPasswordService.solicitarPorEmail(request.email(), request.rol());
+    }
+
+    @PostMapping("/restablecer-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void restablecerPassword(@Valid @RequestBody RestablecimientoPasswordRequest request) {
+        recuperacionPasswordService.restablecer(request);
     }
 }

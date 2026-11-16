@@ -6,6 +6,21 @@ import { sesionGuard } from './core/seguridad/sesion-guard';
 export const routes: Routes = [
   { path: 'login', loadChildren: () => import('./login/login.routes') },
   {
+    path: 'recuperar-password',
+    loadComponent: () =>
+      import('./login/recuperar-password/recuperar-password').then((m) => m.RecuperarPassword),
+    title: 'Recuperar contraseña',
+  },
+  {
+    // A esta ruta lleva el link del mail: el token viene en ?token=
+    path: 'restablecer-password',
+    loadComponent: () =>
+      import('./login/restablecer-password/restablecer-password').then(
+        (m) => m.RestablecerPassword,
+      ),
+    title: 'Elegir contraseña nueva',
+  },
+  {
     // Sin path propio: sólo agrega la barra superior alrededor de las rutas de los actores.
     path: '',
     component: Layout,

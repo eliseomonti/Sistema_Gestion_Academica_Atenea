@@ -4,18 +4,18 @@
   <h2 id="titulo-ventana">{{ agregado() ? 'Docente agregado' : 'Nuevo docente' }}</h2>
 
   @if (agregado(); as nombre) {
-    <!-- Éxito, en los dos casos. Si fue un alta, también el usuario y la contraseña. -->
+    <!-- Éxito, en los dos casos. Si fue un alta, también el legajo y si salió el mail. -->
     @if (credenciales(); as datos) {
       <p class="exito" role="status">Se dio de alta a {{ nombre }} como docente.</p>
       <p>Legajo: {{ datos.legajo }}</p>
-      <p>Usuario: <strong>{{ datos.username }}</strong></p>
-      <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
       @if (datos.mailEnviado) {
-        <p class="exito">Se le mandaron el usuario y la contraseña por mail.</p>
+        <p class="exito">Se le mandaron por mail el usuario y la contraseña para ingresar.</p>
       } @else {
-        <p class="error" role="alert">No se pudo mandar el mail con el usuario y la contraseña: entregáselos vos.</p>
+        <p class="error" role="alert">
+          No se pudo mandar el mail con el usuario y la contraseña. La persona puede pedir una
+          contraseña nueva con su email, desde "¿Olvidaste tu contraseña?" en el ingreso.
+        </p>
       }
-      <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
     } @else {
       <p class="exito" role="status">Se le asignó el rol de docente a {{ nombre }}.</p>
     }
