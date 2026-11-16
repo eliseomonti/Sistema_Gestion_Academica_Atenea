@@ -49,9 +49,10 @@ public class DocenteService {
         Persona docente = personaService.crear(datos);
         personaService.asignarLegajoDocente(docente);
         CredencialesIniciales credenciales = personaService.crearUsuario(docente, NombreRol.ROLE_DOCENTE);
+        boolean mailEnviado = personaService.enviarCredenciales(docente, credenciales);
 
         return new AltaPersonaResponse(docente.getId(), docente.getLegajoDocente(),
-                credenciales.username(), credenciales.passwordTemporal());
+                credenciales.username(), credenciales.passwordTemporal(), mailEnviado);
     }
 
     /** Una persona que ya existe (por ejemplo, un estudiante) pasa a ser también docente. Conserva su usuario. */

@@ -71,6 +71,11 @@
 			<groupId>org.springframework.modulith</groupId>
 			<artifactId>spring-modulith-starter-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.resend</groupId>
+			<artifactId>resend-java</artifactId>
+			<version>4.29.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.mysql</groupId>
