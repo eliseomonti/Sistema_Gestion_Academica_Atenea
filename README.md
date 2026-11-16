@@ -131,7 +131,6 @@ Por defecto, `backend/src/main/resources/application.properties` conecta a `jdbc
 | `DB_USER` | `root` |
 | `DB_PASSWORD` | `root` |
 | `JWT_SECRET` | Clave de desarrollo (no usar en producción) |
-| `CORS_ORIGINS` | `http://localhost:4200` |
 
 Si el entorno local utiliza otras credenciales o el conector de MariaDB, también puede crearse el archivo `backend/src/main/resources/application-local.properties` (ignorado por Git):
 
@@ -171,6 +170,8 @@ npm start
 ### Producción actual: Azure
 
 La aplicación publicada está en **https://atenea-frontend.calmcliff-ac059761.chilecentral.azurecontainerapps.io**.
+
+El estado del sistema (frontend, y backend con su base) se puede consultar en la página pública de monitoreo: **https://stats.uptimerobot.com/0INBxiFWcc**. UptimeRobot verifica cada 5 minutos la página principal y `/api/health`, y avisa por mail si alguno deja de responder.
 
 ```text
 Navegador ──HTTPS──▶ atenea-frontend (nginx) ──/api──▶ atenea-backend (Spring Boot, interno)

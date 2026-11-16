@@ -24,7 +24,6 @@ services:
       DB_URL: jdbc:mysql://mysql:3306/atenea_db
       DB_USER: root
       DB_PASSWORD: ${DB_PASSWORD:-root}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4200}
       TZ: America/Argentina/Buenos_Aires
     ports:
       - "8080:8080"
