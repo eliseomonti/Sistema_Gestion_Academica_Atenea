@@ -10,6 +10,11 @@
       <p>Legajo: {{ datos.legajo }}</p>
       <p>Usuario: <strong>{{ datos.username }}</strong></p>
       <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
+      @if (datos.mailEnviado) {
+        <p class="exito">Se le mandaron el usuario y la contraseña por mail.</p>
+      } @else {
+        <p class="error" role="alert">No se pudo mandar el mail con el usuario y la contraseña: entregáselos vos.</p>
+      }
       <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
     } @else {
       <p class="exito" role="status">Se le asignó el rol de docente a {{ nombre }}.</p>

@@ -45,6 +45,7 @@ public class PersonaService {
     private final InscripcionCarreraRepository inscripcionCarreraRepository;
     private final PersonaMapper personaMapper;
     private final SeguridadApi seguridadApi;
+    private final MailCredencialesService mailCredencialesService;
 
     @Transactional(readOnly = true)
     public PersonaResponse buscarPorDni(String dni) {
@@ -137,6 +138,16 @@ public class PersonaService {
     // El username es el DNI: ya es único y la persona lo conoce.
     public CredencialesIniciales crearUsuario(Persona persona, NombreRol rol) {
         return seguridadApi.crearUsuario(persona.getId(), persona.getDni(), rol);
+    }
+
+    /**
+     * Le manda a la persona su usuario y su contraseña temporal. Se llama al final del alta: el flush
+     * hace saltar antes los errores de la base (por ejemplo, un legajo repetido), así no sale un mail
+     * con un usuario que después no se guarda. Devuelve true si el mail salió.
+     */
+    public boolean enviarCredenciales(Persona persona, CredencialesIniciales credenciales) {
+        personaRepository.flush();
+        return mailCredencialesService.enviar(persona, credenciales);
     }
 
     /** Para quien ya tiene usuario: suma el rol y conserva su contraseña. */

@@ -82,9 +82,10 @@ public class EstudianteService {
         personaService.asignarLegajoEstudiante(estudiante);
         CredencialesIniciales credenciales = personaService.crearUsuario(estudiante, NombreRol.ROLE_ESTUDIANTE);
         inscripcionCarreraRepository.save(new InscripcionCarrera(estudiante, plan.id(), LocalDate.now()));
+        boolean mailEnviado = personaService.enviarCredenciales(estudiante, credenciales);
 
         return new AltaPersonaResponse(estudiante.getId(), estudiante.getLegajoEstudiante(),
-                credenciales.username(), credenciales.passwordTemporal());
+                credenciales.username(), credenciales.passwordTemporal(), mailEnviado);
     }
 
     /**

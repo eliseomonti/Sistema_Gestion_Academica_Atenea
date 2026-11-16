@@ -25,4 +25,5 @@ export interface AltaPersonaResponse {
   legajo: number;
   username: string;
   passwordTemporal: string;
+  mailEnviado: boolean;
 }
