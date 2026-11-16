@@ -5,6 +5,7 @@ Thumbs.db
 # Secretos y configuracion local (NUNCA subir)
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.jks
