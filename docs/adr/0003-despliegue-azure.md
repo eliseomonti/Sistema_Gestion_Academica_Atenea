@@ -20,11 +20,12 @@ recursos en cinco regiones (`brazilsouth`, `canadacentral`, `chilecentral`, `new
    - `docker-compose.yml` levanta MySQL, backend y frontend para desarrollo local, y carga los scripts
      de `bdd/` la primera vez.
 2. **La configuración entra por variables de entorno.** `application.properties` lee la conexión a la
-   base y los orígenes de CORS con valores por defecto de desarrollo. El perfil `prod` quita los
+   base con valores por defecto de desarrollo. El perfil `prod` quita los
    valores por defecto de `DB_PASSWORD` y `JWT_SECRET`: si faltan, la aplicación no arranca.
 3. **El frontend llama a la API por la ruta relativa `/api`.** En producción la reenvía nginx y en
-   desarrollo `ng serve` (con `proxy.conf.json`). Frontend y backend quedan en el mismo origen, y la
-   misma compilación de Angular sirve en cualquier entorno.
+   desarrollo `ng serve` (con `proxy.conf.json`). Frontend y backend quedan en el mismo origen, así
+   que el backend no necesita configuración de CORS, y la misma compilación de Angular sirve en
+   cualquier entorno.
 4. **Producción en servicios administrados de Azure**, todo en Chile Central:
    - Frontend y backend en **Azure Container Apps**. El backend tiene ingreso interno, así que sólo
      se llega a él a través del frontend. Azure provee HTTPS.
@@ -82,8 +83,8 @@ recursos en cinco regiones (`brazilsouth`, `canadacentral`, `chilecentral`, `new
 
 - El workflow de CI/CD corre en cada PR y en cada merge a `main`. La regla de protección de `main`
   exige que la verificación pase.
-- El último paso del deploy comprueba que la página responda 200 y que la API responda (un login
-  inválido devuelve 401).
+- El último paso del deploy comprueba que la página responda 200 y que `/api/health` (backend y base)
+  responda 200.
 
 ## Revisión
 
