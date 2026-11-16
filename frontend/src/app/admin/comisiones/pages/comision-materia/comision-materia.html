@@ -5,21 +5,22 @@
     <p class="bien">{{ texto }}</p>
     <button type="button" (click)="cerrar()">Listo</button>
   } @else if (errorAlCargar()) {
-    <p class="error" role="alert">No se pudieron cargar los datos de la comisión.</p>
+    <p class="error" role="alert">No se pudieron cargar los datos de la comision</p>
     <button type="button" (click)="cerrar()">Cerrar</button>
   } @else if (cargandoDatos()) {
     <p class="estado">Cargando…</p>
   } @else if (editando() && !materiaEditada()) {
-    <p class="error" role="alert">La comisión no tiene esa materia.</p>
+    <p class="error" role="alert">La comisión no tiene esa materia</p>
     <button type="button" (click)="cerrar()">Cerrar</button>
   } @else if (!editando() && opciones().length === 0) {
-    <p class="estado">Ya están todas las materias del año en esta comisión.</p>
+    <p class="estado">Ya están todas las materias del año en esta comisión</p>
     <button type="button" (click)="cerrar()">Cerrar</button>
   } @else {
     <form [formRoot]="materiaForm">
       @if (materiaEditada(); as materia) {
         <!-- Al editar, la materia no cambia: para eso se quita y se agrega otra. -->
         <p class="materia">{{ materia.nombreMateria }}</p>
+        <a class="inscriptos" routerLink="inscriptos">Ver inscriptos</a>
       } @else {
         <label>
           Materia

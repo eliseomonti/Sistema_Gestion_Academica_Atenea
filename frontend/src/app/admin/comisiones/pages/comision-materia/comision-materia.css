@@ -174,3 +174,20 @@ legend {
   color: var(--color-texto);
   background: var(--color-fondo);
 }
+
+.inscriptos {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-bottom: var(--espacio-3);
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--color-primario);
+  border-radius: var(--radio);
+  color: var(--color-primario);
+  background: var(--color-superficie);
+  text-decoration: none;
+}
+
+.inscriptos:hover {
+  background: var(--color-primario-claro);
+}

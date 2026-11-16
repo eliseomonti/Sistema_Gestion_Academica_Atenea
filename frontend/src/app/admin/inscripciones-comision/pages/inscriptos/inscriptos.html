@@ -1,0 +1,45 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+    <h2>Inscriptos</h2>
+    <p class="subtitulo">{{nombreMateria()}}</p>
+
+    @if(inscriptos.error())
+    {
+        <p class="error">No se pudieron cargar los inscriptos</p>
+    }@else if(inscriptos.value(); as lista)
+    {
+        <ul class="lista">
+            @for(inscripto of lista; track inscripto.inscripcionId)
+            {
+                <li>
+                    <div>
+                        <p class="nombre">{{inscripto.apellido}}, {{inscripto.nombre}}</p>
+                        <p class="detalle">Legajo {{inscripto.legajo}} · inscripto el {{inscripto.fechaInscripcion | date: 'dd/MM/yyyy'}}</p>
+                    </div>
+
+                    @if(aBajar()?.inscripcionId === inscripto.inscripcionId)
+                    {
+                        <app-confirmar-dialog [mensaje]="mensajeBaja(inscripto)" confirmarTexto="Dar de baja" [procesando]="bajando()" (confirmar)="darDeBaja(inscripto)" (cancelar)="aBajar.set(null)" />
+                    }@else
+                    {
+                        <button type="button" class="peligro" [disabled]="bajando()" (click)="aBajar.set(inscripto)">Dar de baja</button>
+                    }
+                </li>
+            }@empty
+            {
+                <li class="detalle">No hay estudiantes inscriptos.</li>
+            }
+        </ul>
+    }@else
+    {
+        <p class="detalle">Cargando inscriptos...</p>
+    }
+
+    @if(aviso(); as mensaje)
+    {
+        <p [class.error]="mensaje.esError" [class.bien]="!mensaje.esError">{{mensaje.texto}}</p>
+    }
+
+    <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+        <app-icono nombre="cerrar" />
+    </button>
+</dialog>

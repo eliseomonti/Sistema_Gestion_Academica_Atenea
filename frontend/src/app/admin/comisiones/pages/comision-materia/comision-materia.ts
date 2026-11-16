@@ -21,7 +21,7 @@ import {
   pattern,
   required,
 } from '@angular/forms/signals';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom, map } from 'rxjs';
 import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
 import { Icono } from '../../../../shared/ui/icono/icono';
@@ -132,7 +132,7 @@ function aHorarioRequest(horario: HorarioElegido, bloques: Bloque[]): HorarioReq
  */
 @Component({
   selector: 'app-comision-materia',
-  imports: [FormRoot, FormField, Icono, DocenteBuscador, ConfirmarDialog],
+  imports: [FormRoot, FormField, Icono, DocenteBuscador, ConfirmarDialog, RouterLink],
   templateUrl: './comision-materia.html',
   styleUrl: './comision-materia.css',
 })
