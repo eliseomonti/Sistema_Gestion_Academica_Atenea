@@ -52,7 +52,7 @@ public class DocenteService {
         boolean mailEnviado = personaService.enviarCredenciales(docente, credenciales);
 
         return new AltaPersonaResponse(docente.getId(), docente.getLegajoDocente(),
-                credenciales.username(), credenciales.passwordTemporal(), mailEnviado);
+                mailEnviado);
     }
 
     /** Una persona que ya existe (por ejemplo, un estudiante) pasa a ser también docente. Conserva su usuario. */

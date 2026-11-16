@@ -3,6 +3,7 @@ package com.utn.atenea.personas.controller;
 import com.jayway.jsonpath.JsonPath;
 import com.utn.atenea.personas.model.Persona;
 import com.utn.atenea.personas.repository.PersonaRepository;
+import com.utn.atenea.compartido.mail.EnvioMails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -41,6 +43,7 @@ class EstudianteControllerTest {
     private static final String DNI = "99000002";
 
     @Autowired MockMvc mvc;
+    @MockitoBean EnvioMails envioMails;
     @Autowired JdbcTemplate jdbc;
     @Autowired PersonaRepository personaRepository;
     @Autowired JwtDecoder jwtDecoder;
@@ -74,7 +77,7 @@ class EstudianteControllerTest {
 
         String respuesta = alta(DNI, planVigente)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value(DNI))
+                .andExpect(jsonPath("$.passwordTemporal").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
 
         long personaId = JsonPath.<Number>read(respuesta, "$.personaId").longValue();
@@ -91,7 +94,7 @@ class EstudianteControllerTest {
         assertThat(((Date) inscripcion.get("fecha_inscripcion")).toLocalDate()).isEqualTo(LocalDate.now());
 
         // Las credenciales devueltas sirven para loguearse y el token trae el rol de estudiante.
-        assertThat(roles(DNI, JsonPath.read(respuesta, "$.passwordTemporal"))).containsExactly("ROLE_ESTUDIANTE");
+        assertThat(roles(DNI, CredencialesDelMail.password(envioMails))).containsExactly("ROLE_ESTUDIANTE");
     }
 
     @Test
@@ -147,7 +150,7 @@ class EstudianteControllerTest {
                 .andExpect(jsonPath("$.estado").value("ACTIVA"));
 
         // Conserva su contraseña y el token trae los dos roles.
-        assertThat(roles(DNI, JsonPath.read(respuesta, "$.passwordTemporal")))
+        assertThat(roles(DNI, CredencialesDelMail.password(envioMails)))
                 .containsExactlyInAnyOrder("ROLE_DOCENTE", "ROLE_ESTUDIANTE");
     }
 
@@ -397,7 +400,7 @@ class EstudianteControllerTest {
                 .andExpect(jsonPath("$.page.totalElements").value(0));
         listar("carreraId", carreraId.toString(), "estado", "BAJA")
                 .andExpect(jsonPath("$.content[*].dni").value(contains(DNI)));
-        login(DNI, JsonPath.read(respuesta, "$.passwordTemporal"))
+        login(DNI, CredencialesDelMail.password(envioMails))
                 .andExpect(status().isUnauthorized());
     }
 

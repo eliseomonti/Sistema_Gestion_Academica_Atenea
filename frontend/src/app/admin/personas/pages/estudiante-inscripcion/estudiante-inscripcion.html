@@ -8,18 +8,18 @@
   }
 
   @if (inscripta(); as nombre) {
-    <!-- Éxito, en los dos casos. Si fue un alta, también el usuario y la contraseña. -->
+    <!-- Éxito, en los dos casos. Si fue un alta, también el legajo y si salió el mail. -->
     <p class="exito" role="status">Se inscribió a {{ nombre }} en este plan.</p>
     @if (credenciales(); as datos) {
       <p>Legajo: {{ datos.legajo }}</p>
-      <p>Usuario: <strong>{{ datos.username }}</strong></p>
-      <p>Contraseña temporal: <strong>{{ datos.passwordTemporal }}</strong></p>
       @if (datos.mailEnviado) {
-        <p class="exito">Se le mandaron el usuario y la contraseña por mail.</p>
+        <p class="exito">Se le mandaron por mail el usuario y la contraseña para ingresar.</p>
       } @else {
-        <p class="error" role="alert">No se pudo mandar el mail con el usuario y la contraseña: entregáselos vos.</p>
+        <p class="error" role="alert">
+          No se pudo mandar el mail con el usuario y la contraseña. La persona puede pedir una
+          contraseña nueva con su email, desde "¿Olvidaste tu contraseña?" en el ingreso.
+        </p>
       }
-      <p class="aviso">Anotala ahora: esta contraseña no se vuelve a mostrar.</p>
     }
     <div class="botones">
       <button type="button" (click)="cerrar()">Listo</button>

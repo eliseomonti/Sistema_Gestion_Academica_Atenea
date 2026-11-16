@@ -108,4 +108,21 @@
 
     <button type="submit" [disabled]="passwordForm().submitting()">Cambiar contraseña</button>
   </form>
+
+  <div class="olvido">
+    <p class="ayuda">
+      ¿No te acordás de la contraseña actual? Te mandamos un link por mail para elegir una nueva.
+    </p>
+    <button type="button" class="secundario" [disabled]="pidiendoLink()" (click)="pedirLink()">
+      Mandame el link
+    </button>
+    @if (linkEnviado()) {
+      <p class="ok" role="status">
+        Te mandamos el link a tu mail. Vence en 30 minutos. Si no lo ves, revisá la carpeta de spam.
+      </p>
+    }
+    @if (errorLink(); as mensaje) {
+      <p class="error" role="alert">{{ mensaje }}</p>
+    }
+  </div>
 </section>

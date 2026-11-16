@@ -1,12 +1,14 @@
 package com.utn.atenea.personas.controller;
 
 import com.jayway.jsonpath.JsonPath;
+import com.utn.atenea.compartido.mail.EnvioMails;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -35,6 +37,7 @@ class PersonaControllerTest {
     private static final String OTRO_DNI = "99000004";
 
     @Autowired MockMvc mvc;
+    @MockitoBean EnvioMails envioMails;
 
     @Test
     void buscarPorDniDevuelveLaPersonaConSusLegajos() throws Exception {
@@ -62,7 +65,7 @@ class PersonaControllerTest {
         String alta = altaDocente(DNI, "persona.test@atenea.test");
         long personaId = JsonPath.<Number>read(alta, "$.personaId").longValue();
         long legajo = JsonPath.<Number>read(alta, "$.legajo").longValue();
-        String password = JsonPath.read(alta, "$.passwordTemporal");
+        String password = CredencialesDelMail.password(envioMails);
 
         modificar(personaId, "Ana María", OTRO_DNI, "nuevo.mail@atenea.test")
                 .andExpect(status().isOk())
@@ -123,7 +126,7 @@ class PersonaControllerTest {
                 .andExpect(jsonPath("$.activo").value(false))
                 .andExpect(jsonPath("$.legajoDocente").value(legajo));
 
-        login(DNI, JsonPath.read(alta, "$.passwordTemporal")).andExpect(status().isUnauthorized());
+        login(DNI, CredencialesDelMail.password(envioMails)).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/admin/personas/dni/{dni}", DNI).with(admin()))
                 .andExpect(jsonPath("$.activo").value(false));
     }

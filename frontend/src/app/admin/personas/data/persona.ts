@@ -23,7 +23,5 @@ export interface PersonaResponse {
 export interface AltaPersonaResponse {
   personaId: number;
   legajo: number;
-  username: string;
-  passwordTemporal: string;
   mailEnviado: boolean;
 }

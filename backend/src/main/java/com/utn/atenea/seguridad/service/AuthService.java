@@ -17,19 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.HexFormat;
+
+import static com.utn.atenea.seguridad.service.TokensAleatorios.hash;
 
 @Service
 public class AuthService {
-
-    private static final int BYTES_REFRESH_TOKEN = 32;
 
     private final AuthenticationManager authenticationManager;
     private final UsuarioRepository usuarioRepository;
@@ -37,7 +31,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final Duration duracionRefreshToken;
-    private final SecureRandom secureRandom = new SecureRandom();
 
     public AuthService(AuthenticationManager authenticationManager,
                        UsuarioRepository usuarioRepository,
@@ -110,14 +103,14 @@ public class AuthService {
      * El único lugar donde se fija una contraseña: también lo va a usar el restablecimiento por mail.
      * Las sesiones abiertas se cierran porque se abrieron con la contraseña anterior.
      */
-    private void establecerPassword(Usuario usuario, String passwordNueva) {
+    void establecerPassword(Usuario usuario, String passwordNueva) {
         usuario.setPassword(passwordEncoder.encode(passwordNueva));
         usuario.setFechaCambioPassword(LocalDateTime.now());
         refreshTokenRepository.revocarTodosDelUsuario(usuario.getId());
     }
 
     private TokenResponse emitirTokens(Usuario usuario) {
-        String refreshToken = generarTokenAleatorio();
+        String refreshToken = TokensAleatorios.generar();
         LocalDateTime ahora = LocalDateTime.now();
         refreshTokenRepository.save(
                 new RefreshToken(usuario, hash(refreshToken), ahora, ahora.plus(duracionRefreshToken)));
@@ -126,20 +119,5 @@ public class AuthService {
                 jwtService.generarAccessToken(usuario),
                 refreshToken,
                 jwtService.getDuracionAccessToken().toSeconds());
-    }
-
-    private String generarTokenAleatorio() {
-        byte[] bytes = new byte[BYTES_REFRESH_TOKEN];
-        secureRandom.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-    }
-
-    private static String hash(String token) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 no disponible", e);
-        }
     }
 }

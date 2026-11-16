@@ -46,5 +46,8 @@
     }
 
     <button type="submit" [disabled]="loginForm().submitting()">Ingresar</button>
+    <a class="enlace" routerLink="/recuperar-password" [queryParams]="{ rol: rol().toLowerCase() }"
+      >¿Olvidaste tu contraseña?</a
+    >
   </form>
 </main>

@@ -1,6 +1,12 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { catchError, finalize, map, Observable, of, shareReplay, throwError } from 'rxjs';
-import { CambioPasswordRequest, LoginRequest, TokenResponse } from './auth';
+import {
+  CambioPasswordRequest,
+  LoginRequest,
+  RecuperacionPasswordRequest,
+  RestablecimientoPasswordRequest,
+  TokenResponse,
+} from './auth';
 import { AuthApi } from './auth-api';
 import { Rol } from './rol';
 
@@ -119,6 +125,20 @@ export class Sesion {
    * tokens nuevos para esta, que se guardan para que siga abierta. Las otras pestañas los toman
    * del localStorage, así que también siguen.
    */
+  /** Para quien se olvidó la contraseña: no hay sesión, así que no se guarda nada. */
+  recuperarPassword(request: RecuperacionPasswordRequest): Observable<void> {
+    return this.authApi.recuperarPassword(request);
+  }
+
+  restablecerPassword(request: RestablecimientoPasswordRequest): Observable<void> {
+    return this.authApi.restablecerPassword(request);
+  }
+
+  /** Desde Mi cuenta: el link del mail vuelve al login del rol con el que se entró. */
+  pedirLinkPassword(): Observable<void> {
+    return this.authApi.pedirLinkPassword({ rol: this.rol()?.toLowerCase() });
+  }
+
   cambiarPassword(request: CambioPasswordRequest): Observable<void> {
     return this.authApi.cambiarPassword(request).pipe(
       map((tokens) => {

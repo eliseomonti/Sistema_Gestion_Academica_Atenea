@@ -100,3 +100,24 @@ form {
 button[type='submit'] {
   align-self: flex-start;
 }
+
+/* El link por mail, debajo del formulario y separado de él. */
+.olvido {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-divisor);
+}
+
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
+}

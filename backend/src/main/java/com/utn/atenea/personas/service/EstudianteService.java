@@ -85,7 +85,7 @@ public class EstudianteService {
         boolean mailEnviado = personaService.enviarCredenciales(estudiante, credenciales);
 
         return new AltaPersonaResponse(estudiante.getId(), estudiante.getLegajoEstudiante(),
-                credenciales.username(), credenciales.passwordTemporal(), mailEnviado);
+                mailEnviado);
     }
 
     /**
