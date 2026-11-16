@@ -129,10 +129,9 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             web=$(curl -s -o /dev/null -w '%{http_code}' "$URL_PRODUCCION/")
-            api=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL_PRODUCCION/api/auth/login" \
-              -H 'Content-Type: application/json' -d '{"username":"x","password":"x"}')
+            api=$(curl -s -o /dev/null -w '%{http_code}' "$URL_PRODUCCION/api/health")
             echo "intento $i: web=$web api=$api"
-            if [ "$web" = 200 ] && [ "$api" = 401 ]; then exit 0; fi
+            if [ "$web" = 200 ] && [ "$api" = 200 ]; then exit 0; fi
             sleep 10
           done
           echo "La app no respondio como se esperaba"; exit 1
