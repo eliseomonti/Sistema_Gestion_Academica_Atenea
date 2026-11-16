@@ -1,1 +1,70 @@
 <app-bienvenida [nombre]="sesion.nombre()" />
+
+<ul class="tarjetas">
+  @for (tarjeta of tarjetas(); track tarjeta.texto) {
+    <li>
+      @if (tarjeta.ruta) {
+        <a class="tarjeta" [routerLink]="tarjeta.ruta">
+          <span class="titulo"><app-icono [nombre]="tarjeta.icono" /> {{ tarjeta.texto }}</span>
+          <span class="total">{{ tarjeta.total }}</span>
+          <span class="detalle">{{ tarjeta.detalle }}</span>
+          <app-icono class="flecha" nombre="flecha-derecha" />
+        </a>
+      } @else {
+        <div class="tarjeta">
+          <span class="titulo"><app-icono [nombre]="tarjeta.icono" /> {{ tarjeta.texto }}</span>
+          <span class="total">{{ tarjeta.total }}</span>
+          <span class="detalle">{{ tarjeta.detalle }}</span>
+        </div>
+      }
+    </li>
+  }
+</ul>
+
+<div class="secciones">
+  <section class="seccion">
+    <h2><app-icono nombre="calendario" /> Mis clases de hoy</h2>
+
+    @if (materias.error()) {
+      <p class="estado">No se pudieron cargar tus materias</p>
+    } @else if (materias.hasValue()) {
+      <ul class="lista">
+        @for (clase of clasesDeHoy(); track $index) {
+          <li>
+            <a [routerLink]="['/docente/comisiones-materia', clase.comisionMateriaId]">
+              <strong>{{ clase.horaInicio }} a {{ clase.horaFin }} {{ clase.materia }}</strong>
+            </a>
+            <span class="estado">Comisión {{ clase.comision }} {{ clase.aula }}</span>
+          </li>
+        } @empty {
+          <li class="estado">Hoy no tenes clases</li>
+        }
+      </ul>
+    } @else {
+      <p class="estado">Cargando clases…</p>
+    }
+  </section>
+
+  <section class="seccion">
+    <h2><app-icono nombre="documento" /> Proximas mesas de examen</h2>
+
+    @if (mesas.error()) {
+      <p class="estado">No se pudieron cargar las mesas</p>
+    } @else if (mesas.hasValue()) {
+      <ul class="lista">
+        @for (mesa of proximasMesas(); track mesa.examenFinalId) {
+          <li>
+            <a [routerLink]="['/docente/examenes-finales', mesa.examenFinalId]">
+              <strong>{{ mesa.fecha | date: 'dd/MM/yyyy' }} {{ mesa.nombreMateria }}</strong>
+            </a>
+            <span class="estado">{{ horarioMesa(mesa) }}</span>
+          </li>
+        } @empty {
+          <li class="estado">No tenes mesas de examen proximas</li>
+        }
+      </ul>
+    } @else {
+      <p class="estado">Cargando mesas…</p>
+    }
+  </section>
+</div>
