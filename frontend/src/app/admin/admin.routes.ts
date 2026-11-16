@@ -95,6 +95,14 @@ const routes: Routes = [
                 title: 'Agregar materia',
               },
               {
+                path: 'materias/:comisionMateriaId/inscriptos',
+                loadComponent: () =>
+                  import('./inscripciones-comision/pages/inscriptos/inscriptos').then(
+                    (m) => m.Inscriptos,
+                  ),
+                title: 'Inscriptos',
+              },
+              {
                 // Después de 'materias/nueva': si no, "nueva" se tomaría como un id.
                 path: 'materias/:comisionMateriaId',
                 loadComponent: () =>
