@@ -1,0 +1,129 @@
+<dialog #dialogo class="ventana" (close)="volver()">
+    <h2>{{editando() ? 'Editar mesa' : 'Nueva mesa'}}</h2>
+
+    @if(mensaje())
+    {
+        <p class="bien">{{mensaje()}}</p>
+        <button type="button" (click)="cerrar()">Listo</button>
+    }@else if(mesa.isLoading() || materias.isLoading())
+    {
+        <p class="estado">Cargando...</p>
+    }@else if(mesa.error() || materias.error())
+    {
+        <p class="error">No se pudieron cargar los datos</p>
+    }@else
+    {
+        <form [formRoot]="mesaForm">
+            @if(mesa.value(); as datos)
+            {<p class="subtitulo">{{datos.nombreMateria}}</p>
+            }@else
+            {
+                <label>
+                    Materia
+                    <select [formField]="mesaForm.materiaId">
+                        <option value="">Elegí</option>
+                        @for(materia of materias.value() ?? []; track materia.materiaId)
+                        {
+                            <option [value]="materia.materiaId">{{materia.nombre}}</option>
+                        }
+                    </select>
+                </label>
+            }
+
+            <label>
+                Fecha
+                <input type="date" [formField]="mesaForm.fecha" />
+            </label>
+
+            <div class="horas">
+                <label>
+                    Desde
+                    <input type="time" [formField]="mesaForm.horaInicio" />
+                </label>
+                <label>
+                    Hasta
+                    <input type="time" [formField]="mesaForm.horaFin" />
+                </label>
+            </div>
+
+            <label>
+                Aula
+                <select [formField]="mesaForm.aulaId">
+                    <option value="">Virtual</option>
+                    @for(aula of aulas.value() ?? []; track aula.id)
+                    {
+                        <option [value]="aula.id">{{aula.nombre}}</option>
+                    }
+                </select>
+            </label>
+
+            <fieldset>
+                <legend>Tribunal</legend>
+                <ul class="tribunal">
+                    @for(docente of tribunal(); track docente.personaId)
+                    {
+                        <li>
+                            <span>{{docente.apellido}}, {{docente.nombre}}</span>
+                            <button type="button" class="quitar" [attr.aria-label]="'Quitar a ' + docente.apellido" (click)="quitarDocente(docente.personaId)">
+                                <app-icono nombre="cerrar" />
+                            </button>
+                        </li>
+                    }@empty
+                    {
+                        <li class="estado">Todavía no hay docentes</li>
+                    }
+                </ul>
+<input #texto type="search" placeholder="Buscar docente" aria-label="Buscar docente por apellido, nombre o DNI" (input)="buscarDocente(texto.value)" (keydown.enter)="$event.preventDefault()" />
+                <ul class="resultados">
+                    @for(docente of opcionesDocentes(); track docente.personaId)
+                    {
+                        <li>
+                            <button type="button" class="secundario" (click)="agregarDocente(docente); texto.value = ''">
+                                {{docente.apellido}}, {{docente.nombre}} · {{docente.dni}}
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </fieldset>
+
+            @if(mesaForm().touched() && mesaForm().invalid())
+            {
+                <p class="error">Completá la materia, la fecha y las horas</p>
+            }
+
+            <div class="botones">
+                <button class="guardar" [disabled]="cargando()">{{editando() ? 'Guardar cambios' : 'Crear mesa'}}</button>
+                <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+            </div>
+        </form>
+
+        @if(editando())
+        {
+            <section class="acciones">
+                <h3>Acciones sobre la mesa</h3>
+                @if(confirmarBorrar())
+                {
+                    <app-confirmar-dialog mensaje="Se va a borrar la mesa, NO se puede deshacer" confirmarTexto="Eliminar" [procesando]="cargando()" (confirmar)="borrar()" (cancelar)="confirmarBorrar.set(false)" />
+                }@else
+                {
+                    <div class="accion">
+                        <div>
+                            <p class="accion-titulo">Eliminar</p>
+                            <p class="accion-detalle">Solo si no tiene estudiantes inscriptos</p>
+                        </div>
+                        <button type="button" class="peligro" (click)="confirmarBorrar.set(true)">Eliminar</button>
+                    </div>
+                }
+            </section>
+        }
+    }
+
+    @if(error())
+    {
+        <p class="error">{{error()}}</p>
+    }
+
+    <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar()">
+        <app-icono nombre="cerrar" />
+    </button>
+</dialog>

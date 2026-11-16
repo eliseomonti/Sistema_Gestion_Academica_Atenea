@@ -109,27 +109,52 @@ const routes: Routes = [
       },
       {
         path: 'periodos',
-        loadComponent: () =>
-          import('./periodos-inscripcion/pages/periodos-lista/periodos-lista').then(
-            (m) => m.PeriodosLista,
-          ),
-        title: 'Períodos de inscripción',
         children: [
           {
-            path: 'nuevo',
+            path: ':periodoId/mesas',
             loadComponent: () =>
-              import('./periodos-inscripcion/pages/periodo-alta/periodo-alta').then(
-                (m) => m.PeriodoAlta,
-              ),
-            title: 'Nuevo período',
+              import('./examenes-finales/pages/mesas-lista/mesas-lista').then((m) => m.MesasLista),
+            title: 'Mesas de examen',
+            children: [
+              {
+                path: 'nueva',
+                loadComponent: () =>
+                  import('./examenes-finales/pages/mesa/mesa').then((m) => m.Mesa),
+                title: 'Nueva mesa',
+              },
+              {
+                path: ':examenFinalId',
+                loadComponent: () =>
+                  import('./examenes-finales/pages/mesa/mesa').then((m) => m.Mesa),
+                title: 'Editar mesa',
+              },
+            ],
           },
-            {
-            path: ':periodoId',
+          {
+            path: '',
             loadComponent: () =>
-              import('./periodos-inscripcion/pages/periodo-edicion/periodo-edicion').then(
-                (m) => m.PeriodoEdicion,
+              import('./periodos-inscripcion/pages/periodos-lista/periodos-lista').then(
+                (m) => m.PeriodosLista,
               ),
-            title: 'Editar periodo',
+            title: 'Períodos de inscripción',
+            children: [
+              {
+                path: 'nuevo',
+                loadComponent: () =>
+                  import('./periodos-inscripcion/pages/periodo-alta/periodo-alta').then(
+                    (m) => m.PeriodoAlta,
+                  ),
+                title: 'Nuevo período',
+              },
+              {
+                path: ':periodoId',
+                loadComponent: () =>
+                  import('./periodos-inscripcion/pages/periodo-edicion/periodo-edicion').then(
+                    (m) => m.PeriodoEdicion,
+                  ),
+                title: 'Editar período',
+              },
+            ],
           },
         ],
       },
@@ -182,7 +207,6 @@ const routes: Routes = [
           import('./personas/pages/persona-edicion/persona-edicion').then((m) => m.PersonaEdicion),
         title: 'Editar estudiante',
       },
-      
     ],
   },
 ];

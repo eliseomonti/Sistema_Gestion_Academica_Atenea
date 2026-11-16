@@ -1,0 +1,34 @@
+<a class="volver" routerLink="../.."><app-icono nombre="flecha-izquierda" /> Periodos</a>
+
+<h2>Mesas de examen</h2>
+@if(periodo.value(); as turno)
+{
+    <p class="subtitulo">
+        Turno de finales {{turno.anioLectivo}} · Inscripción del {{turno.fechaInicio | date: 'dd/MM/yyyy'}} al {{turno.fechaCierre | date: 'dd/MM/yyyy'}}
+    </p>
+}
+
+<div class="herramientas">
+    <a class="nuevo" routerLink="nueva">Nueva mesa</a>
+</div>
+
+@if(mesas.error())
+{
+    <p class="error">No se pudieron cargar las mesas</p>
+}@else if(mesas.value(); as lista)
+{
+    @if(lista.length === 0)
+    {
+        <p class="estado">Este turno todavía no tiene mesas</p>
+    }@else
+    {
+        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
+            <ng-template appCelda="fecha" let-mesa>{{mesa.fecha | date: 'dd/MM/yyyy'}}</ng-template>
+        </app-tabla>
+    }
+}@else
+{
+    <p class="estado">Cargando mesas...</p>
+}
+
+<router-outlet (deactivate)="mesas.reload()" />

@@ -10,6 +10,10 @@
         <p class="subtitulo">
             {{datos.tipo === 'CURSADA' ? 'Cursada' : 'Final'}} · Ciclo {{datos.anioLectivo}} · {{datos.habilitada ? 'Habilitado' : 'Deshabilitado'}}
         </p>
+        @if(datos.tipo === 'FINAL')
+        {
+            <a class="mesas" routerLink="mesas">Ver mesas de examen →</a>
+        }
 
         <form [formRoot]="periodoForm">
             <label>
