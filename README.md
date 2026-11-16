@@ -26,6 +26,8 @@ Proyecto desarrollado en el marco de las asignaturas **Gestión de Desarrollo de
 
 ```text
 .
+├── .github/workflows/
+│   └── ci.yml                # CI/CD: verificación en cada PR y deploy automático a Azure al mergear a main
 ├── backend/                  # API REST en Spring Boot 4.1.1 (Java 21)
 │   ├── src/main/java/        # Módulos: compartido, seguridad, carreras, personas,
 │   │                         #          comisiones, examenes, inscripciones
@@ -45,7 +47,7 @@ Proyecto desarrollado en el marco de las asignaturas **Gestión de Desarrollo de
 │   ├── 02-personas.sql       # Padrón de prueba: administradores, 30 docentes, +700 estudiantes
 │   └── 03-aulas.sql          # 35 aulas, laboratorios y espacios comunes
 ├── docs/
-│   ├── adr/                  # Architecture Decision Records (ADR 0001 y ADR 0002)
+│   ├── adr/                  # Architecture Decision Records (ADR 0001 a ADR 0003)
 │   └── manual-usuario.md     # Manual de usuario por rol (Administrador, Docente, Estudiante)
 ├── docker-compose.yml        # Base de datos, backend y frontend en contenedores (desarrollo)
 ├── docker-compose.prod.yml   # Ajustes para producción: HTTPS con Caddy, secretos y reinicio automático
@@ -166,7 +168,61 @@ npm start
 
 ## Despliegue en producción
 
-Para producción se suma `docker-compose.prod.yml` encima del compose base. Este archivo:
+### Producción actual: Azure
+
+La aplicación publicada está en **https://atenea-frontend.calmcliff-ac059761.chilecentral.azurecontainerapps.io**.
+
+```text
+Navegador ──HTTPS──▶ atenea-frontend (nginx) ──/api──▶ atenea-backend (Spring Boot, interno)
+                                                            └──TLS──▶ Azure Database for MySQL
+```
+
+| Recurso (grupo `rg-atenea`, región Chile Central) | Qué es |
+| :--- | :--- |
+| `atenea-frontend` | Container App con la imagen del frontend. Es la única puerta pública; Azure provee el HTTPS. |
+| `atenea-backend` | Container App con la imagen del backend, con ingreso **interno**: sólo la ve el frontend. Corre con el perfil `prod`. |
+| `atenea-mysql-e8ff1a` | Azure Database for MySQL 8.4 (Flexible Server, B1ms), con backups automáticos de 7 días. |
+| `atenea-env` | Entorno de Container Apps (red interna compartida por las dos apps). |
+| `id-atenea-github` | Identidad que usa GitHub Actions para deployar (rol *Contributor* sólo sobre `rg-atenea`). |
+
+Las imágenes se publican en GitHub Container Registry (`ghcr.io/eliseomonti/atenea-backend` y `atenea-frontend`), etiquetadas con el hash corto del commit. Las contraseñas de la base y la clave de los JWT están guardadas como *secretos* de las Container Apps, no en el repositorio.
+
+#### Cómo se deploya
+
+**Mergeando a `main`.** El workflow [`ci.yml`](.github/workflows/ci.yml) hace todo automáticamente:
+
+1. **En cada pull request:** corre los tests del backend (contra un MySQL 8.4 con los scripts de `bdd/`), y el lint, los tests y el build del frontend. Si algo falla, el PR no se puede mergear.
+2. **Al mergear a `main`:** vuelve a correr la verificación y, si pasa, construye las dos imágenes, las publica en GHCR, actualiza las Container Apps y comprueba que la aplicación responda.
+
+El historial de deploys se ve en la sección **Deployments → produccion** del repositorio, y el detalle de cada corrida en la pestaña **Actions**. GitHub entra a Azure con **OIDC** (identidad federada): no hay contraseñas de Azure guardadas en GitHub.
+
+#### Volver a una versión anterior
+
+Cada deploy crea una **revisión** nueva de cada Container App. Para volver atrás, en el portal de Azure: *Container App → Revisions* y activar la anterior. O bien, desde la CLI, apuntar a la imagen de un commit previo:
+
+```bash
+az containerapp update -n atenea-backend  -g rg-atenea --image ghcr.io/eliseomonti/atenea-backend:<hash>
+az containerapp update -n atenea-frontend -g rg-atenea --image ghcr.io/eliseomonti/atenea-frontend:<hash>
+```
+
+#### Cambios en el esquema de la base
+
+El deploy **no modifica la base**. Si un cambio agrega o modifica tablas o columnas, el SQL correspondiente se aplica en la base de Azure **antes** de mergear: el backend valida el esquema al arrancar (`ddl-auto=validate`) y no levanta si no coincide.
+
+#### Mantenimiento
+
+- **Token de GHCR:** Azure descarga las imágenes con un token de GitHub de sólo lectura que **vence cada 90 días** (el actual, alrededor del 14/02/2027). Al vencer, la aplicación sigue funcionando pero los deploys nuevos fallan. Se renueva creando un token nuevo (*classic*, scope `read:packages`) y actualizándolo en las dos apps:
+
+  ```bash
+  az containerapp registry set -n atenea-backend  -g rg-atenea --server ghcr.io --username eliseomonti --password <token>
+  az containerapp registry set -n atenea-frontend -g rg-atenea --server ghcr.io --username eliseomonti --password <token>
+  ```
+
+- **Costos:** la base está cubierta por los servicios gratuitos de Azure (750 h/mes de B1ms y 32 GB). Las Container Apps se pagan con el crédito de Azure for Students. Para gastar menos cuando no se usa la aplicación, se puede permitir que se apaguen solas (`--min-replicas 0`), a costa de unos segundos de espera en el primer acceso.
+
+### Alternativa: servidor propio con Docker Compose
+
+Si se despliega en una máquina virtual propia (por ejemplo, Oracle Cloud o una VPS) en lugar de Azure, se usa `docker-compose.prod.yml` encima del compose base. Este archivo:
 
 - Agrega **Caddy**, que obtiene y renueva automáticamente el certificado HTTPS (Let's Encrypt) y redirige `http://` a `https://`.
 - Deja expuestos sólo los puertos `80` y `443`. La base, el backend y nginx quedan accesibles únicamente por la red interna de Docker.
@@ -196,6 +252,8 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ---
 
 ## Verificación de calidad y arquitectura
+
+Estas verificaciones corren automáticamente en cada pull request (GitHub Actions, ver [`ci.yml`](.github/workflows/ci.yml)), y la rama `main` no acepta cambios que no las pasen. También pueden correrse localmente:
 
 ### Backend (Spring Modulith y pruebas)
 
@@ -240,3 +298,4 @@ Todos los usuarios generados por `bdd/02-personas.sql` ingresan utilizando su **
 - **Guía técnica del frontend**: [`frontend/CLAUDE.md`](frontend/CLAUDE.md)
 - **ADR 0001 — Monolito modular en el backend**: [`docs/adr/0001-monolito-modular.md`](docs/adr/0001-monolito-modular.md)
 - **ADR 0002 — Estructura del frontend en Angular**: [`docs/adr/0002-estructura-frontend.md`](docs/adr/0002-estructura-frontend.md)
+- **ADR 0003 — Despliegue en Azure con contenedores y CI/CD**: [`docs/adr/0003-despliegue-azure.md`](docs/adr/0003-despliegue-azure.md)
