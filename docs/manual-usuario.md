@@ -8,7 +8,7 @@ Este manual describe la operatoria del sistema **ATENEA** para cada uno de sus p
 
 ### 1.1 Inicio de sesión (`RF01`)
 1. Acceder a la pantalla de ingreso (`/login`). La dirección depende de dónde esté corriendo el sistema:
-   - **Versión publicada:** `https://<dominio>/login`.
+   - **Versión publicada:** https://atenea-frontend.calmcliff-ac059761.chilecentral.azurecontainerapps.io/login
    - **En una PC con Docker:** `http://localhost:8081/login`.
    - **En una PC sin Docker (desarrollo con `ng serve`):** `http://localhost:4200/login`.
 2. Ingresar el **Usuario** (DNI de la persona) y la **Contraseña** (en los datos de demostración, `Prueba123`).
