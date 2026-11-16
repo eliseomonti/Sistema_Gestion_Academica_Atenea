@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  TZ: America/Argentina/Buenos_Aires
+
+jobs:
+  backend:
+    name: Backend (tests)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          TZ: America/Argentina/Buenos_Aires
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Cargar la base de datos
+        run: |
+          for f in atenea_db_script 01-carreras 02-personas 03-aulas; do
+            mysql -h 127.0.0.1 -uroot -proot --default-character-set=utf8mb4 < bdd/$f.sql
+          done
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Tests
+        working-directory: backend
+        run: ./mvnw -B verify
+
+  frontend:
+    name: Frontend (lint, tests y build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npx ng test --watch=false
+      - run: npm run build
