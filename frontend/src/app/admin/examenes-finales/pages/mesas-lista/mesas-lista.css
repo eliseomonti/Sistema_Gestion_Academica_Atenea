@@ -1,0 +1,53 @@
+/* Igual que "Planes de estudio" de arriba: azul, sin subrayado */
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-1);
+  min-height: 2.75rem;
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.volver:hover {
+  text-decoration: underline;
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--texto-grande);
+}
+
+.subtitulo {
+  margin: var(--espacio-1) 0 var(--espacio-3);
+  color: var(--color-texto-suave);
+}
+
+.herramientas {
+  display: flex;
+  margin-bottom: var(--espacio-3);
+}
+
+/* Igual que "Nueva comisión" */
+.nuevo {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: var(--radio);
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-primario);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nuevo:hover {
+  background: var(--color-primario-hover);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}

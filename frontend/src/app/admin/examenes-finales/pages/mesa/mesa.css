@@ -1,0 +1,180 @@
+label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+select {
+  background: var(--color-superficie);
+}
+
+.ventana {
+  width: min(100% - 2rem, 40rem);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+.ventana::backdrop {
+  background: var(--color-velo);
+}
+
+h2 {
+  margin: 0;
+  padding-right: 2.75rem;
+  font-size: var(--texto-grande);
+}
+
+.subtitulo {
+  margin: var(--espacio-1) 0 var(--espacio-4);
+  color: var(--color-texto-suave);
+}
+
+/* Desde y Hasta en la misma fila */
+.horas {
+  display: flex;
+  gap: var(--espacio-3);
+}
+
+.horas label {
+  flex: 1;
+}
+
+fieldset {
+  margin: 0 0 var(--espacio-3);
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+}
+
+legend {
+  padding: 0 var(--espacio-1);
+  font-weight: 500;
+}
+
+.tribunal,
+.resultados {
+  margin: 0 0 var(--espacio-2);
+  padding: 0;
+  list-style: none;
+}
+
+.tribunal li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resultados li {
+  margin-top: var(--espacio-1);
+}
+
+.quitar {
+  min-width: 2.75rem;
+  padding: 0;
+  color: var(--color-texto-suave);
+  background: none;
+}
+
+.quitar:hover {
+  color: var(--color-error);
+  background: none;
+}
+
+/* Guardar ocupa el ancho que sobra; Cancelar, sólo lo que necesita */
+.botones {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-4);
+}
+
+.guardar {
+  flex: 1;
+}
+
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.bien {
+  color: var(--color-ok);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Eliminar, separado del formulario y en rojo */
+.acciones {
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-divisor);
+}
+
+h3 {
+  margin: 0 0 var(--espacio-2);
+  font-size: var(--texto-base);
+  font-weight: 500;
+  color: var(--color-error);
+}
+
+.accion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+}
+
+.accion p {
+  margin: 0;
+}
+
+.accion-detalle {
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+.peligro {
+  flex-shrink: 0;
+  padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  background: var(--color-superficie);
+}
+
+.peligro:hover {
+  background: var(--color-error-fondo);
+}
+
+/* La ✕ arriba a la derecha, sin fondo azul */
+.cerrar {
+  position: absolute;
+  top: var(--espacio-2);
+  right: var(--espacio-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  padding: 0;
+  border: none;
+  color: var(--color-texto-suave);
+  background: transparent;
+}
+
+.cerrar:hover {
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}

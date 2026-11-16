@@ -1,6 +1,6 @@
 import { afterNextRender, Component, ElementRef, inject, input, linkedSignal, signal, viewChild } from '@angular/core';
 import { PeriodoInscripcionApi } from '../../data/periodos-inscripcion-api';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, FormRoot, required } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
@@ -9,7 +9,7 @@ import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirma
 import { Icono } from '../../../../shared/ui/icono/icono';
 
 @Component({
-  imports: [FormRoot, FormField, ConfirmarDialog, Icono],
+  imports: [FormRoot, FormField, ConfirmarDialog, Icono, RouterLink],
   selector: 'app-periodo-edicion',
   styleUrl: './periodo-edicion.css',
   templateUrl: './periodo-edicion.html',
