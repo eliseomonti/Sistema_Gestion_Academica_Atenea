@@ -294,8 +294,6 @@ Todos los usuarios generados por `bdd/02-personas.sql` ingresan utilizando su **
 ## Documentación adicional
 
 - **Manual de usuario por rol**: [`docs/manual-usuario.md`](docs/manual-usuario.md)
-- **Guía técnica del backend**: [`backend/CLAUDE.md`](backend/CLAUDE.md)
-- **Guía técnica del frontend**: [`frontend/CLAUDE.md`](frontend/CLAUDE.md)
 - **ADR 0001 — Monolito modular en el backend**: [`docs/adr/0001-monolito-modular.md`](docs/adr/0001-monolito-modular.md)
 - **ADR 0002 — Estructura del frontend en Angular**: [`docs/adr/0002-estructura-frontend.md`](docs/adr/0002-estructura-frontend.md)
 - **ADR 0003 — Despliegue en Azure con contenedores y CI/CD**: [`docs/adr/0003-despliegue-azure.md`](docs/adr/0003-despliegue-azure.md)
