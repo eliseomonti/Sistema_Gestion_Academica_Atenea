@@ -23,26 +23,6 @@ h3{
   color: var(--color-texto-suave);
 }
 
-.avance{
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--espacio-3);
-  font-size: var(--texto-chico);
-}
-
-.barra{
-  height: 0.5rem;
-  margin-top: var(--espacio-1);
-  border-radius: var(--radio);
-  background: var(--color-divisor);
-  overflow: hidden;
-}
-
-.relleno{
-  height: 100%;
-  background: var(--color-primario);
-}
-
 .materias{
   margin: 0;
   padding: 0;

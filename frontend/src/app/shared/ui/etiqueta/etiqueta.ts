@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 
 /**
- * Etiqueta de estado: verde si está bien, roja si no. El texto va adentro:
+ * Etiqueta de estado: verde si está bien, roja si no, azul para destacar sin juzgar. El texto va adentro:
  *
  * <app-etiqueta tipo="ok">Activa</app-etiqueta>
  */
@@ -12,5 +12,5 @@ import { Component, input } from '@angular/core';
   host: { '[class]': 'tipo()' },
 })
 export class Etiqueta {
-  readonly tipo = input.required<'ok' | 'error'>();
+  readonly tipo = input.required<'ok' | 'error' | 'info'>();
 }

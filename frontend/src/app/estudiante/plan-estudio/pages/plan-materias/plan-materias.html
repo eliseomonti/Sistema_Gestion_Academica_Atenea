@@ -10,13 +10,6 @@
             <h2>{{plan.nombreCarrera}}</h2>
             <p class="detalle">{{plan.nombrePlan}}</p>
 
-            <div class="avance">
-                <span>{{plan.materiasAprobadas}} de {{plan.totalMaterias}} materias aprobadas</span>
-                <strong>{{plan.porcentajeAvance}}%</strong>
-            </div>
-            <div class="barra">
-                <div class="relleno" [style.width.%]="plan.porcentajeAvance"></div>
-            </div>
             @for(anio of aniosDe(plan); track anio)
             {
                 <h3>{{anio}}° año</h3>

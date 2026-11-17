@@ -1,0 +1,47 @@
+<!-- El título y las pestañas los pone la pantalla Mis notas. -->
+<section class="bloque">
+    @if(cursadas.error())
+    {
+        <p class="error">No se pudieron cargar tus cursadas</p>
+        <button type="button" (click)="cursadas.reload()">Reintentar</button>
+    }@else if(cursadas.value(); as lista)
+    {
+        <!-- Cada materia es un grupo; su última fila es el cierre. -->
+        @if(lista.length === 0)
+        {
+            <p class="detalle">Todavía no cursaste ninguna materia.</p>
+        }@else
+        {
+            <app-tabla [columnas]="columnas" [filas]="filas()" [agrupar]="grupo">
+                <ng-template appCelda="nota" let-fila>
+                    <span class="nota" [class.cierre]="fila.esCierre" [class.promocion]="fila.promocion" [class.vacia]="fila.nota === '—'">{{fila.nota}}</span>
+                </ng-template>
+                <ng-template appCelda="estado" let-fila>
+                    @if(fila.esCierre)
+                    {
+                        @if(condicionCursada(fila.cursada); as condicion)
+                        {
+                            @if(condicion.tipo; as tipo)
+                            {
+                                <app-etiqueta [tipo]="tipo">{{condicion.texto}}</app-etiqueta>
+                            }@else
+                            {
+                                <span class="detalle">{{condicion.texto}}</span>
+                            }
+                        }@else
+                        {
+                            <span class="detalle">En curso</span>
+                        }
+                        @if(fila.cursada.cierre?.fechaVencimiento; as vencimiento)
+                        {
+                            <span class="detalle vencimiento">Vigente hasta el {{vencimiento | date: 'dd/MM/yyyy'}}</span>
+                        }
+                    }
+                </ng-template>
+            </app-tabla>
+        }
+    }@else
+    {
+        <p class="estado">Cargando cursadas...</p>
+    }
+</section>

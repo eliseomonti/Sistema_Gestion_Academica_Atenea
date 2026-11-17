@@ -1,0 +1,44 @@
+.bloque{
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+}
+
+.detalle{
+  margin: 0;
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+.nota{
+  font-variant-numeric: tabular-nums;
+}
+
+/* La nota del cierre, en negrita; en azul si es de promoción. */
+.nota.cierre{
+  font-weight: 700;
+}
+
+.nota.promocion{
+  color: var(--color-primario);
+}
+
+.nota.vacia{
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+.vencimiento{
+  display: block;
+  margin-top: var(--espacio-1);
+}
+
+.estado{
+  color: var(--color-texto-suave);
+}
+
+.error{
+  color: var(--color-error);
+}

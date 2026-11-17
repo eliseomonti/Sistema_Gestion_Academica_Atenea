@@ -18,12 +18,47 @@ const routes: Routes = [
         ]
     },
     {
-        path: 'inscripciones-comision', loadComponent: () => import('./inscripciones-comision/pages/oferta/oferta').then((m) => m.Oferta), 
-        title: 'Inscripcion a cursado'
+        path: 'inscripciones-comision', loadComponent: () => import('./inscripciones-comision/pages/inscripcion-cursado/inscripcion-cursado').then((m) => m.InscripcionCursado),
+        children: [
+            {path: '', pathMatch: 'full', redirectTo: 'oferta'},
+            {
+                path: 'oferta', loadComponent: () => import('./inscripciones-comision/pages/oferta/oferta').then((m) => m.Oferta),
+                title: 'Inscripcion a cursado'
+            },
+            {
+                path: 'mis-inscripciones', loadComponent: () => import('./inscripciones-comision/pages/mis-inscripciones/mis-inscripciones').then((m) => m.MisInscripciones),
+                title: 'Mis inscripciones a cursado'
+            },
+        ]
     },
-    {path: 'inscripciones-final', loadComponent: () => import('./inscripciones-final/pages/mesas/mesas').then((m) => m.Mesas), 
-    title: 'inscripcion a finales' },
-    {path: 'notas', loadComponent: () => import('./notas/pages/notas/notas').then((m) => m.Notas), title: 'Mis notas'}
+    {
+        path: 'inscripciones-final', loadComponent: () => import('./inscripciones-final/pages/inscripcion-finales/inscripcion-finales').then((m) => m.InscripcionFinales),
+        children: [
+            {path: '', pathMatch: 'full', redirectTo: 'mesas'},
+            {
+                path: 'mesas', loadComponent: () => import('./inscripciones-final/pages/mesas/mesas').then((m) => m.Mesas),
+                title: 'inscripcion a finales'
+            },
+            {
+                path: 'mis-inscripciones', loadComponent: () => import('./inscripciones-final/pages/mis-inscripciones/mis-inscripciones').then((m) => m.MisInscripcionesFinal),
+                title: 'Mis inscripciones a finales'
+            },
+        ]
+    },
+    {
+        path: 'notas', loadComponent: () => import('./notas/pages/notas/notas').then((m) => m.Notas),
+        children: [
+            {path: '', pathMatch: 'full', redirectTo: 'cursadas'},
+            {
+                path: 'cursadas', loadComponent: () => import('./notas/pages/notas-cursadas/notas-cursadas').then((m) => m.NotasCursadas),
+                title: 'Mis notas de cursadas'
+            },
+            {
+                path: 'finales', loadComponent: () => import('./notas/pages/notas-finales/notas-finales').then((m) => m.NotasFinales),
+                title: 'Mis notas de finales'
+            },
+        ]
+    }
     
 ];
 

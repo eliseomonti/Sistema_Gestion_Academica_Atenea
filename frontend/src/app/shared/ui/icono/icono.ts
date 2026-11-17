@@ -20,7 +20,10 @@ export type NombreIcono =
   | 'medalla'
   | 'casa'
   | 'salir'
-  | 'sobre';
+  | 'sobre'
+  | 'reloj'
+  | 'ubicacion'
+  | 'tilde';
 
 /**
  * Ícono de Feather Icons (MIT), salvo `birrete`, que es de Lucide (ISC) y tiene el mismo diseño.

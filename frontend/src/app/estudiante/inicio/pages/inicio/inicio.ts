@@ -48,39 +48,37 @@ export class Inicio {
 
 
 
-  private readonly oferta = rxResource({
-    stream: () => this.inscripcionesApi.disponibilidad(),
-  });
 
 
+  /** Una por opción del menú lateral, con su mismo nombre, ícono y ruta, como en el inicio del admin. */
   protected readonly tarjetas = computed<Tarjeta[]>(() => [
     {
-      texto: 'Materias inscriptas',
-      ruta: '/estudiante/inscripciones-comision',
-      icono: 'libro',
-      total: total(this.inscripciones, (lista) => String(lista.filter((i) => i.estado === 'INSCRIPTO').length)),
-      detalle: 'en este ciclo lectivo',
-    },
-    {
-      texto: 'Finales aprobados',
-      ruta: '/estudiante/notas',
-      icono: 'medalla',
-      total: total(this.finales, (lista) => String(lista.filter((f) => f.aprobado === true).length)),
-      detalle: 'en toda la carrera',
-    },
-    {
-      texto: 'Avance de la carrera',
+      texto: 'Plan de estudio',
       ruta: '/estudiante/plan-estudio',
-      icono: 'birrete',
-      total: total(this.planes, (planes) => `${planes[0]?.porcentajeAvance ?? 0}%`),
-      detalle: 'de las materias aprobadas',
+      icono: 'libro',
+      total: total(this.planes, (planes) => String(planes.reduce((suma, plan) => suma + plan.totalMaterias, 0))),
+      detalle: 'materias en tu plan',
     },
     {
-      texto: 'Para inscribirte',
+      texto: 'Inscripción a cursado',
       ruta: '/estudiante/inscripciones-comision',
       icono: 'editar',
-      total: total(this.oferta, (lista) => String(lista.length)),
-      detalle: 'materias disponibles',
+      total: total(this.inscripciones, (lista) => String(lista.filter((i) => i.estado === 'INSCRIPTO').length)),
+      detalle: 'materias inscriptas',
+    },
+    {
+      texto: 'Inscripción a finales',
+      ruta: '/estudiante/inscripciones-final',
+      icono: 'portapapeles',
+      total: total(this.mesas, (lista) => String(lista.filter((m) => m.estado === 'INSCRIPTO').length)),
+      detalle: 'mesas inscriptas',
+    },
+    {
+      texto: 'Notas',
+      ruta: '/estudiante/notas',
+      icono: 'medalla',
+      total: this.notasDelAnio(),
+      detalle: 'cargadas en este ciclo lectivo',
     },
   ]);
 
@@ -99,6 +97,22 @@ export class Inicio {
   }
 
   protected readonly cursadas = rxResource({ stream: () => this.notasApi.listarCursada() });
+
+  /** Las notas de evaluaciones y de finales con fecha de este año. Necesita las cursadas y los finales. */
+  private notasDelAnio(): string
+  {
+    if (this.cursadas.error() || this.finales.error()) {
+      return '—';
+    }
+    if (!this.cursadas.hasValue() || !this.finales.hasValue()) {
+      return '…';
+    }
+    const anio = String(new Date().getFullYear());
+    const deCursado = this.cursadas.value().flatMap((cursada) => cursada.evaluaciones)
+      .filter((e) => e.nota !== null && e.fecha.startsWith(anio)).length;
+    const deFinal = this.finales.value().filter((f) => f.nota !== null && f.fecha.startsWith(anio)).length;
+    return String(deCursado + deFinal);
+  }
 
   protected readonly notasRecientes = computed<NotaReciente[]>(() => {
     const deCursado = (this.cursadas.value() ?? []).flatMap((cursada) => 

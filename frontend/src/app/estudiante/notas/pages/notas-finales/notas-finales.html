@@ -1,0 +1,33 @@
+<!-- El título y las pestañas los pone la pantalla Mis notas. -->
+<section class="bloque">
+    @if(finales.error())
+    {
+        <p class="error">No se pudieron cargar tus finales</p>
+        <button type="button" (click)="finales.reload()">Reintentar</button>
+    }@else if(finales.value(); as lista)
+    {
+        @if(lista.length === 0)
+        {
+            <p class="detalle">Todavía no rendiste ningún final.</p>
+        }@else
+        {
+            <app-tabla [columnas]="columnas" [filas]="lista">
+                <ng-template appCelda="nota" let-final>
+                    <span class="nota" [class.vacia]="final.nota === null">{{notaFinal(final)}}</span>
+                </ng-template>
+                <ng-template appCelda="estado" let-final>
+                    @if(estadoFinal(final).tipo; as tipo)
+                    {
+                        <app-etiqueta [tipo]="tipo">{{estadoFinal(final).texto}}</app-etiqueta>
+                    }@else
+                    {
+                        <span class="detalle">{{estadoFinal(final).texto}}</span>
+                    }
+                </ng-template>
+            </app-tabla>
+        }
+    }@else
+    {
+        <p class="estado">Cargando finales...</p>
+    }
+</section>

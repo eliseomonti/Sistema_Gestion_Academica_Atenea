@@ -1,0 +1,52 @@
+<!-- El título y las pestañas los pone la pantalla Inscripción a finales. -->
+<section class="bloque">
+    @if(misInscripciones.error())
+    {
+        <p class="error">No se pudieron cargar tus inscripciones</p>
+    }@else if(misInscripciones.value(); as lista)
+    {
+        <!-- La inscripción dada de baja ya no viene en la lista: el éxito se avisa con un cartel flotante. -->
+        @if(avisoBaja(); as aviso)
+        {
+            @if(!aviso.esError)
+            {
+                <app-aviso (cerrar)="avisoBaja.set(null)">{{aviso.texto}}</app-aviso>
+            }
+        }
+        <ul class="lista">
+            @for(inscripcion of lista; track inscripcion.id)
+            {
+                <li [class.de-baja]="inscripcion.estado === 'BAJA'">
+                    <!-- Los datos a la izquierda y el botón de baja a la derecha. -->
+                    <div class="fila">
+                        <div>
+                            <strong>{{inscripcion.nombreMateria}}</strong>
+                            <p class="detalle">
+                                {{inscripcion.fecha | date: 'dd/MM/yyyy'}} · {{horario(inscripcion)}}
+                            </p>
+                        </div>
+                        @if(inscripcion.estado === 'INSCRIPTO' && aBajar()?.id !== inscripcion.id)
+                        {
+                            <button type="button" class="baja" [disabled]="bajando()" (click)="aBajar.set(inscripcion)">Darme de baja</button>
+                        }
+                    </div>
+
+                    @if(aBajar()?.id === inscripcion.id)
+                    {
+                        <app-confirmar-dialog [mensaje]="mensajeBaja(inscripcion)" confirmarTexto="Darme de baja" [procesando]="bajando()" (confirmar)="darDeBaja(inscripcion)" (cancelar)="aBajar.set(null)" />
+                    }
+                    @if(avisoBaja()?.inscripcionId === inscripcion.id && avisoBaja()?.esError)
+                    {
+                        <p class="error" role="alert">{{avisoBaja()?.texto}}</p>
+                    }
+                </li>
+            }@empty
+            {
+                <li class="detalle">No estas anotado a ninguna mesa</li>
+            }
+        </ul>
+    }@else
+    {
+        <p class="estado">Cargando tus inscripciones...</p>
+    }
+</section>

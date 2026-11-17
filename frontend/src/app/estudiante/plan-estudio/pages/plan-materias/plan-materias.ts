@@ -12,12 +12,12 @@ const CUATRIMESTRES: Record<PeriodoLectivo, string> = {
   ANUAL: 'Anual',
 };
 
-const ESTADOS: Record<EstadoMateria, { texto: string; tipo: 'ok' | 'error' | null }> = {
-  APROBADA: { texto: 'Aprobada', tipo: 'ok' },
+const ESTADOS: Record<EstadoMateria, { texto: string; tipo: 'info' | null }> = {
+  APROBADA: { texto: 'Aprobada', tipo: 'info' },
   REGULAR: { texto: 'Regular', tipo: null },
   CURSANDO: { texto: 'Cursando', tipo: null },
-  REGULARIDAD_VENCIDA: { texto: 'Regularidad vencida', tipo: 'error' },
-  NO_REGULAR: { texto: 'No regular', tipo: 'error' },
+  REGULARIDAD_VENCIDA: { texto: 'Regularidad vencida', tipo: null },
+  NO_REGULAR: { texto: 'No regular', tipo: null },
   NO_CURSADA: { texto: 'Sin cursar', tipo: null },
 };
 
