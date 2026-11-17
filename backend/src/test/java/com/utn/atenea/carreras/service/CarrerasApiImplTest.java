@@ -2,6 +2,7 @@ package com.utn.atenea.carreras.service;
 
 import com.utn.atenea.carreras.CarrerasApi;
 import com.utn.atenea.carreras.CorrelativaDelPlan;
+import com.utn.atenea.carreras.CorrelativasDeMateria;
 import com.utn.atenea.carreras.EstadoCorrelativa;
 import com.utn.atenea.carreras.MateriaDelPlan;
 import com.utn.atenea.carreras.MateriaResumen;
@@ -173,6 +174,59 @@ class CarrerasApiImplTest {
                         EstadoCorrelativa.CURSADA, EstadoCorrelativa.APROBADA),
                 new CorrelativaDelPlan(fisica.getMateria().getId(), analisis.getMateria().getId(),
                         null, EstadoCorrelativa.APROBADA));
+    }
+
+    @Test
+    void regimenDeCorrelatividadesTraeTodasLasMateriasConLosCodigosDeSusCorrelativas() {
+        PlanMateria algebra = agregarConCodigo("01", "Álgebra de prueba", 1);
+        PlanMateria analisis = agregarConCodigo("02", "Análisis I de prueba", 1);
+        PlanMateria analisisII = agregarConCodigo("03", "Análisis II de prueba", 2);
+        PlanMateria fisica = agregarConCodigo("04", "Física de prueba", 2);
+        correlatividadRepository.save(
+                new Correlatividad(analisisII, analisis, EstadoCorrelativa.CURSADA, EstadoCorrelativa.APROBADA));
+        correlatividadRepository.save(
+                new Correlatividad(analisisII, algebra, EstadoCorrelativa.CURSADA, EstadoCorrelativa.APROBADA));
+        correlatividadRepository.save(
+                new Correlatividad(fisica, algebra, EstadoCorrelativa.APROBADA, null));
+        correlatividadRepository.save(
+                new Correlatividad(fisica, analisis, EstadoCorrelativa.CURSADA, EstadoCorrelativa.CURSADA));
+
+        assertThat(carrerasApi.regimenDeCorrelatividades(vigente.getId())).containsExactly(
+                new CorrelativasDeMateria(algebra.getMateria().getId(), "01", "Álgebra de prueba", 1,
+                        PeriodoLectivo.ANUAL, List.of(), List.of(), List.of(), List.of()),
+                new CorrelativasDeMateria(analisis.getMateria().getId(), "02", "Análisis I de prueba", 1,
+                        PeriodoLectivo.ANUAL, List.of(), List.of(), List.of(), List.of()),
+                new CorrelativasDeMateria(analisisII.getMateria().getId(), "03", "Análisis II de prueba", 2,
+                        PeriodoLectivo.ANUAL, List.of("01", "02"), List.of(), List.of(), List.of("01", "02")),
+                new CorrelativasDeMateria(fisica.getMateria().getId(), "04", "Física de prueba", 2,
+                        PeriodoLectivo.ANUAL, List.of("02"), List.of("01"), List.of("02"), List.of()));
+    }
+
+    @Test
+    void regimenDeCorrelatividadesOrdenaLosCodigosSinCerosAdelanteComoNumeros() {
+        PlanMateria programacion = agregarConCodigo("10", "Programación de prueba", 1);
+        PlanMateria algebra = agregarConCodigo("2", "Álgebra de prueba", 1);
+        PlanMateria analisis = agregarConCodigo("5", "Análisis de prueba", 1);
+        PlanMateria tesis = agregarConCodigo("11", "Tesis de prueba", 2);
+        for (PlanMateria correlativa : List.of(programacion, algebra, analisis)) {
+            correlatividadRepository.save(
+                    new Correlatividad(tesis, correlativa, EstadoCorrelativa.CURSADA, EstadoCorrelativa.APROBADA));
+        }
+
+        List<CorrelativasDeMateria> regimen = carrerasApi.regimenDeCorrelatividades(vigente.getId());
+
+        assertThat(regimen).extracting(CorrelativasDeMateria::codigo).containsExactly("2", "5", "10", "11");
+        assertThat(regimen.get(3).cursadasParaCursar()).containsExactly("2", "5", "10");
+    }
+
+    @Test
+    void regimenDeCorrelatividadesDeUnPlanSinMateriasEstaVacio() {
+        assertThat(carrerasApi.regimenDeCorrelatividades(vigente.getId())).isEmpty();
+    }
+
+    private PlanMateria agregarConCodigo(String codigo, String nombre, int anioCursado) {
+        Materia materia = materiaRepository.save(new Materia(nombre, 4, 64));
+        return planMateriaRepository.save(new PlanMateria(vigente, materia, codigo, anioCursado, PeriodoLectivo.ANUAL));
     }
 
     private PlanMateria agregarAlPlan(PlanEstudio plan, String nombre) {

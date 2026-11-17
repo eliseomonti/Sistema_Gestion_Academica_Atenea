@@ -2,8 +2,11 @@ package com.utn.atenea.inscripciones.service;
 
 import com.utn.atenea.carreras.CarrerasApi;
 import com.utn.atenea.carreras.PlanEstudioResumen;
+import com.utn.atenea.compartido.exception.RecursoNoEncontradoException;
+import com.utn.atenea.inscripciones.dto.CorrelatividadesMateriaEstudianteResponse;
 import com.utn.atenea.inscripciones.dto.MateriaPlanEstudianteResponse;
 import com.utn.atenea.inscripciones.dto.PlanEstudianteResponse;
+import com.utn.atenea.inscripciones.mapper.PlanEstudianteMapper;
 import com.utn.atenea.inscripciones.reglas.EstadoMateria;
 import com.utn.atenea.inscripciones.reglas.SituacionAcademica;
 import com.utn.atenea.personas.InscripcionCarreraResumen;
@@ -23,6 +26,7 @@ public class PlanEstudianteService {
     private final PersonasApi personasApi;
     private final CarrerasApi carrerasApi;
     private final SituacionAcademicaService situacionAcademicaService;
+    private final PlanEstudianteMapper planEstudianteMapper;
 
     /** Uno por cada inscripción a carrera activa; las materias, por año, período y nombre. */
     public List<PlanEstudianteResponse> planes(Long estudianteId) {
@@ -30,6 +34,16 @@ public class PlanEstudianteService {
                 .filter(InscripcionCarreraResumen::activa)
                 .map(this::plan)
                 .toList();
+    }
+
+    /** El régimen de correlatividades de un plan en el que el estudiante está inscripto. */
+    public List<CorrelatividadesMateriaEstudianteResponse> correlatividades(Long estudianteId, Long planEstudioId) {
+        boolean inscripto = personasApi.inscripcionesCarrera(estudianteId).stream()
+                .anyMatch(inscripcion -> inscripcion.activa() && inscripcion.planEstudioId().equals(planEstudioId));
+        if (!inscripto) {
+            throw new RecursoNoEncontradoException("No estás inscripto en el plan con id " + planEstudioId);
+        }
+        return planEstudianteMapper.toResponse(carrerasApi.regimenDeCorrelatividades(planEstudioId));
     }
 
     private PlanEstudianteResponse plan(InscripcionCarreraResumen inscripcionCarrera) {

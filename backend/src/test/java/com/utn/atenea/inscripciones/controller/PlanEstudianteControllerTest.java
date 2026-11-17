@@ -131,7 +131,57 @@ class PlanEstudianteControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void correlatividadesDelPlanConLosCodigosDeSusCorrelativas() throws Exception {
+        Long programacionI = insertarMateriaConCodigo("Programación I de prueba plan", "01", 1);
+        Long matematica = insertarMateriaConCodigo("Matemática de prueba plan", "02", 1);
+        Long programacionII = insertarMateriaConCodigo("Programación II de prueba plan", "03", 2);
+        insertarCorrelatividad(programacionII, programacionI, "CURSADA", "CURSADA");
+        insertarCorrelatividad(programacionII, matematica, "APROBADA", "APROBADA");
+
+        mvc.perform(get(URL + "/{planEstudioId}/correlatividades", plan).with(estudianteLogueado(estudiante)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].codigo").value(contains("01", "02", "03")))
+                .andExpect(jsonPath("$[0].cursadasParaCursar").isEmpty())
+                .andExpect(jsonPath("$[2].nombre").value("Programación II de prueba plan"))
+                .andExpect(jsonPath("$[2].cursadasParaCursar").value(contains("01")))
+                .andExpect(jsonPath("$[2].aprobadasParaCursar").value(contains("02")))
+                .andExpect(jsonPath("$[2].cursadasParaRendir").value(contains("01")))
+                .andExpect(jsonPath("$[2].aprobadasParaRendir").value(contains("02")));
+    }
+
+    @Test
+    void correlatividadesDeUnPlanEnElQueNoEstaInscriptoDevuelve404() throws Exception {
+        Long otroPlan = insertar("INSERT INTO plan_estudio (carrera_id, nombre) VALUES (?, 'Plan 2030')", carreraId);
+
+        mvc.perform(get(URL + "/{planEstudioId}/correlatividades", otroPlan).with(estudianteLogueado(estudiante)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void correlatividadesConLaInscripcionDadaDeBajaDevuelve404() throws Exception {
+        jdbc.update("UPDATE inscripcion_carrera SET estado = 'BAJA', fecha_estado = CURRENT_DATE WHERE id = ?",
+                inscripcionCarrera);
+
+        mvc.perform(get(URL + "/{planEstudioId}/correlatividades", plan).with(estudianteLogueado(estudiante)))
+                .andExpect(status().isNotFound());
+    }
+
     // --- Ayudas ---
+
+    /** Devuelve el id de plan_materia, que es lo que referencia correlatividad_materias. */
+    private Long insertarMateriaConCodigo(String nombre, String codigo, int anioCursado) {
+        Long materia = insertar("INSERT INTO materia (nombre, carga_horaria_semanal, carga_horaria_total) "
+                + "VALUES (?, 4, 64)", nombre);
+        return insertar("INSERT INTO plan_materia (plan_estudio_id, materia_id, codigo, anio_cursado, periodo_lectivo) "
+                + "VALUES (?, ?, ?, ?, 'ANUAL')", plan, materia, codigo, anioCursado);
+    }
+
+    private void insertarCorrelatividad(Long planMateria, Long correlativa, String paraCursar, String paraRendir) {
+        jdbc.update("INSERT INTO correlatividad_materias (plan_estudio_id, plan_materia_id, "
+                + "plan_materia_correlativa_id, estado_para_cursar, estado_para_rendir) VALUES (?, ?, ?, ?, ?)",
+                plan, planMateria, correlativa, paraCursar, paraRendir);
+    }
 
     private Long insertarMateria(String nombre, int anioCursado, String periodoLectivo) {
         Long materia = insertar("INSERT INTO materia (nombre, carga_horaria_semanal, carga_horaria_total) "

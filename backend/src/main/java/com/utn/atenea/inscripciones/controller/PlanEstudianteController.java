@@ -1,11 +1,13 @@
 package com.utn.atenea.inscripciones.controller;
 
+import com.utn.atenea.inscripciones.dto.CorrelatividadesMateriaEstudianteResponse;
 import com.utn.atenea.inscripciones.dto.PlanEstudianteResponse;
 import com.utn.atenea.inscripciones.service.PlanEstudianteService;
 import com.utn.atenea.seguridad.UsuarioPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +25,12 @@ public class PlanEstudianteController {
     @GetMapping
     public List<PlanEstudianteResponse> planes(@AuthenticationPrincipal UsuarioPrincipal principal) {
         return planEstudianteService.planes(principal.personaId());
+    }
+
+    // 404 si el estudiante no está inscripto en ese plan.
+    @GetMapping("/{planEstudioId}/correlatividades")
+    public List<CorrelatividadesMateriaEstudianteResponse> correlatividades(
+            @AuthenticationPrincipal UsuarioPrincipal principal, @PathVariable Long planEstudioId) {
+        return planEstudianteService.correlatividades(principal.personaId(), planEstudioId);
     }
 }

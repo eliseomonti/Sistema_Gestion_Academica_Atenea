@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import { rolDeUrl, rutaLogin } from '../../core/seguridad/rol';
 import { Sesion } from '../../core/seguridad/sesion';
 import { Icono } from '../../shared/ui/icono/icono';
+import { TITULOS } from '../login';
 
 /** Los mismos límites que valida el backend (RestablecimientoPasswordRequest). */
 const LARGO_MINIMO = 8;
@@ -35,6 +36,7 @@ export class RestablecerPassword {
   readonly token = input<string>();
   readonly rol = input<string>();
 
+  protected readonly titulo = computed(() => TITULOS[rolDeUrl(this.rol()) ?? 'ESTUDIANTE']);
   protected readonly login = computed(() => {
     const rol = rolDeUrl(this.rol());
     return rol ? rutaLogin(rol) : ['/login'];

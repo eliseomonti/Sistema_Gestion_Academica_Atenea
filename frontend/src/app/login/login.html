@@ -8,11 +8,17 @@
     <h1>{{ titulo() }}</h1>
   </header>
 
-  <form class="tarjeta" [formRoot]="loginForm">
+  <form class="tarjeta" [formRoot]="loginForm" (submit)="intentoIngresar.set(true)">
     <div class="campo">
       <label for="username">Usuario</label>
-      <input id="username" type="text" autocomplete="username" [formField]="loginForm.username" />
-      @if (loginForm.username().touched() && loginForm.username().invalid()) {
+      <input
+        id="username"
+        type="text"
+        autocomplete="username"
+        [attr.aria-invalid]="intentoIngresar() && loginForm.username().invalid()"
+        [formField]="loginForm.username"
+      />
+      @if (intentoIngresar() && loginForm.username().invalid()) {
         <p class="error-campo">{{ loginForm.username().errors()[0].message }}</p>
       }
     </div>
@@ -24,6 +30,7 @@
           id="password"
           [type]="mostrarPassword() ? 'text' : 'password'"
           autocomplete="current-password"
+          [attr.aria-invalid]="intentoIngresar() && loginForm.password().invalid()"
           [formField]="loginForm.password"
         />
         <button
@@ -36,7 +43,7 @@
           <app-icono [nombre]="mostrarPassword() ? 'ojo' : 'ojo-tachado'" />
         </button>
       </div>
-      @if (loginForm.password().touched() && loginForm.password().invalid()) {
+      @if (intentoIngresar() && loginForm.password().invalid()) {
         <p class="error-campo">{{ loginForm.password().errors()[0].message }}</p>
       }
     </div>

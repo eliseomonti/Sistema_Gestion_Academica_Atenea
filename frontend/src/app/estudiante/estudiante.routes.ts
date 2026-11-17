@@ -4,8 +4,18 @@ import { Routes } from '@angular/router';
 const routes: Routes = [
     {path: '', pathMatch: 'full', loadComponent: () => import('./inicio/pages/inicio/inicio').then((m) => m.Inicio), title: 'Inicio'},
     {
-        path: 'plan-estudio', loadComponent: () => import('./plan-estudio/pages/plan-estudio/plan-estudio').then((m) => m.PlanEstudio), 
-        title: 'Plan de estudio'
+        path: 'plan-estudio', loadComponent: () => import('./plan-estudio/pages/plan-estudio/plan-estudio').then((m) => m.PlanEstudio),
+        children: [
+            {path: '', pathMatch: 'full', redirectTo: 'materias'},
+            {
+                path: 'materias', loadComponent: () => import('./plan-estudio/pages/plan-materias/plan-materias').then((m) => m.PlanMaterias),
+                title: 'Plan de estudio'
+            },
+            {
+                path: 'correlatividades', loadComponent: () => import('./plan-estudio/pages/plan-correlatividades/plan-correlatividades').then((m) => m.PlanCorrelatividades),
+                title: 'Correlatividades'
+            },
+        ]
     },
     {
         path: 'inscripciones-comision', loadComponent: () => import('./inscripciones-comision/pages/oferta/oferta').then((m) => m.Oferta), 

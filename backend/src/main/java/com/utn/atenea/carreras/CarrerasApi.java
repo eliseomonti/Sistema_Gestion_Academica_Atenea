@@ -29,4 +29,7 @@ public interface CarrerasApi {
 
     /** Todas las correlatividades del plan. */
     List<CorrelativaDelPlan> correlatividades(Long planEstudioId);
+
+    /** Todas las materias del plan, por año y código, cada una con los códigos de sus correlativas ordenados. */
+    List<CorrelativasDeMateria> regimenDeCorrelatividades(Long planEstudioId);
 }

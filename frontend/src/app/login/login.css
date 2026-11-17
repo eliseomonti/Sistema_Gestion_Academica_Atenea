@@ -43,6 +43,14 @@ h1 {
   color: var(--color-texto-sobre-primario);
 }
 
+h2 {
+  margin: 0;
+  font-size: var(--texto-grande);
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-marca);
+}
+
 .campo {
   display: flex;
   flex-direction: column;
@@ -108,4 +116,86 @@ h1 {
   align-self: center;
   min-height: 44px;
   font-size: var(--texto-chico);
+  font-weight: 500;
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.enlace:hover {
+  text-decoration: underline;
+}
+
+/* Recuperar contraseña: el título con la explicación debajo */
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  text-align: center;
+}
+
+/* Recuperar contraseña, después de enviar el email */
+.enviado {
+  gap: var(--espacio-3);
+  text-align: center;
+}
+
+.icono-envio {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  color: var(--color-ok);
+  background: var(--color-ok-fondo);
+}
+
+.detalle {
+  margin: 0;
+}
+
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: var(--espacio-2);
+  border-radius: var(--radio);
+  color: var(--color-texto-sobre-primario);
+  background: var(--color-primario);
+  text-decoration: none;
+}
+
+.boton:hover {
+  background: var(--color-primario-hover);
+}
+
+.reenvio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-1);
+  margin: 0;
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+.reenviar {
+  padding: 0;
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-link);
+  background: transparent;
+}
+
+.reenviar:hover {
+  text-decoration: underline;
+  background: transparent;
+}
+
+.reenviar:disabled {
+  color: var(--color-texto-suave);
+  text-decoration: none;
 }

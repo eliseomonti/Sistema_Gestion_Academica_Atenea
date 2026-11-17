@@ -1,0 +1,60 @@
+<!-- El título y las pestañas los pone la pantalla Plan de estudio. -->
+@if (planes.isLoading()) {
+  <p class="estado">Cargando correlatividades…</p>
+} @else if (planes.error()) {
+  <p class="estado error" role="alert">No se pudieron cargar las correlatividades.</p>
+  <button type="button" (click)="planes.reload()">Reintentar</button>
+} @else {
+  @for (item of planes.value() ?? []; track item.plan.planEstudioId) {
+    <section class="plan">
+      <h2>{{ item.plan.nombreCarrera }}</h2>
+      <p class="detalle">{{ item.plan.nombrePlan }}</p>
+      @if (item.filas.length === 0) {
+        <p class="estado">El plan todavía no tiene materias cargadas.</p>
+      } @else {
+        <app-tabla
+          [columnas]="columnas"
+          [filas]="item.filas"
+          [agrupar]="grupo"
+          [detalleGrupo]="cantidad"
+        >
+          <ng-template appCelda="codigo" let-materia>
+            <span class="codigo">{{ materia.codigo }}</span>
+          </ng-template>
+          <ng-template appCelda="paraCursar" let-materia>
+            @for (
+              exigencia of exigencias(materia.cursadasParaCursar, materia.aprobadasParaCursar);
+              track exigencia.etiqueta
+            ) {
+              <span class="exigencia">
+                <span class="etiqueta">{{ exigencia.etiqueta }}</span>
+                @for (codigo of exigencia.codigos; track codigo) {
+                  <span class="chip">{{ codigo }}</span>
+                }
+              </span>
+            } @empty {
+              <span class="vacio">—</span>
+            }
+          </ng-template>
+          <ng-template appCelda="paraRendir" let-materia>
+            @for (
+              exigencia of exigencias(materia.cursadasParaRendir, materia.aprobadasParaRendir);
+              track exigencia.etiqueta
+            ) {
+              <span class="exigencia">
+                <span class="etiqueta">{{ exigencia.etiqueta }}</span>
+                @for (codigo of exigencia.codigos; track codigo) {
+                  <span class="chip">{{ codigo }}</span>
+                }
+              </span>
+            } @empty {
+              <span class="vacio">—</span>
+            }
+          </ng-template>
+        </app-tabla>
+      }
+    </section>
+  } @empty {
+    <p class="estado">No estás inscripto a ninguna carrera.</p>
+  }
+}

@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
 import { API_URL } from "../../../core/http/api-url";
 import { Observable } from "rxjs";
-import { PlanEstudianteResponse } from "./plan-estudio";
+import { CorrelatividadesMateriaEstudianteResponse, PlanEstudianteResponse } from "./plan-estudio";
 
 @Service()
 export class PlanEstudioApi{
@@ -13,5 +13,10 @@ export class PlanEstudioApi{
     listarPlan(): Observable<PlanEstudianteResponse[]>
     {
         return this.http.get<PlanEstudianteResponse[]>(this.url);
+    }
+
+    listarCorrelatividades(planEstudioId: number): Observable<CorrelatividadesMateriaEstudianteResponse[]>
+    {
+        return this.http.get<CorrelatividadesMateriaEstudianteResponse[]>(`${this.url}/${planEstudioId}/correlatividades`);
     }
 }

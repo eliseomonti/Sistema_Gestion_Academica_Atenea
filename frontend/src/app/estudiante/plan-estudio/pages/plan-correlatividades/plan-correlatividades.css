@@ -1,0 +1,76 @@
+.plan {
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--texto-grande);
+}
+
+.detalle {
+  margin: var(--espacio-1) 0 var(--espacio-3);
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+.estado {
+  color: var(--color-texto-suave);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+/* Números de ancho fijo, para que los códigos queden alineados. */
+.codigo {
+  font-variant-numeric: tabular-nums;
+}
+
+/* En la lista de celular, el estilo lo pone `tituloEnLista`; en la tabla (desde 48rem), gris. */
+@container (min-width: 48rem) {
+  .codigo {
+    color: var(--color-texto-suave);
+  }
+}
+
+/* Una línea por exigencia: "Cursadas" y los códigos, cada uno en su recuadro. */
+.exigencia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-1);
+}
+
+.exigencia + .exigencia {
+  margin-top: var(--espacio-1);
+}
+
+.etiqueta {
+  min-width: 5.5rem;
+  font-size: var(--texto-chico);
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+.chip {
+  min-width: 1.75rem;
+  padding: 0 var(--espacio-2);
+  font-size: var(--texto-chico);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+}
+
+.vacio {
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
