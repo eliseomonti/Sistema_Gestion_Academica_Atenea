@@ -4,6 +4,10 @@ form {
   gap: var(--espacio-2);
 }
 
+button {
+  align-self: flex-end;
+}
+
 .error-campo {
   margin: 0;
   color: var(--color-error);

@@ -56,6 +56,10 @@ legend {
 }
 
 .tribunal,
+.buscador {
+  width: 100%;
+}
+
 .resultados {
   margin: 0 0 var(--espacio-2);
   padding: 0;
@@ -84,15 +88,11 @@ legend {
   background: none;
 }
 
-/* Guardar ocupa el ancho que sobra; Cancelar, sólo lo que necesita */
 .botones {
   display: flex;
+  justify-content: flex-end;
   gap: var(--espacio-2);
   margin-top: var(--espacio-4);
-}
-
-.guardar {
-  flex: 1;
 }
 
 .secundario {

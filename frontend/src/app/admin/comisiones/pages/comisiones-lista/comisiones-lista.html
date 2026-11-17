@@ -57,6 +57,11 @@
   } @else {
     <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
       <ng-template appCelda="turno" let-comision>{{ comision.turno | turno }}</ng-template>
+      <ng-template appCelda="activa" let-comision>
+        <app-etiqueta [tipo]="comision.activa ? 'ok' : 'error'">
+          {{ comision.activa ? 'Activa' : 'Inactiva' }}
+        </app-etiqueta>
+      </ng-template>
     </app-tabla>
   }
 } @else {

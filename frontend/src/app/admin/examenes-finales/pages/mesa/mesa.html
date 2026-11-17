@@ -73,7 +73,7 @@
                         <li class="estado">Todavía no hay docentes</li>
                     }
                 </ul>
-<input #texto type="search" placeholder="Buscar docente" aria-label="Buscar docente por apellido, nombre o DNI" (input)="buscarDocente(texto.value)" (keydown.enter)="$event.preventDefault()" />
+<input #texto type="search" class="buscador" placeholder="Buscar por apellido, nombre, DNI o legajo" aria-label="Buscar docente por apellido, nombre, DNI o legajo" (input)="buscarDocente(texto.value)" (keydown.enter)="$event.preventDefault()" />
                 <ul class="resultados">
                     @for(docente of opcionesDocentes(); track docente.personaId)
                     {
@@ -92,8 +92,8 @@
             }
 
             <div class="botones">
-                <button class="guardar" [disabled]="cargando()">{{editando() ? 'Guardar cambios' : 'Crear mesa'}}</button>
                 <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+                <button [disabled]="cargando()">{{editando() ? 'Guardar cambios' : 'Crear mesa'}}</button>
             </div>
         </form>
 

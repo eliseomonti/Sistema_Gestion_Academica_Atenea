@@ -16,33 +16,39 @@
     [formField]="filtrosForm.busqueda"
   />
 
-  <!-- Sólo en /admin/estudiantes: en la pestaña de un plan la carrera ya está elegida. -->
-  @if (planId() === undefined) {
-    <!-- popover: el navegador lo abre y lo cierra, y también lo cierra con Esc o al tocar afuera. -->
-    <button
-      type="button"
-      class="boton-filtro"
-      [class.activo]="filtrosForm.carreraId().value() !== ''"
-      popovertarget="filtros-estudiantes"
-      aria-label="Filtros"
-    >
-      <app-icono nombre="filtro" />
-    </button>
-    <div #panelFiltros id="filtros-estudiantes" class="panel-filtros" popover>
-      <label for="filtro-carrera">Carrera</label>
-      <!-- Al elegir una opción, el panel se cierra: el valor ya lo guardó [formField]. -->
-      <select
-        id="filtro-carrera"
-        [formField]="filtrosForm.carreraId"
-        (change)="panelFiltros.hidePopover()"
-      >
-        <option value="">Todas</option>
-        @for (carrera of opcionesCarrera(); track carrera.id) {
-          <option [value]="carrera.id">{{ carrera.nombre }}</option>
-        }
+  <!-- popover: el navegador lo abre y lo cierra, y también lo cierra con Esc o al tocar afuera. -->
+  <button
+    type="button"
+    class="boton-filtro"
+    [class.activo]="hayFiltroEnPanel()"
+    popovertarget="filtros-estudiantes"
+    aria-label="Filtros"
+  >
+    <app-icono nombre="filtro" />
+  </button>
+  <div id="filtros-estudiantes" class="panel-filtros" popover>
+    <!-- Sólo en /admin/estudiantes: en la pestaña de un plan la carrera ya está elegida. -->
+    @if (planId() === undefined) {
+      <label>
+        Carrera
+        <select [formField]="filtrosForm.carreraId">
+          <option value="">Todas</option>
+          @for (carrera of opcionesCarrera(); track carrera.id) {
+            <option [value]="carrera.id">{{ carrera.nombre }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <label>
+      Estado
+      <select [formField]="filtrosForm.estado">
+        <option value="ACTIVA">Activos</option>
+        <option value="EGRESADO">Egresados</option>
+        <option value="BAJA">Bajas</option>
       </select>
-    </div>
-  }
+    </label>
+  </div>
 </div>
 
 @if (estudiantes.error()) {

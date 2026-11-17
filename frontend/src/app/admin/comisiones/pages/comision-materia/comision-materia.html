@@ -172,9 +172,16 @@
           (cancelar)="confirmarQuitar.set(false)"
         />
       } @else {
-        <button type="button" class="baja" (click)="confirmarQuitar.set(true)">
-          Quitar materia
-        </button>
+        <section class="acciones">
+          <h3>Acciones sobre la materia</h3>
+          <div class="accion">
+            <div>
+              <p class="accion-titulo">Quitar materia</p>
+              <p class="accion-detalle">Se quita de la comisión, con sus docentes y horarios.</p>
+            </div>
+            <button type="button" class="peligro" (click)="confirmarQuitar.set(true)">Quitar</button>
+          </div>
+        </section>
       }
     }
   }

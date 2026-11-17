@@ -1,4 +1,4 @@
-import { afterNextRender, Component, computed, ElementRef, inject, input, linkedSignal, numberAttribute, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, input, linkedSignal, numberAttribute, signal, viewChild } from '@angular/core';
 import { ExamenFinalResponse } from '../../data/examen-final';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CarrerasApi } from '../../../carreras/data/carreras-api';
@@ -74,6 +74,7 @@ export class Mesa {
   protected readonly tribunal = computed(() => this.datos().docentes);
 
   private readonly busqueda = signal('')
+  private espera?: ReturnType<typeof setTimeout>;
   private readonly encontrados = rxResource({
     params: () => {
       const texto = this.busqueda().trim()
@@ -110,11 +111,13 @@ export class Mesa {
   constructor()
   {
     afterNextRender(() => this.dialogo().nativeElement.showModal());
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.espera));
   }
 
   protected buscarDocente(texto: string): void
   {
-    this.busqueda.set(texto);
+    clearTimeout(this.espera);
+    this.espera = setTimeout(() => this.busqueda.set(texto), 300);
   }
 
   protected agregarDocente(docente: DocenteListadoResponse): void
@@ -123,6 +126,7 @@ export class Mesa {
       ...datos,
       docentes: [...datos.docentes, { personaId: docente.personaId, apellido: docente.apellido, nombre: docente.nombre }],
     }));
+    clearTimeout(this.espera);
     this.busqueda.set('');
   }
 

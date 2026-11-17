@@ -38,7 +38,7 @@ interface Grupo<T> {
   imports: [NgTemplateOutlet, RouterLink, Icono],
   templateUrl: './tabla.html',
   styleUrl: './tabla.css',
-  host: { '[class.centrado]': 'centrado()' },
+  host: { '[class.centrado]': 'centrado()', '[class.sin-tarjeta]': 'sinTarjeta()' },
 })
 export class Tabla<T> {
   readonly columnas = input.required<Columna<T>[]>();
@@ -62,6 +62,11 @@ export class Tabla<T> {
   readonly encabezado = input(true);
   /** PRUEBA: en escritorio, todo centrado menos la columna principal. `<app-tabla centrado>`. */
   readonly centrado = input(false, { transform: booleanAttribute });
+  /**
+   * Sin la tarjeta blanca alrededor, para cuando la pantalla pone la tabla dentro de su propia
+   * tarjeta junto con otras cosas (un título, por ejemplo). `<app-tabla sinTarjeta>`.
+   */
+  readonly sinTarjeta = input(false, { transform: booleanAttribute });
 
   /** Los `<ng-template appCelda>` que puso la pantalla adentro de `<app-tabla>`. */
   private readonly celdas = contentChildren(Celda);

@@ -1,7 +1,7 @@
 import { afterNextRender, Component, ElementRef, inject, input, numberAttribute, signal, viewChild} from '@angular/core';
 import { PeriodoInscripcionApi } from '../../data/periodos-inscripcion-api';
 import { ActivatedRoute, Router } from '@angular/router';
-import { form, required, min, FormField, FormRoot} from '@angular/forms/signals';
+import { form, required, FormField, FormRoot} from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { TipoPeriodo } from '../../data/periodo-inscripcion';
 import { PeriodoLectivo } from '../../../../shared/models/periodo-lectivo';
@@ -29,7 +29,6 @@ export class PeriodoAlta {
 
   private readonly datos = signal({
     tipo: '',
-    anioLectivo: new Date().getFullYear(),
     periodoLectivo: '',
     fechaInicio: '',
     fechaCierre: ''
@@ -38,8 +37,6 @@ export class PeriodoAlta {
   protected readonly periodoForm = form(
     this.datos, (campo) => {
       required(campo.tipo, {message: 'Elegio el tipo'});
-      min(campo.anioLectivo, 2000, { message: 'Revisa el año lectivo' });
-
       required(campo.periodoLectivo, {message: 'Elegi el cuatrimestre', when: ({ valueOf }) => valueOf(campo.tipo) === 'CURSADA'});
       required(campo.fechaInicio, {message: 'Elegi la fecha de inicio'});
       required(campo.fechaCierre, {message: 'Elegi la fecha de cierre'});
@@ -69,7 +66,7 @@ export class PeriodoAlta {
       await firstValueFrom(this.api.altaPeriodo({
         carreraId: this.carreraId(),
         tipo: datos.tipo as TipoPeriodo,
-        anioLectivo: datos.anioLectivo,
+        anioLectivo: new Date().getFullYear(),
         periodoLectivo: datos.tipo === 'CURSADA' ? (datos.periodoLectivo as PeriodoLectivo) : null,
         fechaInicio: datos.fechaInicio,
         fechaCierre: datos.fechaCierre,

@@ -1,4 +1,6 @@
-import { Component, inject, input, numberAttribute, signal } from '@angular/core';
+import { Component, computed, inject, input, numberAttribute, signal } from '@angular/core';
+import { Icono } from '../../../../shared/ui/icono/icono';
+import { Etiqueta } from '../../../../shared/ui/etiqueta/etiqueta';
 import { PeriodoLectivo } from '../../../../shared/models/periodo-lectivo';
 import { PeriodoInscripcionApi } from '../../data/periodos-inscripcion-api';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -20,7 +22,7 @@ const CUATRIMESTRE: Record<PeriodoLectivo, string> =
 
 
 @Component({
-  imports: [FormField, Tabla, Celda, DatePipe, RouterLink, RouterOutlet],
+  imports: [FormField, Tabla, Celda, DatePipe, RouterLink, RouterOutlet, Icono, Etiqueta],
   selector: 'app-periodos-lista',
   styleUrl: './periodos-lista.css',
   templateUrl: './periodos-lista.html',
@@ -34,9 +36,22 @@ export class PeriodosLista {
   private readonly filtros = signal({
     anioLectivo: new Date().getFullYear(),
     tipo: '',
+    estado: 'TODOS',
   });
 
   protected readonly filtrosForm = form(this.filtros);
+
+  protected readonly hayFiltro = computed(() => {
+    const filtros = this.filtros();
+    return filtros.anioLectivo !== new Date().getFullYear() || filtros.tipo !== '' || filtros.estado !== 'TODOS';
+  });
+
+  protected readonly periodosFiltrados = computed(() => {
+    const estado = this.filtros().estado;
+    return (this.periodos.value() ?? []).filter(
+      (p) => estado === 'TODOS' || p.habilitada === (estado === 'HABILITADOS'),
+    );
+  });
 
   protected readonly periodos = rxResource({
     params: () => ({
@@ -57,7 +72,9 @@ export class PeriodosLista {
 
     {clave: 'fechaCierre', titulo: 'Hasta'},
     
-    {clave: 'Habilitada', titulo: 'Estado', valor: (p) => (p.habilitada ? 'Habilitado' : 'Deshabilitado')}
+    {clave: 'habilitada', titulo: 'Estado'},
+
+    {clave: 'mesas', titulo: 'Mesas'}
 
     
   

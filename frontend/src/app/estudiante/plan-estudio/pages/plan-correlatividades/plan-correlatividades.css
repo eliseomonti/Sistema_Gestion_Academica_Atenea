@@ -1,3 +1,4 @@
+/* La carrera, el plan y la tabla en una sola tarjeta; la tabla va sin la suya (`sinTarjeta`). */
 .plan {
   margin-bottom: var(--espacio-4);
   padding: var(--espacio-4);

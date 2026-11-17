@@ -27,7 +27,7 @@ export class PlanDetalle {
     { texto: 'Materias', ruta: 'materias' },
     { texto: 'Estudiantes', ruta: 'estudiantes' },
     { texto: 'Comisiones', ruta: 'comisiones'},
-    { texto: 'Periodos', ruta: 'periodos'},
+    { texto: 'Periodos de Inscripción', ruta: 'periodos'},
   ];
 
   /**

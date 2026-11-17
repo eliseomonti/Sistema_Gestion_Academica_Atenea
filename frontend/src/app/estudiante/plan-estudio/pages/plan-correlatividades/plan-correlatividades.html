@@ -13,6 +13,7 @@
         <p class="estado">El plan todavía no tiene materias cargadas.</p>
       } @else {
         <app-tabla
+          sinTarjeta
           [columnas]="columnas"
           [filas]="item.filas"
           [agrupar]="grupo"

@@ -29,15 +29,11 @@ h2{
   color: var(--color-texto-suave);
 }
 
-/* Guardar ocupa el ancho que sobra; Cancelar, sólo lo que necesita. */
 .botones {
   display: flex;
+  justify-content: flex-end;
   gap: var(--espacio-2);
   margin-top: var(--espacio-4);
-}
-
-.guardar {
-  flex: 1;
 }
 
 /* Cancelar: con borde y sin el fondo azul, para que la otra sea la acción principal. */

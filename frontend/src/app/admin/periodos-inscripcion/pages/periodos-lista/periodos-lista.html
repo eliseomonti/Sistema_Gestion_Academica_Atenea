@@ -1,33 +1,67 @@
 <div class="herramientas">
-    <a class="nuevo" routerLink="nuevo">Nuevo periodo</a>
-    <label>
-        Año lectivo
-        <input type="number" class="anio" [formField]="filtrosForm.anioLectivo"/>
-    </label>
+    <a class="nuevo" routerLink="nuevo">Nuevo Periodo de Inscripción</a>
 
-    <label>
-        Tipo
-        <select [formField]="filtrosForm.tipo">
-            <option value="">Todos</option>
-            <option value="CURSADA">Cursada</option>
-            <option value="FINAL">Final</option>
-        </select>
-    </label>
+    <button
+        type="button"
+        class="boton-filtro"
+        [class.activo]="hayFiltro()"
+        popovertarget="filtros-periodos"
+        aria-label="Filtros"
+    >
+        <app-icono nombre="filtro" />
+    </button>
+    <div id="filtros-periodos" class="panel-filtros" popover>
+        <label>
+            Año lectivo
+            <input type="number" [formField]="filtrosForm.anioLectivo"/>
+        </label>
+
+        <label>
+            Tipo
+            <select [formField]="filtrosForm.tipo">
+                <option value="">Todos</option>
+                <option value="CURSADA">Cursada</option>
+                <option value="FINAL">Final</option>
+            </select>
+        </label>
+
+        <label>
+            Estado
+            <select [formField]="filtrosForm.estado">
+                <option value="TODOS">Todos</option>
+                <option value="HABILITADOS">Habilitados</option>
+                <option value="DESHABILITADOS">Deshabilitados</option>
+            </select>
+        </label>
+    </div>
 </div>
 
 @if(periodos.error())
 {
     <p class="error">No se pudieron cargar los períodos</p>
-}@else if(periodos.value(); as lista)
+}@else if(periodos.value())
 {
-    @if(lista.length === 0)
+    @if(periodosFiltrados().length === 0)
     {
         <p class="estado">No hay períodos con este filtro</p>
     }@else
     {
-        <app-tabla [columnas]="columnas" [filas]="lista" [enlace]="enlace">
+        <app-tabla [columnas]="columnas" [filas]="periodosFiltrados()" [enlace]="enlace">
             <ng-template appCelda="fechaInicio" let-periodo>{{periodo.fechaInicio | date:'dd/MM/yyyy HH:mm'}}</ng-template>
             <ng-template appCelda="fechaCierre" let-periodo>{{periodo.fechaCierre | date:'dd/MM/yyyy HH:mm'}}</ng-template>
+            <ng-template appCelda="habilitada" let-periodo>
+                <app-etiqueta [tipo]="periodo.habilitada ? 'ok' : 'error'">
+                    {{ periodo.habilitada ? 'Habilitado' : 'Deshabilitado' }}
+                </app-etiqueta>
+            </ng-template>
+            <ng-template appCelda="mesas" let-periodo>
+                @if(periodo.tipo === 'FINAL')
+                {
+                    <a class="ir-mesas" [routerLink]="[periodo.id, 'mesas']" aria-label="Ver mesas de examen" title="Ver mesas de examen">
+                        <app-icono nombre="documento" />
+                    </a>
+                }
+            </ng-template>
         </app-tabla>
     }
 }@else

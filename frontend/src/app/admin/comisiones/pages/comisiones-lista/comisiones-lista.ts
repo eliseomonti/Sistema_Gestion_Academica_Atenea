@@ -10,11 +10,12 @@ import { Turno } from '../../../../shared/models/turno';
 import { TurnoPipe } from '../../../../shared/pipes/turno-pipe';
 import { Celda } from '../../../../shared/ui/tabla/celda';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
+import { Etiqueta } from '../../../../shared/ui/etiqueta/etiqueta';
 import { RouterLink, RouterOutlet } from '@angular/router';
 
 
 @Component({
-  imports: [FormField, Tabla, Celda, TurnoPipe, RouterLink, RouterOutlet, Icono],
+  imports: [FormField, Tabla, Celda, TurnoPipe, RouterLink, RouterOutlet, Icono, Etiqueta],
   selector: 'app-comisiones-lista',
   styleUrl: './comisiones-lista.css',
   templateUrl: './comisiones-lista.html',
@@ -84,6 +85,7 @@ export class ComisionesLista {
       tituloEnLista: true,
     },
     { clave: 'turno', titulo: 'Turno' },
+    { clave: 'activa', titulo: 'Estado' },
   ];
 
   protected readonly enlace = (comision: ComisionResponse) => [comision.id];
