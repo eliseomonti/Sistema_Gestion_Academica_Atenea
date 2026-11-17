@@ -1,18 +1,36 @@
-/* La tabla mira el ancho que le toca a ella, no el de la pantalla (container query). */
+/*
+ * La tabla va en una tarjeta blanca, igual en los tres actores: la pantalla no la vuelve a poner
+ * alrededor. Mira el ancho que le toca a ella, no el de la pantalla (container query).
+ */
 :host {
   display: block;
   container-type: inline-size;
+  padding: var(--espacio-1) 0; /* en la lista, las filas ya tienen su margen a los costados */
+  border: 1px solid var(--color-divisor);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+@media (min-width: 768px) {
+  :host {
+    padding: var(--espacio-4);
+  }
+}
+
+:host(.sin-tarjeta) {
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
 }
 
 /* ---- Base (angosto): una lista, con una línea entre fila y fila ---- */
-/* Los mismos bordes que la tabla de escritorio. */
+/* Sin contorno propio: el marco lo pone la tarjeta. */
 
 table {
   display: block;
   overflow: hidden; /* para que el fondo de una fila resaltada no tape las esquinas */
-  border: 1px solid var(--color-borde-tabla);
-  border-radius: var(--radio);
-  background: var(--color-superficie);
 }
 
 tbody {
@@ -31,7 +49,7 @@ tr {
   align-items: center;
   gap: var(--espacio-1) var(--espacio-2);
   padding: var(--espacio-3) var(--espacio-5) var(--espacio-3) var(--espacio-3);
-  border-bottom: 1px solid var(--color-borde-tabla);
+  border-bottom: 1px solid var(--color-divisor);
 }
 
 /* Sin enlace no hace falta el lugar para tocar: filas más bajas, entran más en la pantalla. */
