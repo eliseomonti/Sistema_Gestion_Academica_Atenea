@@ -26,14 +26,10 @@ form {
   font-size: var(--texto-chico);
 }
 
-/* Con Cancelar, Guardar ocupa el ancho que sobra y Cancelar sólo lo que necesita. */
 .botones {
   display: flex;
+  justify-content: flex-end;
   gap: var(--espacio-2);
-}
-
-.ancho {
-  flex: 1;
 }
 
 .secundario {

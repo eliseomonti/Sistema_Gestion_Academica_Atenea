@@ -27,6 +27,27 @@ button{
   margin-right: var(--espacio-2);
 }
 
+.botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-4);
+}
+
+.botones button {
+  margin-right: 0;
+}
+
+.secundario {
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  background: var(--color-superficie);
+}
+
+.secundario:hover {
+  background: var(--color-fondo);
+}
+
 .bien{
   color: var(--color-ok);
 }

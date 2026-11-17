@@ -16,3 +16,61 @@
     </li>
   }
 </ul>
+
+<div class="secciones">
+  <section class="seccion">
+    <h2><app-icono nombre="editar" /> Inscripciones abiertas</h2>
+
+    @if (carreras.error() || periodos.error()) {
+      <p class="estado">No se pudieron cargar las inscripciones</p>
+    } @else if (periodos.hasValue()) {
+      <ul class="lista">
+        @for (item of inscripcionesAbiertas(); track item.periodo.id) {
+          <li>
+            @if (item.ruta) {
+              <a [routerLink]="item.ruta"><strong>{{ tipoPeriodo(item.periodo) }} · {{ item.carrera }}</strong></a>
+            } @else {
+              <strong>{{ tipoPeriodo(item.periodo) }} · {{ item.carrera }}</strong>
+            }
+            <span class="estado">
+              @if (abierta(item.periodo)) {
+                Abierta · cierra el {{ item.periodo.fechaCierre | date: 'dd/MM/yyyy HH:mm' }}
+              } @else {
+                Abre el {{ item.periodo.fechaInicio | date: 'dd/MM/yyyy HH:mm' }}
+              }
+            </span>
+          </li>
+        } @empty {
+          <li class="estado">No hay inscripciones abiertas ni por abrir en los próximos 30 días</li>
+        }
+      </ul>
+    } @else {
+      <p class="estado">Cargando inscripciones…</p>
+    }
+  </section>
+
+  <section class="seccion">
+    <h2><app-icono nombre="documento" /> Próximas mesas de examen</h2>
+
+    @if (carreras.error() || periodos.error() || mesas.error()) {
+      <p class="estado">No se pudieron cargar las mesas</p>
+    } @else if (mesas.hasValue()) {
+      <ul class="lista">
+        @for (item of proximasMesas(); track item.mesa.id) {
+          <li>
+            @if (item.ruta) {
+              <a [routerLink]="item.ruta"><strong>{{ item.mesa.fecha | date: 'dd/MM/yyyy' }} {{ item.mesa.nombreMateria }}</strong></a>
+            } @else {
+              <strong>{{ item.mesa.fecha | date: 'dd/MM/yyyy' }} {{ item.mesa.nombreMateria }}</strong>
+            }
+            <span class="estado">{{ item.carrera }} · {{ horario(item.mesa) }}</span>
+          </li>
+        } @empty {
+          <li class="estado">No hay mesas de examen próximas</li>
+        }
+      </ul>
+    } @else {
+      <p class="estado">Cargando mesas…</p>
+    }
+  </section>
+</div>

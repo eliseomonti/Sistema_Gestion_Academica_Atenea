@@ -77,17 +77,22 @@
 /* Sólo abierto: un display fijo le ganaría al display: none del popover cerrado. */
 .panel-filtros:popover-open {
   display: grid;
-  gap: var(--espacio-1);
+  gap: var(--espacio-3);
   min-width: 12rem;
   max-width: calc(100vw - 2rem); /* los nombres de carrera son largos */
 }
 
 .panel-filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
   font-size: var(--texto-chico);
   font-weight: 500;
 }
 
 .panel-filtros select {
   min-width: 0;
+  font-size: var(--texto-base);
+  font-weight: 400;
   background: var(--color-superficie);
 }

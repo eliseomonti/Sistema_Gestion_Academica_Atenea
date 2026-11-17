@@ -2,9 +2,9 @@
 <input
   #texto
   type="search"
-  placeholder="buscar docente"
-  aria-label="Buscar docente por apellido, nombre o DNI"
-  (input)="buscar.emit(texto.value)"
+  placeholder="Buscar por apellido, nombre, DNI o legajo"
+  aria-label="Buscar docente por apellido, nombre, DNI o legajo"
+  (input)="escribir(texto.value)"
   (keydown.enter)="$event.preventDefault()"
 />
 <ul>

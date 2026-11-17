@@ -17,11 +17,6 @@
                 </select>
             </label>
 
-            <label>
-                Año lectivo
-                <input type="number" [formField]="periodoForm.anioLectivo"/>
-            </label>
-
             @if(periodoForm.tipo().value() === 'CURSADA')
             {
                 <label>
@@ -50,8 +45,10 @@
                 <p class="error">Completa todos los datos</p>
             }
 
-            <button [disabled]="cargando()">Crear</button>
-            <button type="button" (click)="cerrar()">Cancelar</button>
+            <div class="botones">
+                <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+                <button [disabled]="cargando()">Crear</button>
+            </div>
         </form>
     }
 

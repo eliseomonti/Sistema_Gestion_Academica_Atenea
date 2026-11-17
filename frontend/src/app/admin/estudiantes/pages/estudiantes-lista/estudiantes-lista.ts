@@ -8,7 +8,7 @@ import { Columna } from '../../../../shared/ui/tabla/columna';
 import { Icono } from '../../../../shared/ui/icono/icono';
 import { Tabla } from '../../../../shared/ui/tabla/tabla';
 import { CarrerasApi } from '../../../carreras/data/carreras-api';
-import { EstudianteListadoResponse } from '../../data/estudiante';
+import { EstadoInscripcionCarrera, EstudianteListadoResponse } from '../../data/estudiante';
 import { EstudiantesApi } from '../../data/estudiantes-api';
 
 type ListadoEstudiantes = Pagina<EstudianteListadoResponse>;
@@ -51,16 +51,25 @@ export class EstudiantesLista {
   );
 
   /**
-   * El buscador y el desplegable de carrera escriben acá, a través de `filtrosForm`. carreraId es
-   * texto porque es el valor de un <select>: '' es "Todas las carreras".
+   * El buscador y los desplegables de carrera y estado escriben acá, a través de `filtrosForm`.
+   * carreraId es texto porque es el valor de un <select>: '' es "Todas las carreras".
    */
-  private readonly filtros = signal({ busqueda: '', carreraId: '' });
+  private readonly filtros = signal<{
+    busqueda: string;
+    carreraId: string;
+    estado: EstadoInscripcionCarrera;
+  }>({ busqueda: '', carreraId: '', estado: 'ACTIVA' });
 
   /** Hay algún filtro puesto: cambia el mensaje de la lista vacía. */
   protected readonly hayFiltro = computed(() => {
-    const { busqueda, carreraId } = this.filtros();
-    return busqueda.trim() !== '' || carreraId !== '';
+    const { busqueda, carreraId, estado } = this.filtros();
+    return busqueda.trim() !== '' || carreraId !== '' || estado !== 'ACTIVA';
   });
+
+  /** Algún filtro del panel distinto del de siempre: el botón de filtro se pinta. */
+  protected readonly hayFiltroEnPanel = computed(
+    () => this.filtros().carreraId !== '' || this.filtros().estado !== 'ACTIVA',
+  );
 
   /**
    * debounce: el texto pasa a `filtros` recién cuando se deja de escribir por 300 ms. Sin esto,
@@ -85,6 +94,7 @@ export class EstudiantesLista {
       buscar: this.filtros().busqueda,
       carreraId: this.filtros().carreraId === '' ? undefined : Number(this.filtros().carreraId),
       planEstudioId: this.planId(),
+      estado: this.filtros().estado,
       pagina: this.pagina(),
     }),
     stream: ({ params }) => this.api.listar(params),

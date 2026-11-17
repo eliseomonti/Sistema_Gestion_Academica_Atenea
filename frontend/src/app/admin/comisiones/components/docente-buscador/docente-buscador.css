@@ -1,3 +1,11 @@
+:host {
+  display: block;
+}
+
+input {
+  width: 100%;
+}
+
 ul {
   display: flex;
   flex-direction: column;

@@ -141,9 +141,47 @@ legend {
   font-weight: 500;
 }
 
-.baja {
-  margin-top: var(--espacio-3);
-  background: var(--color-error);
+.acciones {
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-divisor);
+}
+
+h3 {
+  margin: 0 0 var(--espacio-2);
+  font-size: var(--texto-base);
+  font-weight: 500;
+  color: var(--color-error);
+}
+
+.accion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+}
+
+.accion p {
+  margin: 0;
+}
+
+.accion-detalle {
+  font-size: var(--texto-chico);
+  color: var(--color-texto-suave);
+}
+
+.peligro {
+  flex-shrink: 0;
+  margin-right: 0;
+  padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  background: var(--color-superficie);
+}
+
+.peligro:hover {
+  background: var(--color-error-fondo);
 }
 
 .bien {

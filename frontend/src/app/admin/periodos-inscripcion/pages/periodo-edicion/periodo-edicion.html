@@ -32,8 +32,8 @@
             }
 
             <div class="botones">
-                <button class="guardar" [disabled]="cargando()">Guardar cambios</button>
                 <button type="button" class="secundario" (click)="cerrar()">Cancelar</button>
+                <button [disabled]="cargando()">Guardar cambios</button>
             </div>
         </form>
 
