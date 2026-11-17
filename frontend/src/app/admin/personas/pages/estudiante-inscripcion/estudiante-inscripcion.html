@@ -9,9 +9,11 @@
 
   @if (inscripta(); as nombre) {
     <!-- Éxito, en los dos casos. Si fue un alta, también el legajo y si salió el mail. -->
-    <p class="exito" role="status">Se inscribió a {{ nombre }} en este plan.</p>
     @if (credenciales(); as datos) {
       <p>Legajo: {{ datos.legajo }}</p>
+    }
+    <p class="exito" role="status">Se inscribió a {{ nombre }} en este plan.</p>
+    @if (credenciales(); as datos) {
       @if (datos.mailEnviado) {
         <p class="exito">Se le mandaron por mail el usuario y la contraseña para ingresar.</p>
       } @else {

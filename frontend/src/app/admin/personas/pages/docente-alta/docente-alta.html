@@ -6,8 +6,8 @@
   @if (agregado(); as nombre) {
     <!-- Éxito, en los dos casos. Si fue un alta, también el legajo y si salió el mail. -->
     @if (credenciales(); as datos) {
-      <p class="exito" role="status">Se dio de alta a {{ nombre }} como docente.</p>
       <p>Legajo: {{ datos.legajo }}</p>
+      <p class="exito" role="status">Se dio de alta a {{ nombre }} como docente.</p>
       @if (datos.mailEnviado) {
         <p class="exito">Se le mandaron por mail el usuario y la contraseña para ingresar.</p>
       } @else {
