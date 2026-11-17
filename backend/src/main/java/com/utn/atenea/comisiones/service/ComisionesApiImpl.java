@@ -69,7 +69,9 @@ public class ComisionesApiImpl implements ComisionesApi {
     }
 
     private static MateriaDictada toMateriaDictada(ComisionMateria materia) {
+        // La consulta trae horarios y docentes juntos: con dos docentes, cada horario viene dos veces.
         List<MateriaDictada.Horario> horarios = materia.getHorarios().stream()
+                .distinct()
                 .sorted(Comparator.comparing(ComisionHorario::getDiaSemana).thenComparing(ComisionHorario::getHoraInicio))
                 .map(horario -> new MateriaDictada.Horario(horario.getDiaSemana(), horario.getHoraInicio(),
                         horario.getHoraFin(), horario.getAula() != null ? horario.getAula().getNombre() : null))

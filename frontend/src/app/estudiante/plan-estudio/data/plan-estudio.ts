@@ -21,3 +21,16 @@ export interface MateriaPlanEstudianteResponse{
     nota: number | null;
     vencimientoRegularidad: string | null;
 }
+
+/** Una fila del régimen de correlatividades: los códigos de las materias que exige para cursar y para rendir. */
+export interface CorrelatividadesMateriaEstudianteResponse {
+    materiaId: number;
+    codigo: string | null;
+    nombre: string;
+    anioCursado: number;
+    periodoLectivo: PeriodoLectivo;
+    cursadasParaCursar: string[];
+    aprobadasParaCursar: string[];
+    cursadasParaRendir: string[];
+    aprobadasParaRendir: string[];
+}

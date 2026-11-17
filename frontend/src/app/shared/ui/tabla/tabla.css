@@ -128,9 +128,9 @@ td.oculta-en-lista {
 
 @container (min-width: 48rem) {
   /*
-   * Bordes separados: cada celda dibuja su borde inferior (la línea entre filas) y la tabla el
-   * contorno. Entre columnas no hay línea: las separa el espacio. Con border-collapse, el fondo
-   * de una fila resaltada tapaba el borde de arriba.
+   * Bordes separados: cada celda dibuja su borde inferior (la línea entre filas) y la tabla no
+   * tiene contorno. Entre columnas no hay línea: las separa el espacio. Con border-collapse, el
+   * fondo de una fila resaltada tapaba el borde de arriba.
    */
   table {
     display: table;
@@ -138,8 +138,7 @@ td.oculta-en-lista {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border: 1px solid var(--color-borde-tabla);
-    border-bottom: none; /* lo pone la última fila */
+    border: none;
     border-radius: 0;
   }
 
@@ -165,7 +164,7 @@ td.oculta-en-lista {
     padding: var(--espacio-3);
     text-align: left;
     color: var(--color-texto);
-    border-bottom: 1px solid var(--color-borde-tabla);
+    border-bottom: 1px solid var(--color-divisor);
   }
 
   /* PRUEBA: con `centrado`, todo centrado menos la columna principal (por ahora, sólo materias). */
@@ -176,9 +175,15 @@ td.oculta-en-lista {
 
   th {
     font-size: var(--texto-chico);
-    font-weight: 700;
+    font-weight: 500;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
-    background: var(--color-encabezado-tabla);
+    color: var(--color-texto-suave);
+  }
+
+  thead th {
+    padding-block: var(--espacio-2);
+    border-bottom-color: var(--color-encabezado-tabla);
   }
 
   .grupo th {

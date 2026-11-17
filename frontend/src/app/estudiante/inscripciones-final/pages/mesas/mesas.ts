@@ -2,13 +2,22 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { InscripcionFinalApi } from '../../data/inscripciones-final-api';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { InscripcionFinalResponse, OfertaFinalResponse } from '../../data/inscripcion-final';
+import { OfertaFinalResponse } from '../../data/inscripcion-final';
 import { HttpErrorResponse } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
-import { ConfirmarDialog } from '../../../../shared/ui/confirmar-dialog/confirmar-dialog';
+import { Icono } from '../../../../shared/ui/icono/icono';
+import { Aviso } from '../../../../shared/ui/aviso/aviso';
+
+const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+/** Las mesas de una materia, para mostrarlas en una sola tarjeta. */
+interface MateriaConMesas {
+  materiaId: number;
+  nombreMateria: string;
+  mesas: OfertaFinalResponse[];
+}
 
 @Component({
-  imports: [DatePipe, ConfirmarDialog],
+  imports: [Icono, Aviso],
   selector: 'app-mesas',
   styleUrl: './mesas.css',
   templateUrl: './mesas.html',
@@ -17,23 +26,42 @@ export class Mesas {
 
   private readonly api = inject(InscripcionFinalApi);
   protected readonly oferta = rxResource({ stream: () => this.api.oferta()})
-  protected readonly misInscripciones = rxResource({ stream: () => this.api.listar()})
 
   protected readonly mesas = computed(() => 
     [...(this.oferta.value() ?? [])].sort((a,b) => (a.fecha + a.horaInicio).localeCompare(b.fecha + b.horaInicio))
   )
 
+  /** Una tarjeta por materia, en el orden de su primera mesa. */
+  protected readonly materias = computed<MateriaConMesas[]>(() => {
+    const porMateria = new Map<number, MateriaConMesas>();
+    for (const mesa of this.mesas()) {
+      const materia = porMateria.get(mesa.materiaId)
+        ?? { materiaId: mesa.materiaId, nombreMateria: mesa.nombreMateria, mesas: [] };
+      materia.mesas.push(mesa);
+      porMateria.set(mesa.materiaId, materia);
+    }
+    return [...porMateria.values()];
+  })
+
 
   protected readonly inscribiendo = signal<number | null>(null)
+  /** El error de la última inscripción, que se muestra en la fila de esa mesa. */
   protected readonly aviso = signal<{examenFinalId: number; texto: string; esError: boolean} | null>(null)
+  /** El éxito se avisa con un cartel flotante. */
+  protected readonly exito = signal<string | null>(null)
 
-  protected readonly aBajar =signal<InscripcionFinalResponse | null>(null)
-  protected readonly bajando = signal(false)
-  protected readonly avisoBaja = signal<{ texto: string; esError: boolean } | null>(null)
-
-  protected horario(mesa: { horaInicio: string; horaFin: string; nombreAula: string | null }): string
+  /** "Jue 20/11/2026" */
+  protected dia(mesa: OfertaFinalResponse): string
   {
-    return `${mesa.horaInicio.slice(0, 5)} a ${mesa.horaFin.slice(0, 5)} · ${mesa.nombreAula ?? 'Virtual'}`;
+    const [anio, mes, dia] = mesa.fecha.slice(0, 10).split('-');
+    const diaSemana = new Date(Number(anio), Number(mes) - 1, Number(dia)).getDay();
+    return `${DIAS[diaSemana]} ${dia}/${mes}/${anio}`;
+  }
+
+  /** "08:30 a 10:30" */
+  protected horas(mesa: OfertaFinalResponse): string
+  {
+    return `${mesa.horaInicio.slice(0, 5)} a ${mesa.horaFin.slice(0, 5)}`;
   }
 
    protected docentes(mesa: OfertaFinalResponse): string
@@ -49,13 +77,13 @@ export class Mesas {
   {
     const id = mesa.examenFinalId;
     this.aviso.set(null);
+    this.exito.set(null);
     this.inscribiendo.set(id);
     try 
     {
       await firstValueFrom(this.api.inscribirte({ examenFinalId: id }));
-      this.aviso.set({ examenFinalId: id, texto: 'Te inscribiste a la mesa de ' + mesa.nombreMateria, esError: false });
+      this.exito.set('Te inscribiste a la mesa de ' + mesa.nombreMateria);
       this.oferta.reload();
-      this.misInscripciones.reload();
     }catch(error)
     {
       this.aviso.set({ examenFinalId: id, texto: mensajeDeError(error), esError: true });
@@ -66,28 +94,6 @@ export class Mesas {
     }
     this.inscribiendo.set(null);
   }
-
-  protected mensajeBaja(inscripcion: InscripcionFinalResponse): string
-  {
-    return `Te vas a dar de baja de la mesa de ${inscripcion.nombreMateria}.`;
-  }
-
-  protected async darDeBaja(inscripcion: InscripcionFinalResponse): Promise<void>
-  {
-    this.avisoBaja.set(null);
-    this.bajando.set(true);
-    try {
-      await firstValueFrom(this.api.darDeBaja(inscripcion.id));
-      this.avisoBaja.set({ texto: 'Te diste de baja de la mesa de ' + inscripcion.nombreMateria, esError: false });
-    } catch (error) {
-      this.avisoBaja.set({ texto: mensajeDeError(error), esError: true });
-    }
-    this.aBajar.set(null);
-    this.bajando.set(false);
-    this.misInscripciones.reload();
-    this.oferta.reload();
-  }
-
 
 }
 

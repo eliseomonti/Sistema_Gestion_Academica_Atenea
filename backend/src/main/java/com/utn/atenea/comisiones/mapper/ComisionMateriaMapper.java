@@ -38,7 +38,9 @@ public interface ComisionMateriaMapper {
      * una materia recién guardada tiene los horarios en el orden en que llegaron.
      */
     default List<HorarioResponse> toHorarios(List<ComisionHorario> horarios) {
+        // Si la consulta trajo también los docentes, cada horario viene una vez por docente.
         return horarios.stream()
+                .distinct()
                 .sorted(Comparator.comparing(ComisionHorario::getDiaSemana)
                         .thenComparing(ComisionHorario::getHoraInicio))
                 .map(this::toResponse)

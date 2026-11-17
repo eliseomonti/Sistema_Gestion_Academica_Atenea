@@ -1,54 +1,7 @@
-<h1>Inscripcion a cursado</h1>
-<section class="mis-inscripciones">
-    <h2>Mis inscripciones</h2>
-
-    @if(misInscripciones.error())
-    {
-        <p class="error">No se pudieron cargar tus inscripciones</p>
-    }@else if(misInscripciones.value(); as lista)
-    {
-        <ul class="comisiones">
-            @for(inscripcion of lista; track inscripcion.id)
-            {
-                <li class="comision" [class.de-baja]="inscripcion.estado === 'BAJA'">
-                    <strong>{{inscripcion.nombreMateria}}</strong> · Comision {{inscripcion.nombreComision}}
-                    <p class="detalle">
-                        {{cuatrimestre(inscripcion.periodoLectivo)}}  desde el {{inscripcion.fechaInscripcion | date: 'dd/MM/yyyy'}}
-                        {{inscripcion.estado === 'INSCRIPTO' ? 'Inscripto' : 'Dado de baja'}}
-                    </p>
-
-                    @if(inscripcion.estado === 'INSCRIPTO')
-                    {
-                        @if(aBajar()?.id === inscripcion.id)
-                        {
-                            <app-confirmar-dialog [mensaje]="mensajeBaja(inscripcion)" confirmarTexto="Darme de baja" [procesando]="bajando()" (confirmar)="darDeBaja(inscripcion)" (cancelar)="aBajar.set(null)" />
-                        }@else
-                        {
-                            <button type="button" class="baja" [disabled]="bajando()" (click)="aBajar.set(inscripcion)">Darme de baja</button>
-                        }
-                    }
-                </li>
-            }@empty
-            {
-                <li class="detalle">Todavia no te inscribiste a ninguna materia este año</li>
-            }
-        </ul>
-
-        @if(avisoBaja(); as aviso)
-        {
-            <p [class.error]="aviso.esError" [class.bien]="!aviso.esError">{{aviso.texto}}</p>
-        }
-    }@else
-    {
-        <p class="estado">Cargando tus inscripciones...</p>
-    }
-</section>
-
-<h2>Materias para inscribirte</h2>
-
+<!-- El título y las pestañas los pone la pantalla Inscripción a cursado. -->
 @if(oferta.error())
 {
-    <p class="error">NO se pudo cargar la oferta</p>
+    <p class="error">No se pudo cargar la oferta</p>
     <button type="button" (click)="oferta.reload()">Reintentar</button>
 }@else if(oferta.value(); as materias)
 {
@@ -59,49 +12,57 @@
     {
         @for(anio of anio(); track anio)
         {
-            <h2>{{anio}}° año</h2>
+            <h2 class="anio">{{ordinal(anio)}} año</h2>
 
             @for(materia of materiasDelAnio(anio); track materia.materiaId)
             {
                 <article class="materia">
-                    <h3>{{materia.nombreMateria}}</h3>
-                    <p class="detalle">{{cuatrimestre(materia.periodoLectivo)}}</p>
+                    <header class="cabecera">
+                        <h3>{{materia.nombreMateria}}</h3>
+                        <span class="suave">{{cuatrimestre(materia.periodoLectivo)}}</span>
+                    </header>
 
                     <ul class="comisiones">
                         @for(comision of materia.comisiones; track comision.comisionMateriaId)
                         {
-                            <li class="comision">
-                                <strong>Comisión {{comision.nombreComision}}</strong> · {{comision.turno | turno}}
-                                <ul class="horarios">
+                            <li class="comision" [class.inscripta]="comision.inscripto">
+                                <span><strong>Comisión {{comision.nombreComision}}</strong><span class="suave"> · {{comision.turno | turno}}</span></span>
+
+                                <span class="horarios">
                                     @for(h of comision.horarios; track $index)
                                     {
-                                        <li>{{horario(h)}}</li>
+                                        <span class="horario">
+                                            <span class="dato"><app-icono nombre="reloj" />{{dia(h)}}</span>
+                                            <span class="dato"><app-icono nombre="ubicacion" />{{h.aula ?? 'Virtual'}}</span>
+                                        </span>
                                     }@empty
                                     {
-                                        <li>Horarios a confirmar</li>
+                                        <span class="dato suave">Horarios a confirmar</span>
                                     }
-                                </ul>
-                                <p class="detalle">{{docentes(comision)}}</p>
-                                <p class="detalle">{{cupo(comision)}}</p>
+                                </span>
 
-                                 @if(comision.inscripto)
-                                {
-                                    <p class="inscripto">Estás inscripto</p>
-                                }@else
-                                {
-                                    <button type="button"
-                                        [disabled]="inscribiendo() !== null || yaInscriptoEnMateria(materia) || comision.cupoDisponible === 0"
-                                        (click)="inscribir(comision)">
-                                        {{comision.cupoDisponible === 0 ? 'Sin cupo' : 'Inscribirme'}}
-                                    </button>
-                                }
+                                <span class="dato"><app-icono nombre="persona" />{{docentes(comision)}}</span>
+
+                                <span class="cupo" [class.pocos]="quedanPocos(comision)">{{cupo(comision)}}</span>
+
+                                <span class="accion">
+                                    @if(comision.inscripto)
+                                    {
+                                        <span class="inscripto"><app-icono nombre="tilde" />Estás inscripto</span>
+                                    }@else if(!yaInscriptoEnMateria(materia))
+                                    {
+                                        <button type="button"
+                                            [disabled]="inscribiendo() !== null || comision.cupoDisponible === 0"
+                                            (click)="inscribir(comision)">
+                                            {{comision.cupoDisponible === 0 ? 'Sin cupo' : 'Inscribirme'}}
+                                        </button>
+                                    }
+                                </span>
 
                                 @if(aviso()?.ComisionMateriaId === comision.comisionMateriaId)
                                 {
-                                    <p [class.error]="aviso()?.esError" [class.bien]="!aviso()?.esError">{{aviso()?.texto}}</p>
+                                    <p class="error" role="alert">{{aviso()?.texto}}</p>
                                 }
-
-
                             </li>
                         }
                     </ul>
@@ -112,4 +73,9 @@
 }@else
 {
     <p class="estado">Cargando...</p>
+}
+
+@if(exito(); as texto)
+{
+    <app-aviso (cerrar)="exito.set(null)">{{texto}}</app-aviso>
 }

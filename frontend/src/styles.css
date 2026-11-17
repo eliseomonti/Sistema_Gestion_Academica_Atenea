@@ -97,6 +97,15 @@ select {
   border-radius: var(--radio);
 }
 
+input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+input[aria-invalid='true']:focus-visible {
+  outline: 2px solid var(--color-error);
+  outline-offset: 2px;
+}
+
 button {
   min-height: 44px;
   padding: var(--espacio-2) var(--espacio-4);

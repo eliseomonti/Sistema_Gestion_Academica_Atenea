@@ -382,6 +382,31 @@ class InscripcionComisionControllerTest {
     }
 
     @Test
+    void conVariosDocentesLosHorariosNoSeRepiten() throws Exception {
+        abrirPeriodo("PRIMER_CUATRIMESTRE");
+        insertar("INSERT INTO comision_horario (comision_materia_id, dia_semana, hora_inicio, hora_fin) "
+                + "VALUES (?, 'LUNES', '08:30', '10:30')", programacionEnComision1);
+        insertar("INSERT INTO comision_horario (comision_materia_id, dia_semana, hora_inicio, hora_fin) "
+                + "VALUES (?, 'MIERCOLES', '08:30', '10:30')", programacionEnComision1);
+        Long titular = insertar("""
+                INSERT INTO persona (nombre, apellido, dni, telefono, fecha_nacimiento, email, legajo_docente)
+                VALUES ('Ana', 'Ruiz', '30000101', '2231111111', '1980-01-01', 'ana@inscripciones.test', 980201)
+                """);
+        Long ayudante = insertar("""
+                INSERT INTO persona (nombre, apellido, dni, telefono, fecha_nacimiento, email, legajo_docente)
+                VALUES ('Luis', 'Paz', '30000102', '2231111112', '1985-01-01', 'luis@inscripciones.test', 980202)
+                """);
+        insertar("INSERT INTO comision_docente (comision_materia_id, docente_id, rol) VALUES (?, ?, 'TITULAR')",
+                programacionEnComision1, titular);
+        insertar("INSERT INTO comision_docente (comision_materia_id, docente_id, rol) VALUES (?, ?, 'AYUDANTE')",
+                programacionEnComision1, ayudante);
+
+        mvc.perform(get(URL + "/oferta").with(estudianteLogueado(estudiante)))
+                .andExpect(jsonPath("$[1].comisiones[0].horarios[*].diaSemana").value(contains("LUNES", "MIERCOLES")))
+                .andExpect(jsonPath("$[1].comisiones[0].docentes.length()").value(2));
+    }
+
+    @Test
     void ofertaDescuentaElCupoYMarcaDondeEstaInscripto() throws Exception {
         abrirPeriodo("PRIMER_CUATRIMESTRE");
         mvc.perform(get(URL + "/oferta").with(estudianteLogueado(estudiante)))

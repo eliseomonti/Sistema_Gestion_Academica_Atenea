@@ -2,9 +2,12 @@ package com.utn.atenea.carreras.service;
 
 import com.utn.atenea.carreras.CarrerasApi;
 import com.utn.atenea.carreras.CorrelativaDelPlan;
+import com.utn.atenea.carreras.CorrelativasDeMateria;
+import com.utn.atenea.carreras.EstadoCorrelativa;
 import com.utn.atenea.carreras.MateriaDelPlan;
 import com.utn.atenea.carreras.MateriaResumen;
 import com.utn.atenea.carreras.PlanEstudioResumen;
+import com.utn.atenea.carreras.model.Correlatividad;
 import com.utn.atenea.carreras.model.PlanMateria;
 import com.utn.atenea.carreras.repository.CarreraRepository;
 import com.utn.atenea.carreras.repository.CorrelatividadRepository;
@@ -16,13 +19,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CarrerasApiImpl implements CarrerasApi {
+
+    /**
+     * Los códigos de un plan tienen todos el mismo formato ("01", "77-10-101") o son números sin
+     * ceros adelante ("1", "10"). Comparar primero el largo hace que "5" vaya antes que "10".
+     */
+    private static final Comparator<String> POR_CODIGO = Comparator.nullsLast(
+            Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder()));
 
     private final CarreraRepository carreraRepository;
     private final PlanEstudioRepository planEstudioRepository;
@@ -80,6 +94,36 @@ public class CarrerasApiImpl implements CarrerasApi {
                         correlatividad.getCorrelativa().getMateria().getId(),
                         correlatividad.getEstadoParaCursar(),
                         correlatividad.getEstadoParaRendir()))
+                .toList();
+    }
+
+    @Override
+    public List<CorrelativasDeMateria> regimenDeCorrelatividades(Long planEstudioId) {
+        Map<Long, List<Correlatividad>> porPlanMateria = correlatividadRepository.buscarDelPlan(planEstudioId).stream()
+                .collect(Collectors.groupingBy(correlatividad -> correlatividad.getPlanMateria().getId()));
+        return planMateriaRepository.buscarDelPlan(planEstudioId, null).stream()
+                .sorted(Comparator.comparingInt(PlanMateria::getAnioCursado)
+                        .thenComparing(PlanMateria::getCodigo, POR_CODIGO))
+                .map(planMateria -> {
+                    List<Correlatividad> correlativas = porPlanMateria.getOrDefault(planMateria.getId(), List.of());
+                    return new CorrelativasDeMateria(planMateria.getMateria().getId(), planMateria.getCodigo(),
+                            planMateria.getMateria().getNombre(), planMateria.getAnioCursado(),
+                            planMateria.getPeriodoLectivo(),
+                            codigos(correlativas, Correlatividad::getEstadoParaCursar, EstadoCorrelativa.CURSADA),
+                            codigos(correlativas, Correlatividad::getEstadoParaCursar, EstadoCorrelativa.APROBADA),
+                            codigos(correlativas, Correlatividad::getEstadoParaRendir, EstadoCorrelativa.CURSADA),
+                            codigos(correlativas, Correlatividad::getEstadoParaRendir, EstadoCorrelativa.APROBADA));
+                })
+                .toList();
+    }
+
+    private static List<String> codigos(List<Correlatividad> correlativas,
+                                        Function<Correlatividad, EstadoCorrelativa> exigido,
+                                        EstadoCorrelativa estado) {
+        return correlativas.stream()
+                .filter(correlatividad -> exigido.apply(correlatividad) == estado)
+                .map(correlatividad -> correlatividad.getCorrelativa().getCodigo())
+                .sorted(POR_CODIGO)
                 .toList();
     }
 

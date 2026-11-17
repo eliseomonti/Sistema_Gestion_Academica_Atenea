@@ -7,7 +7,7 @@ import { Rol, rutaInicio } from '../core/seguridad/rol';
 import { Sesion } from '../core/seguridad/sesion';
 import { Icono } from '../shared/ui/icono/icono';
 
-const TITULOS: Record<Rol, string> = {
+export const TITULOS: Record<Rol, string> = {
   ADMIN: 'Módulo de administración académica',
   DOCENTE: 'Módulo de autogestión de docentes',
   ESTUDIANTE: 'Módulo de autogestión de estudiantes',
@@ -29,6 +29,7 @@ export class Login {
   protected readonly titulo = computed(() => TITULOS[this.rol()]);
   protected readonly error = signal<string | null>(null);
   protected readonly mostrarPassword = signal(false);
+  protected readonly intentoIngresar = signal(false);
 
   private readonly credenciales = signal({ username: '', password: '' });
   protected readonly loginForm = form(

@@ -15,3 +15,8 @@
   color: var(--color-error);
   background: var(--color-error-fondo);
 }
+
+:host(.info) {
+  color: var(--color-primario-hover);
+  background: var(--color-primario-claro);
+}
